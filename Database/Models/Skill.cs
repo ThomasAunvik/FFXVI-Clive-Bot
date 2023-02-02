@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,18 +19,22 @@ namespace CliveBot.Database.Models
     {
         None,
         Ifrit,
+        Pheonix,
         Garuda,
         Shiva,
         Titan,
+        Ramuh,
         Odin,
         Bahamut,
     }
 
     public class SkillModel
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; } = 0;
         public string Name { get; set; } = "Unknown Name";
         public string Description { get; set; } = "Unknown Descritpion";
+        public List<SkillLanguage> Localized { get; set; } = new List<SkillLanguage>();
         public SkillCategory Category { get; set; } = SkillCategory.None;
         public SkillSummon Summon { get; set; } = SkillSummon.None;
 
@@ -39,5 +45,9 @@ namespace CliveBot.Database.Models
 
         public string? IconUrl { get; set; }
         public string? PreviewImageUrl { get; set; }
+
+        public int? MasteredVersionForeignKey { get; set; }
+        public SkillModel? MasteredVersion { get; set; }
+        public SkillModel? PreviousVersion { get; set; }
     }
 }

@@ -6,6 +6,10 @@
             96580514021912576
         };
 
+        public static readonly List<ulong> botAdmin = new() {
+            96580514021912576
+        };
+
         public static string CURRENT_COMMIT = "";
         public static string GIT_STATUS = "";
     }
