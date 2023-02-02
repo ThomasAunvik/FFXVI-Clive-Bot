@@ -13,10 +13,14 @@ namespace CliveBot.Bot
     internal class BotEventHandler
     {
         private readonly IServiceProvider provider;
+        private readonly DiscordSocketClient client;
+        private readonly InteractionService interactionService;
 
-        public BotEventHandler(IServiceProvider provider)
+        public BotEventHandler(IServiceProvider provider, DiscordSocketClient client, InteractionService interactionService)
         {
             this.provider = provider;
+            this.client = client;
+            this.interactionService = interactionService;
         }
 
         public static Task Log(LogMessage message)
@@ -28,8 +32,6 @@ namespace CliveBot.Bot
 
         public async Task Ready()
         {
-            var client = provider.GetRequiredService<DiscordSocketClient>();
-            var interactionService = provider.GetRequiredService<InteractionService>();
             await interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), provider);
             await interactionService.RegisterCommandsToGuildAsync(466048423884226572);
             await interactionService.RegisterCommandsToGuildAsync(1070690445623042108);
@@ -38,18 +40,19 @@ namespace CliveBot.Bot
 
             client.InteractionCreated += async interaction =>
             {
+                if (interaction is SocketMessageComponent) return;
+
                 var scope = provider.CreateScope();
                 var ctx = new SocketInteractionContext(client, interaction);
 
                 var result = await interactionService.ExecuteCommandAsync(ctx, scope.ServiceProvider);
             };
+
+            client.ButtonExecuted += ButtonExecuted;
         }
 
         internal async Task ButtonExecuted(SocketMessageComponent interaction)
         {
-            var client = provider.GetRequiredService<DiscordSocketClient>();
-            var interactionService = provider.GetRequiredService<InteractionService>();
-
             var scope = provider.CreateScope();
             var ctx = new SocketInteractionContext<SocketMessageComponent>(client, interaction);
 
@@ -70,7 +73,6 @@ namespace CliveBot.Bot
                 errorEmbed.Title = "Critical Error";
                 errorEmbed.Description = execResult.ErrorReason;
             }
-
             
             Console.WriteLine(result.ErrorReason);
         }
