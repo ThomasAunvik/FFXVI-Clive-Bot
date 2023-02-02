@@ -33,11 +33,12 @@ var provider = collection.BuildServiceProvider();
 var client = provider.GetRequiredService<DiscordSocketClient>();
 var eventHandler = provider.GetRequiredService<BotEventHandler>();
 
-var token = Environment.GetEnvironmentVariable("DISCORD_APP_TOKEN");
+var token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
 
 // Configure Callbacks
 client.Log += BotEventHandler.Log;
 client.Ready += eventHandler.Ready;
+client.ButtonExecuted += eventHandler.ButtonExecuted;
 
 // Start Service
 await client.LoginAsync(TokenType.Bot, token);
