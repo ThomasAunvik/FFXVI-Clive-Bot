@@ -4,6 +4,8 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualBasic;
+using System;
 using System.Reflection;
 
 namespace CliveBot.Bot
@@ -30,16 +32,28 @@ namespace CliveBot.Bot
             var interactionService = provider.GetRequiredService<InteractionService>();
             await interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), provider);
             await interactionService.RegisterCommandsToGuildAsync(466048423884226572);
+            await interactionService.RegisterCommandsToGuildAsync(1070690445623042108);
+
+            interactionService.InteractionExecuted += InteractionExecuted;
 
             client.InteractionCreated += async interaction =>
             {
                 var scope = provider.CreateScope();
                 var ctx = new SocketInteractionContext(client, interaction);
 
-                interactionService.InteractionExecuted += InteractionExecuted;
-
                 var result = await interactionService.ExecuteCommandAsync(ctx, scope.ServiceProvider);
             };
+        }
+
+        internal async Task ButtonExecuted(SocketMessageComponent interaction)
+        {
+            var client = provider.GetRequiredService<DiscordSocketClient>();
+            var interactionService = provider.GetRequiredService<InteractionService>();
+
+            var scope = provider.CreateScope();
+            var ctx = new SocketInteractionContext<SocketMessageComponent>(client, interaction);
+
+            await interactionService.ExecuteCommandAsync(ctx, scope.ServiceProvider);
         }
 
         private async Task InteractionExecuted(ICommandInfo info, IInteractionContext ctx, IResult result)
@@ -57,17 +71,8 @@ namespace CliveBot.Bot
                 errorEmbed.Description = execResult.ErrorReason;
             }
 
-            if (ctx.Interaction.HasResponded)
-            {
-                await ctx.Interaction.ModifyOriginalResponseAsync((e) =>
-                {
-                    e.Embed = errorEmbed.Build();
-                });
-            }
-            else
-            {
-                await ctx.Interaction.RespondAsync(embed: errorEmbed.Build());
-            }
+            
+            Console.WriteLine(result.ErrorReason);
         }
     }
 }
