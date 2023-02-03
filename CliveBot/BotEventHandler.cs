@@ -5,6 +5,8 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
+using Serilog;
+using Serilog.Context;
 using System;
 using System.Reflection;
 
@@ -23,9 +25,34 @@ namespace CliveBot.Bot
             this.interactionService = interactionService;
         }
 
-        public static Task Log(LogMessage message)
+        public static Task LogDiscord(LogMessage message)
         {
-            Console.WriteLine(message);
+            LogContext.PushProperty("SourceContext", "Discord");
+            switch(message.Severity)
+            {
+                case LogSeverity.Critical:
+                    Log.Logger.Fatal(message.Exception, message.Message);
+                    break;
+                case LogSeverity.Error:
+                    Log.Logger.Error(message.Exception, message.Message);
+                    break;
+                case LogSeverity.Warning:
+                    Log.Logger.Warning(message.Exception, message.Message);
+                    break;
+                case LogSeverity.Debug:
+                    Log.Logger.Debug(message.Exception, message.Message);
+                    break;
+                case LogSeverity.Info:
+                    Log.Logger.Information(message.Exception, message.Message);
+                    break;
+                case LogSeverity.Verbose:
+                    Log.Logger.Verbose(message.Exception, message.Message);
+                    break;
+                default:
+                    Log.Logger.Information(message.Message);
+                    break;
+
+            }
 
             return Task.CompletedTask;
         }
@@ -37,9 +64,7 @@ namespace CliveBot.Bot
 #if !DEBUG
             await interactionService.RegisterCommandsGloballyAsync();
 #else
-            await interactionService.RegisterCommandsToGuildAsync(466048423884226572);
             await interactionService.RegisterCommandsToGuildAsync(1070690445623042108);
-            await interactionService.RegisterCommandsToGuildAsync(755902027829215272);
 #endif
 
             interactionService.InteractionExecuted += InteractionExecuted;
@@ -79,8 +104,9 @@ namespace CliveBot.Bot
                 errorEmbed.Title = "Critical Error";
                 errorEmbed.Description = execResult.ErrorReason;
             }
-            
-            Console.WriteLine(result.ErrorReason);
+
+            LogContext.PushProperty("SourceContext", "Discord");
+            Log.Error(result.ErrorReason);
         }
     }
 }
