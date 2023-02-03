@@ -39,6 +39,7 @@ var collection = new ServiceCollection()
     {
         builder.AddSerilog();
     })
+    .AddApplicationInsightsTelemetry()
     .AddSingleton<DiscordSocketClient>()
     .AddSingleton<InteractionService>()
     .AddSingleton<BotEventHandler>()
@@ -76,9 +77,10 @@ await client.StartAsync();
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-    builder.Services.AddHealthChecks();
-
     builder.Host.UseSerilog();
+
+    builder.Services.AddHealthChecks();
+    builder.Services.AddApplicationInsightsTelemetry();
 
     var app = builder.Build();
 
