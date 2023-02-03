@@ -5,6 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Discord.Interactions;
 using CliveBot.Database;
 using CliveBot.Bot;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore;
+using Serilog;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
 
 var config = new DiscordSocketConfig()
 {
@@ -17,8 +22,23 @@ if (string.IsNullOrWhiteSpace(dbConnString))
     throw new Exception("No Database Connection String, Example: 'Host=my_host;Database=my_db;Username=my_user;Password=my_pw'");
 }
 
+Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .WriteTo.File(
+                Path.Combine(Directory.GetCurrentDirectory(), "logs/bot.log"),
+                rollingInterval: RollingInterval.Day,
+                shared: true
+            )
+            .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext:l}] {Message}{NewLine}{Exception}")
+            .CreateLogger();
+
 var collection = new ServiceCollection()
     .AddSingleton(config)
+    .AddLogging(builder =>
+    {
+        builder.AddSerilog();
+    })
     .AddSingleton<DiscordSocketClient>()
     .AddSingleton<InteractionService>()
     .AddSingleton<BotEventHandler>()
@@ -33,9 +53,9 @@ var migrate = Environment.GetEnvironmentVariable("MIGRATION_MODE");
 if (migrate == "always")
 {
     var db = provider.GetRequiredService<ApplicationDbContext>();
-    Console.WriteLine("Migrating...");
+    Log.Logger.Information("Migrating...");
     await db.Database.MigrateAsync();
-    Console.WriteLine("Migrating Finished");
+    Log.Logger.Information("Migrating Finished");
 }
 
 var client = provider.GetRequiredService<DiscordSocketClient>();
@@ -44,7 +64,7 @@ var eventHandler = provider.GetRequiredService<BotEventHandler>();
 var token = Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN");
 
 // Configure Callbacks
-client.Log += BotEventHandler.Log;
+client.Log += BotEventHandler.LogDiscord;
 client.Ready += eventHandler.Ready;
 client.ButtonExecuted += eventHandler.ButtonExecuted;
 
@@ -52,4 +72,32 @@ client.ButtonExecuted += eventHandler.ButtonExecuted;
 await client.LoginAsync(TokenType.Bot, token);
 await client.StartAsync();
 
-await Task.Delay(Timeout.Infinite);
+// Start Web Host
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+    builder.Services.AddHealthChecks();
+
+    builder.Host.UseSerilog();
+
+    var app = builder.Build();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    app.UseHealthChecks("/healthz");
+    app.UseStaticFiles();
+
+    app.MapGet("/", () => "Hello World!");
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
