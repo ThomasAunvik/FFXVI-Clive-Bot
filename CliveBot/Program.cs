@@ -29,6 +29,14 @@ var collection = new ServiceCollection()
 
 var provider = collection.BuildServiceProvider();
 
+var migrate = Environment.GetEnvironmentVariable("MIGRATION_MODE");
+if (migrate == "always")
+{
+    var db = provider.GetRequiredService<ApplicationDbContext>();
+    Console.WriteLine("Migrating...");
+    await db.Database.MigrateAsync();
+    Console.WriteLine("Migrating Finished");
+}
 
 var client = provider.GetRequiredService<DiscordSocketClient>();
 var eventHandler = provider.GetRequiredService<BotEventHandler>();
