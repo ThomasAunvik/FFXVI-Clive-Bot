@@ -56,12 +56,7 @@ namespace CliveBot.Bot.Commands
             string name,
             [Summary("Description", $"Something that describes the skill, shown ingame.")]
             string description,
-            [Summary("IconUrl", "A small 128x128 image of the skill (https://i.imgur.com/afqM3Vd.png)")]
-            string? iconUrl,
-            [Summary("PreviewImage", "A large image or gif that shows the skill's usage (https://i.imgur.com/Q9Ntch3.png)")]
-            string? previewImageUrl,
-            [Summary("MasteryPoints", "The number to upgrade the skill")]
-            int? masteryPoints,
+
             [Summary("Summon", "What category of summon is the skill set on")]
             SkillSummon skillSummon,
             [Summary("Category", "What type of ability does this skill do")]
@@ -69,7 +64,14 @@ namespace CliveBot.Bot.Commands
             [Summary("PhysicalRating", "What is the rating of it's physical ability")]
             Rating physicalRating,
             [Summary("MagicalRating", "What is the rating of it's magical ability")]
-            Rating magicalRating
+            Rating magicalRating,
+
+            [Summary("IconUrl", "A small 128x128 image of the skill (https://i.imgur.com/afqM3Vd.png)")]
+            string? iconUrl = null,
+            [Summary("PreviewImage", "A large image or gif that shows the skill's usage (https://i.imgur.com/Q9Ntch3.png)")]
+            string? previewImageUrl = null,
+            [Summary("MasteryPoints", "The number to upgrade the skill")]
+            int? masteryPoints = null
         ) {
             description = description.Replace("\\n", "\n");
 
@@ -118,23 +120,23 @@ namespace CliveBot.Bot.Commands
             [Autocomplete(typeof(SkillAutocompleteHandler))]
             int skillId,
             [Summary("Name", "The name of the skill, for example: 'Flame Punch'")]
-            string? name,
+            string? name = null,
             [Summary("Description", $"Something that describes the skill, shown ingame.")]
-            string? description,
+            string? description = null,
             [Summary("IconUrl", "A small 128x128 image of the skill (https://i.imgur.com/afqM3Vd.png)")]
-            string? iconUrl,
+            string? iconUrl = null,
             [Summary("PreviewImage", "A large image or gif that shows the skill's usage (https://i.imgur.com/Q9Ntch3.png)")]
-            string? previewImageUrl,
+            string? previewImageUrl = null,
             [Summary("MasteryPoints", "The number to upgrade the skill")]
-            int? masteryPoints,
+            int? masteryPoints = null,
             [Summary("Summon", "What category of summon is the skill set on")]
-            SkillSummon? skillSummon,
+            SkillSummon? skillSummon = null,
             [Summary("Category", "What type of ability does this skill do")]
-            SkillCategory? category,
+            SkillCategory? category = null,
             [Summary("PhysicalRating", "What is the rating of it's physical ability")]
-            Rating? physicalRating,
+            Rating? physicalRating = null,
             [Summary("MagicalRating", "What is the rating of it's magical ability")]
-            Rating? magicalRating
+            Rating? magicalRating = null
         )
         {
             description = description?.Replace("\\n", "\n");
