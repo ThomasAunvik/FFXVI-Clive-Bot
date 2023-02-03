@@ -153,6 +153,8 @@ namespace CliveBot.Bot.Commands
                 text += $"{skill.Name} ({skill.MasterizationPoints}) [p{skill.RatingPhysical}/10, m{skill.MasterizationPoints}/10]";
             }
 
+            if (string.IsNullOrEmpty(text)) text = "Empty Text";
+
             embed.AddField(
                 $"Skills of {Enum.GetName(skillSummon)}",
                 text
