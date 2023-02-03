@@ -39,7 +39,6 @@ var collection = new ServiceCollection()
     {
         builder.AddSerilog();
     })
-    .AddApplicationInsightsTelemetry()
     .AddSingleton<DiscordSocketClient>()
     .AddSingleton<InteractionService>()
     .AddSingleton<BotEventHandler>()
