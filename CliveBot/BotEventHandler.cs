@@ -90,9 +90,9 @@ namespace CliveBot.Bot
             await interactionService.ExecuteCommandAsync(ctx, scope.ServiceProvider);
         }
 
-        private async Task InteractionExecuted(ICommandInfo info, IInteractionContext ctx, IResult result)
+        private Task InteractionExecuted(ICommandInfo info, IInteractionContext ctx, IResult result)
         {
-            if (result.IsSuccess) return;
+            if (result.IsSuccess) return Task.CompletedTask;
             EmbedHandler errorEmbed = new(ctx.User);
 
             if (result.Error == InteractionCommandError.UnmetPrecondition && ctx is ISlashCommandInteraction slashInteraction)
@@ -107,6 +107,8 @@ namespace CliveBot.Bot
 
             LogContext.PushProperty("SourceContext", "Discord");
             Log.Error(result.ErrorReason);
+
+            return Task.CompletedTask;
         }
     }
 }
