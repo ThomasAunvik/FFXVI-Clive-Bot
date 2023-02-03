@@ -33,12 +33,13 @@ namespace CliveBot.Bot
         public async Task Ready()
         {
             await interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), provider);
-            await interactionService.RegisterCommandsToGuildAsync(466048423884226572);
-            await interactionService.RegisterCommandsToGuildAsync(1070690445623042108);
-            await interactionService.RegisterCommandsToGuildAsync(755902027829215272);
 
 #if !DEBUG
             await interactionService.RegisterCommandsGloballyAsync();
+#else
+            await interactionService.RegisterCommandsToGuildAsync(466048423884226572);
+            await interactionService.RegisterCommandsToGuildAsync(1070690445623042108);
+            await interactionService.RegisterCommandsToGuildAsync(755902027829215272);
 #endif
 
             interactionService.InteractionExecuted += InteractionExecuted;
