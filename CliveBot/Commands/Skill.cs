@@ -41,15 +41,28 @@ namespace CliveBot.Bot.Commands
             db = _db;
         }
 
-        public static EmbedBuilder SkillEmbedBuild(SkillModel skill)
+        public static EmbedBuilder SkillEmbedBuild(SkillModel skill, string? locale = null)
         {
+            var name = skill.Name;
+            var desc = skill.Description;
+
+            if(locale != null)
+            {
+                var localized = skill.Localized.FirstOrDefault(e => e.Locale == locale);
+                if(localized != null)
+                {
+                    name = localized.Name;
+                    desc = localized.Description;
+                }
+            }
+
             EmbedBuilder embed = new()
             {
-                Title = skill.Name,
+                Title = name,
                 Description = Enum.GetName(skill.Category)
             };
 
-            embed.AddField("Description", skill.Description);
+            embed.AddField("Description", desc);
 
 
             embed.AddField(
@@ -77,23 +90,48 @@ namespace CliveBot.Bot.Commands
             SkillSummon? skillSummon = null,
             [Summary("skill", description: "Select the target skill")]
             [Autocomplete(typeof(SkillAutocompleteHandler))]
-            int? skillId = null,
+            string? skillIdLang = null,
             [Summary("search", description: "Search for the target skill")]
-            string? skillName = null
+            string? skillName = null,
+            [Summary("Locale", "Select a Locale to edit on")]
+            LocaleOptions? locale = null
         ) {
             SkillModel? skill = null;
-            if(skillId != null)
+            string? selectedLocale = null;
+            if(skillIdLang != null)
             {
-                skill = await db.Skills
-                    .Include(s => s.MasteredVersion)
-                    .Include(s => s.PreviousVersion)
-                    .FirstOrDefaultAsync(s => s.Id == skillId);
+                var skillSplit = skillIdLang.Split(",");
+                if (int.TryParse(skillSplit[0], out int skillId))
+                {
+                    skill = await db.Skills
+                        .Include(s => s.MasteredVersion)
+                        .Include(s => s.PreviousVersion)
+                        .Include(s => s.Localized)
+                        .FirstOrDefaultAsync(s => s.Id == skillId);
+
+                    selectedLocale = skillSplit[1];
+                }
             } else if(skillName != null)
             {
-                skill = await db.SkillLanguages
+                var skillLang = await db.SkillLanguages
                     .Where(l => l.Name.ToLower().StartsWith(skillName.ToLower()))
-                    .Select(l => l.Skill)
                     .FirstOrDefaultAsync();
+
+                if(skillLang?.Skill != null)
+                {
+                    skill = skillLang.Skill;
+                    if (locale == null) selectedLocale = skillLang.Locale;
+                }
+
+                var id = skillLang?.SkillId;
+
+                if (id != null) {
+                    skill = await db.Skills
+                       .Include(s => s.MasteredVersion)
+                       .Include(s => s.PreviousVersion)
+                       .Include(s => s.Localized)
+                       .FirstOrDefaultAsync(s => s.Id == id);
+                }
             } else if(skillSummon != null)
             {
                 await ListSkills((SkillSummon)skillSummon);
@@ -104,13 +142,23 @@ namespace CliveBot.Bot.Commands
                 return;
             }
 
+            if(locale != null)
+            {
+                selectedLocale = Enum.GetName(locale ?? LocaleOptions.en);
+            }
+
+            if(selectedLocale == null)
+            {
+                selectedLocale = "en";
+            }
+
             if(skill == null)
             {
                 await RespondAsync(embed: new EmbedBuilder().WithTitle("Failed to find skill").Build());
                 return;
             }
 
-            var embed = SkillEmbedBuild(skill);
+            var embed = SkillEmbedBuild(skill, locale: selectedLocale);
 
             MessageComponent? component = null;
 
@@ -119,11 +167,11 @@ namespace CliveBot.Bot.Commands
                 component = new ComponentBuilder()
                     .WithButton(
                         "Masterize",
-                        $"skill_view_{skill.MasteredVersion?.Id ?? 0}",
+                        $"skillview:{skill.MasteredVersion?.Id ?? 0},{selectedLocale}",
                         disabled: skill.MasteredVersion == null
                     ).WithButton(
                         "Downgrade",
-                        $"skill_view_{skill.PreviousVersion?.Id ?? 0}",
+                        $"skillview:{skill.PreviousVersion?.Id ?? 0},{selectedLocale}",
                         disabled: skill.PreviousVersion == null
                     ).Build();
             }
@@ -212,10 +260,12 @@ namespace CliveBot.Bot.Commands
             this.db = db;
         }
 
-        [ComponentInteraction("skill_view_*")]
-        public async Task SkillAscend(string id)
+        [ComponentInteraction("skillview:*")]
+        public async Task SkillAscend(string idlang)
         {
-            if(!int.TryParse(id, out int skillid))
+            var skillSplit = idlang.Split(",");
+
+            if (!int.TryParse(skillSplit[0], out int skillid))
             {
                 await ReplyAsync(embed: 
                     new EmbedBuilder()
@@ -240,8 +290,9 @@ namespace CliveBot.Bot.Commands
                 return;
             }
 
+            var locale = skillSplit[1];
 
-            var embed = SkillCommand.SkillEmbedBuild(skill);
+            var embed = SkillCommand.SkillEmbedBuild(skill, locale: locale);
 
 
             MessageComponent? component = null;
@@ -250,11 +301,11 @@ namespace CliveBot.Bot.Commands
                 component = new ComponentBuilder()
                     .WithButton(
                         "Masterize",
-                        $"skill_view_{skill.MasteredVersion?.Id ?? 0}",
+                        $"skillview:{skill.MasteredVersion?.Id ?? 0},{locale}",
                         disabled: skill.MasteredVersion == null
                     ).WithButton(
                         "Downgrade",
-                        $"skill_view_{skill.PreviousVersion?.Id ?? 0}",
+                        $"skillview:{skill.PreviousVersion?.Id ?? 0},{locale}",
                         disabled: skill.PreviousVersion == null
                     ).Build();
             }

@@ -45,6 +45,9 @@ var collection = new ServiceCollection()
     .AddDbContext<ApplicationDbContext>((config) =>
     {
         config.UseNpgsql(dbConnString);
+#if DEBUG
+        config.EnableSensitiveDataLogging();
+#endif
     });
 
 var provider = collection.BuildServiceProvider();
