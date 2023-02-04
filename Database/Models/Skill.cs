@@ -30,8 +30,9 @@ namespace CliveBot.Database.Models
 
     public class SkillModel
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int Id { get; set; } = 0;
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        
+        public int Id { get; set; }
         public string Name { get; set; } = "Unknown Name";
         public string Description { get; set; } = "Unknown Descritpion";
         public List<SkillLanguage> Localized { get; set; } = new List<SkillLanguage>();
