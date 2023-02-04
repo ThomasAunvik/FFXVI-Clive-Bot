@@ -30,7 +30,7 @@ namespace CliveBot.Bot.Handler.Autocomplete
             var results = await db.SkillLanguages
                 .Where((l) => l.Name.ToLower().StartsWith(userInput.ToLower()))
                 .Take(25)
-                .Select((l) => new AutocompleteResult(l.Name, l.SkillId))
+                .Select((l) => new AutocompleteResult(l.Name, $"{l.SkillId},{l.Locale}"))
                 .ToListAsync();
 
             return AutocompletionResult.FromSuccess(results);
