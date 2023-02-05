@@ -10,6 +10,7 @@ using Microsoft.AspNetCore;
 using Serilog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
+using CliveBot.Bot.Handler;
 
 var config = new DiscordSocketConfig()
 {
@@ -79,9 +80,24 @@ await client.StartAsync();
 try
 {
     var builder = WebApplication.CreateBuilder(args);
+    builder.Services.AddSingleton(client);
+
     builder.Host.UseSerilog();
 
-    builder.Services.AddHealthChecks();
+
+    builder.Services.AddDbContext<ApplicationDbContext>((config) =>
+    {
+        config.UseNpgsql(dbConnString);
+#if DEBUG
+        config.EnableSensitiveDataLogging();
+#endif
+    });
+
+    builder.Services
+            .AddHealthChecks()
+            .AddCheck<BotHealthCheck>("DiscordBot")
+            .AddDbContextCheck<ApplicationDbContext>("Database");
+
     builder.Services.AddApplicationInsightsTelemetry();
 
     var app = builder.Build();

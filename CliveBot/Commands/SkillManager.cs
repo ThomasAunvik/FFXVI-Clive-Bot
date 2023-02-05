@@ -1,5 +1,6 @@
 ﻿using CliveBot.Bot.Attributes.Preconditions;
 using CliveBot.Bot.Handler.Autocomplete;
+using CliveBot.Bot.Handler.Modals;
 using CliveBot.Bot.Handler.Utils;
 using CliveBot.Database;
 using CliveBot.Database.Models;
@@ -212,6 +213,8 @@ namespace CliveBot.Bot.Commands
             });
         }
 
+       
+
         [SlashCommand("skilllanguage", "Edit or Add a skill's Locale")]
         public async Task SkillEdit(
             [Summary("Skill")]
@@ -242,12 +245,24 @@ namespace CliveBot.Bot.Commands
             var localeName = Enum.GetName(locale);
             var skillLanguage = skill.Localized.FirstOrDefault(l => l.Locale == localeName);
 
+            var skillTitle = skillLanguage == null ? $"Create Language for {skill.Name}" : $"Update Language for {skill.Name}";
+            
+            var skillModal = new ModalSkillLanguage() {
+                Name = skillLanguage?.Name ?? string.Empty,
+                Description = skillLanguage?.Description ?? string.Empty,
+            };
+
+            await Context.Interaction.RespondWithModalAsync<ModalSkillLanguage>("skilllanguagemodal", modifyModal: (modal) => {
+                modal.Title = skillTitle;
+            });
+
+            return;
             var modal = new ModalBuilder()
                 .WithTitle(skillLanguage == null ? $"Create Language for {skill.Name}" : $"Update Language for {skill.Name}")
-                .WithCustomId($"skilllanguagemodal:{skill.Id},{localeName}")
+                .WithCustomId($"skilllanguagemodal")
                 .AddTextInput(
                     "Name",
-                    "skill-language-name",
+                    "skill_language_name",
                     placeholder: "Jump",
                     minLength: 3,
                     maxLength: 25,
@@ -255,7 +270,7 @@ namespace CliveBot.Bot.Commands
                     value: skillLanguage?.Name
                 ).AddTextInput(
                     "Description",
-                    "skill-language-description",
+                    "skill_language_description",
                     style: TextInputStyle.Paragraph,
                     placeholder: $"Hold {SkillCommand.emote_button_x} Button to Jump",
                     minLength: 3,
@@ -267,8 +282,16 @@ namespace CliveBot.Bot.Commands
             await Context.Interaction.RespondWithModalAsync(modal: modal.Build());
         }
 
+        [ModalInteraction("skilllanguagemodal")]
+        public async Task SkillLangModalTest(ModalSkillLanguage modal)
+        {
+            Log.Logger.Information("Modal Works: ");
+            await Context.Interaction.DeferAsync();
+        }
+
         public async static Task SkillLanguageModalEdit(SocketModal modal, ApplicationDbContext db)
         {
+            return;
             var modalId = modal.Data.CustomId.Split(":").Last();
             var ids = modalId.Split(",");
 
@@ -283,8 +306,8 @@ namespace CliveBot.Bot.Commands
 
             var locale = ids.LastOrDefault();
 
-            var name = modal.Data.Components.FirstOrDefault(c => c.CustomId == "skill-language-name")?.Value ?? "Unknown Name";
-            var desc = modal.Data.Components.FirstOrDefault(c => c.CustomId == "skill-language-description")?.Value ?? "No Description";
+            var name = modal.Data.Components.FirstOrDefault(c => c.CustomId == "skillLanguageName")?.Value ?? "Unknown Name";
+            var desc = modal.Data.Components.FirstOrDefault(c => c.CustomId == "skillLanguageDescription")?.Value ?? "No Description";
 
             if (locale == null)
             {
