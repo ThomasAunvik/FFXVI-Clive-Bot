@@ -84,7 +84,6 @@ try
 
     builder.Host.UseSerilog();
 
-
     builder.Services.AddDbContext<ApplicationDbContext>((config) =>
     {
         config.UseNpgsql(dbConnString);

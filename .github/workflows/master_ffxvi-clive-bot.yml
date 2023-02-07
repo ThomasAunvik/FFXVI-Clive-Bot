@@ -10,8 +10,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  buildbot:
+    name: Build Bot
     runs-on: ubuntu-latest
+    env:
+      botdirectory: ./CliveBot
+      dbdirectory: ./Database
+      webdirectory: ./Web
 
     steps:
       - uses: actions/checkout@v2
@@ -23,29 +28,53 @@ jobs:
           include-prerelease: true
 
       - name: Build with dotnet
+        working-directory: ${{ env.botdirectory }}
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        working-directory: ${{ env.botdirectory }}
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/clivebot
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          name: clivebot
+          path: ${{env.DOTNET_ROOT}}/clivebot
 
-  deploy:
+  migrations:
+    name: Migrations
     runs-on: ubuntu-latest
-    needs: build
+    needs: [buildbot]
+
+    steps:
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '7.x'
+          include-prerelease: true
+
+      - name: Set up Dotnet EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+      
+      - name: Run Migrations
+        working-directory: ${{ env.dbdirectory }}
+        env:
+          DATABASE_CONNECTION_URL: ${{ secrets.DATABASE_CONNECTION_URL }}
+        run: dotnet ef database update
+
+  deploybot:
+    name: Deploy Bot
+    runs-on: ubuntu-latest
+    needs: [buildbot, migrations]
     environment:
-      name: 'Production'
+      name: 'Production (Bot)'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v2
         with:
-          name: .net-app
+          name: clivebot
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
