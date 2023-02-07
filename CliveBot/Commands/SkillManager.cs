@@ -247,16 +247,6 @@ namespace CliveBot.Bot.Commands
 
             var skillTitle = skillLanguage == null ? $"Create Language for {skill.Name}" : $"Update Language for {skill.Name}";
             
-            var skillModal = new ModalSkillLanguage() {
-                Name = skillLanguage?.Name ?? string.Empty,
-                Description = skillLanguage?.Description ?? string.Empty,
-            };
-
-            await Context.Interaction.RespondWithModalAsync<ModalSkillLanguage>("skilllanguagemodal", modifyModal: (modal) => {
-                modal.Title = skillTitle;
-            });
-
-            return;
             var modal = new ModalBuilder()
                 .WithTitle(skillLanguage == null ? $"Create Language for {skill.Name}" : $"Update Language for {skill.Name}")
                 .WithCustomId($"skilllanguagemodal")
@@ -282,16 +272,8 @@ namespace CliveBot.Bot.Commands
             await Context.Interaction.RespondWithModalAsync(modal: modal.Build());
         }
 
-        [ModalInteraction("skilllanguagemodal")]
-        public async Task SkillLangModalTest(ModalSkillLanguage modal)
-        {
-            Log.Logger.Information("Modal Works: ");
-            await Context.Interaction.DeferAsync();
-        }
-
         public async static Task SkillLanguageModalEdit(SocketModal modal, ApplicationDbContext db)
         {
-            return;
             var modalId = modal.Data.CustomId.Split(":").Last();
             var ids = modalId.Split(",");
 
