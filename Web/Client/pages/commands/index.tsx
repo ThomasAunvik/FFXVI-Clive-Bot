@@ -2,8 +2,7 @@ import Aux from "@/components/Auxillary";
 import { commandCategories } from "@/components/Commands";
 import MainPageNavBar from "@/components/MainPageNavBar"
 import Head from "next/head"
-import { useContext } from "react";
-import { Accordion, AccordionContext, Button, Container, Table, useAccordionButton } from "react-bootstrap"
+import { Container, Table } from "react-bootstrap"
 
 import styles from 'styles/Commands.module.css';
 

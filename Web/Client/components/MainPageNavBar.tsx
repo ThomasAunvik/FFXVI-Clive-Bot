@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Button, Container, Nav, Navbar } from "react-bootstrap"
+import { Container, Nav, Navbar } from "react-bootstrap"
 import styles from 'styles/NavBar.module.css';
 
 interface IMainPageProps {
@@ -24,7 +24,7 @@ const MainPageNavBar = (props: IMainPageProps) => {
 
     return <Navbar bg="dark" variant="dark" expand="lg" className={styles.navbar} sticky="top">
     <Container>
-      <Navbar.Brand href="#home">Clive Bot</Navbar.Brand>
+      <Navbar.Brand href="/">Clive Bot</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav" >
         <Nav className="me-auto">

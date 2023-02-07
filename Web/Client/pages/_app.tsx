@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootswatch/dist/darkly/bootstrap.min.css";
 
 import "../styles/globals.css";
-import "../public/fonts/finalf.css";
+import "../public/static/fonts/finalf.css";
 
 import type { AppProps } from 'next/app'
 import { SSRProvider } from 'react-bootstrap';

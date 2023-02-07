@@ -76,11 +76,18 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseEndpoints(endpoints =>
+
+app.Use(async (context, next) =>
 {
-    endpoints.MapNextjsStaticHtmls();
+    if(context.Request.Path.StartsWithSegments("/static"))
+    {
+        context.Response.Headers.Add("Cache-Control", "public, max-age=31536000, immutable");
+    }
+
+    await next.Invoke();
 });
 
+app.MapNextjsStaticHtmls();
 app.UseNextjsStaticHosting();
 
 try

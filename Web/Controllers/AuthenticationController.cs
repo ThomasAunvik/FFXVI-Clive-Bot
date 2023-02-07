@@ -7,7 +7,7 @@ namespace CliveBot.Web.Controllers
     public class AuthenticationController : Controller
     {
         [HttpGet("~/signin")]
-        public async Task<IActionResult> SignIn()
+        public IActionResult SignIn()
         {
             return Challenge(new AuthenticationProperties { RedirectUri = "/" }, "Discord");
         }
