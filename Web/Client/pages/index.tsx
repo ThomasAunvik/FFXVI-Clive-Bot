@@ -1,9 +1,7 @@
 import MainPageNavBar from '@/components/MainPageNavBar';
-import axios from 'axios';
 import Head from 'next/head'
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
-import { Button, Col, Container, Nav, Navbar, NavDropdown, Row } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 
 import styles from 'styles/Home.module.css';
 
@@ -32,7 +30,7 @@ export default function Home() {
                 }}>
                   <span>
                     Add Bot to Discord{' '}
-                    <Image alt="discord-icon" src="/images/discord/discord-mark-white.svg" width={20} height={20} className={"pull-right "}/>
+                    <Image alt="discord-icon" src="/static/images/discord/discord-mark-white.svg" width={20} height={20} className={"pull-right "}/>
                   </span>
                 </Button>
                 <br></br>
@@ -53,7 +51,7 @@ export default function Home() {
           <h1>Features</h1>
 
           <h2>Skill Preview</h2>
-          <Image alt="Skill Preview of Lunge attack" src="/images/features/command_skill_preview.webp" width={523} height={516} className={styles.imagecontain} />
+          <Image alt="Skill Preview of Lunge attack" src="/static/images/features/command_skill_preview.webp" width={523} height={516} className={styles.imagecontain} />
         </div>
       </main>
     </>
