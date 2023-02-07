@@ -10,6 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  # BUILDS
   buildbot:
     name: Build Bot
     runs-on: ubuntu-latest
@@ -39,10 +40,40 @@ jobs:
           name: clivebot
           path: ${{env.DOTNET_ROOT}}/clivebot
 
+  buildweb:
+    name: Build Web
+    runs-on: ubuntu-latest
+    env:
+      webdirectory: ./Web
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '7.x'
+          include-prerelease: true
+
+      - name: Build with dotnet
+        working-directory: ${{ env.webdirectory }}
+        run: dotnet build --configuration Release
+
+      - name: dotnet publish
+        working-directory: ${{ env.webdirectory }}
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/web
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v2
+        with:
+          name: webapp
+          path: ${{env.DOTNET_ROOT}}/web
+
+  # MIGRATIONS
   migrations:
     name: Database Migrations
     runs-on: ubuntu-latest
-    needs: [buildbot]
+    needs: [buildbot, buildweb]
     env:
       dbdirectory: ./Database
 
@@ -64,6 +95,8 @@ jobs:
           DATABASE_CONNECTION_URL: ${{ secrets.DATABASE_CONNECTION_URL }}
         run: dotnet ef database update
 
+
+  # DEPLOYMENT
   deploybot:
     name: Deploy Bot
     runs-on: ubuntu-latest
@@ -85,4 +118,27 @@ jobs:
           app-name: 'FFXVI-Clive-Bot'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6B7928DA4B7E4D72942283AFBF82D918 }}
+          package: .
+
+  deployweb:
+    name: Deploy Web
+    runs-on: ubuntu-latest
+    needs: [buildweb, migrations]
+    environment:
+      name: 'Production (Web)'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: webapp
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'FFXVI-Clive-Bot-Web'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_963A587B3B4944D7B3B56A788FCE27C1 }}
           package: .
