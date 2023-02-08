@@ -92,8 +92,8 @@ namespace CliveBot.Bot.Commands
                 RatingPhysical = (int)physicalRating,
                 RatingMagical = (int)magicalRating,
                 MasterizationPoints = masteryPoints ?? 0,
-                Localized = new List<SkillLanguage>() {
-                    new SkillLanguage() {
+                Localized = new List<SkillLanguageModel>() {
+                    new SkillLanguageModel() {
                         Description=description,
                         Name=name
                     }
@@ -322,7 +322,7 @@ namespace CliveBot.Bot.Commands
                 .FirstOrDefaultAsync(s => s.SkillId == id && s.Locale == locale);
             if(lang == null)
             {
-                await db.SkillLanguages.AddAsync(new SkillLanguage()
+                await db.SkillLanguages.AddAsync(new SkillLanguageModel()
                 {
                     Name = name,
                     Description = desc,

@@ -34,8 +34,8 @@ namespace CliveBot.Database.Models
         
         public int Id { get; set; }
         public string Name { get; set; } = "Unknown Name";
-        public string Description { get; set; } = "Unknown Descritpion";
-        public List<SkillLanguage> Localized { get; set; } = new List<SkillLanguage>();
+        public string Description { get; set; } = "Unknown Description";
+        public List<SkillLanguageModel> Localized { get; set; } = new List<SkillLanguageModel>();
         public SkillCategory Category { get; set; } = SkillCategory.None;
         public SkillSummon Summon { get; set; } = SkillSummon.None;
 
