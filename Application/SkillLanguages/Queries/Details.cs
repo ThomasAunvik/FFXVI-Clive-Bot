@@ -31,7 +31,6 @@ namespace CliveBot.Application.Skills.Queries
             {
                 var skill = await _context.Skills
                     .Include(s => s.Localized.Where(l => l.Locale == request.Locale))
-                    .ConvertDto()
                     .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken);
 
                 if(skill == null)
@@ -45,7 +44,7 @@ namespace CliveBot.Application.Skills.Queries
                     throw new RestException(HttpStatusCode.NotFound, $"Could not find any language ({request.Locale}) skill with id: {request.SkillId}");
                 }
 
-                return lang;
+                return lang.ConvertDto();
             }
         }
     }
