@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Database", "Database\Databa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "Web\Web.csproj", "{5BAD22C4-B6DE-49AC-A235-398E61CD466F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{D778FFEA-38CD-4839-BA99-367EEE2864DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "Application\Application.csproj", "{D778FFEA-38CD-4839-BA99-367EEE2864DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azure", "Azure\Azure.csproj", "{1336786A-FB33-4C8F-8986-0744FAAAE4D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{D778FFEA-38CD-4839-BA99-367EEE2864DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D778FFEA-38CD-4839-BA99-367EEE2864DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D778FFEA-38CD-4839-BA99-367EEE2864DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1336786A-FB33-4C8F-8986-0744FAAAE4D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1336786A-FB33-4C8F-8986-0744FAAAE4D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1336786A-FB33-4C8F-8986-0744FAAAE4D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1336786A-FB33-4C8F-8986-0744FAAAE4D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

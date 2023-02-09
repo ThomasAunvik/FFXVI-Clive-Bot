@@ -4,6 +4,7 @@ using Serilog;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using CliveBot.Web.Events;
 using CliveBot.Application;
+using CliveBot.Azure;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using CliveBot.Web.Middleware;
@@ -39,6 +40,14 @@ builder.Services.AddDbContext<ApplicationDbContext>((config) =>
 #endif
 });
 builder.Services.RegisterMediatR();
+
+var azureConfig = builder.Configuration.GetSection("Azure");
+var blobAccountName = azureConfig.GetValue<string>("BlobAccountName") ?? "";
+var blobSasToken = azureConfig.GetValue<string>("BlobSasToken") ?? "";
+
+builder.Services.RegisterAzureBlobServices(
+    blobAccountName, blobSasToken
+);
 
 var discordLogin = builder.Configuration.GetSection("DiscordLogin");
 var discordClientId = discordLogin.GetValue<string>("ClientId") ?? "";

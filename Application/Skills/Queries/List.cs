@@ -34,10 +34,9 @@ namespace CliveBot.Application.Skills.Queries
                 }
 
                 var skills = await skillsQuery
-                    .ConvertDto()
                     .ToListAsync(cancellationToken);
 
-                return skills;
+                return skills.ConvertDto().ToList();
             }
         }
     }

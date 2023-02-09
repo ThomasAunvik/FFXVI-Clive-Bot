@@ -7,7 +7,7 @@ namespace CliveBot.Application.SkillLanguages
         public int Id { get; set; }
         public int SkillId { get; set; }
         public string Locale { get; set; } = "en";
-        public string Name { get; set; } = string.Empty;
+        public required string Name { get; set; }
         public string? Description { get; set; }
     }
 
@@ -26,11 +26,6 @@ namespace CliveBot.Application.SkillLanguages
         }
 
         public static IEnumerable<SkillLanguageDto> ConvertDto(this IEnumerable<SkillLanguageModel> listModels)
-        {
-            return listModels.Select(x => x.ConvertDto());
-        }
-
-        public static IQueryable<SkillLanguageDto> ConvertDto(this IQueryable<SkillLanguageModel> listModels)
         {
             return listModels.Select(x => x.ConvertDto());
         }
