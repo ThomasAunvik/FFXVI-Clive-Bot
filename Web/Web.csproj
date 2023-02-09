@@ -41,6 +41,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Application\Application.csproj" />
+	  <ProjectReference Include="..\Azure\Azure.csproj" />
 	  <ProjectReference Include="..\Database\Database.csproj" />
 	</ItemGroup>
 
