@@ -3,6 +3,8 @@ using CliveBot.Application.Skills;
 using CliveBot.Application.Skills.Commands;
 using CliveBot.Application.Skills.Queries;
 using CliveBot.Database.Models;
+using CliveBot.Web.Policies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.ConstrainedExecution;
 
@@ -11,6 +13,7 @@ namespace CliveBot.Web.Controllers
     /// <summary>
     /// Skills of Clive and it's Eikons
     /// </summary>
+    [ModAuthorize]
     public class SkillController : ApiBaseController
     {
         /// <summary>
@@ -19,7 +22,7 @@ namespace CliveBot.Web.Controllers
         /// <param name="summon">Filter for Skill Summon</param>
         /// <returns>List of Skills</returns>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SkillDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ActionResult<SkillDto>>))]
         public async Task<List<SkillDto>> GetAllSkills(SkillSummon? summon)
         {
             return await Mediator.Send(new SkillList.Query() { Summon = summon });
@@ -33,7 +36,7 @@ namespace CliveBot.Web.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<SkillDto> GetSkill(int id)
+        public async Task<ActionResult<SkillDto>> GetSkill(int id)
         {
             return await Mediator.Send(new SkillDetails.Query() { SkillId = id });
         }
@@ -45,9 +48,10 @@ namespace CliveBot.Web.Controllers
         /// <param name="skill">Skill Object</param>
         /// <returns></returns>
         [HttpPut("{id}")]
+        [ModAuthorize(ManageSkillInfo: true)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<SkillDto> EditSkill(int id, Edit.Command skill)
+        public async Task<ActionResult<SkillDto>> EditSkill(int id, SkillEdit.Command skill)
         {
             skill.SkillId = id;
             return await Mediator.Send(skill);
@@ -62,16 +66,17 @@ namespace CliveBot.Web.Controllers
         }
 
         [HttpPost("{id}/images/icon")]
-        
-        public async Task<SkillDto> UpdateSkillIconImage(int id, IFormFile iconFile)
+        [ModAuthorize(ManageSkillInfo: true)]
+        public async Task<ActionResult<SkillDto>> UpdateSkillIconImage(int id, IFormFile iconFile)
         {
-            return await Mediator.Send(new UploadIconImage.Command { File = iconFile, SkillId = id });
+            return await Mediator.Send(new SkillUploadIconImage.Command { File = iconFile, SkillId = id });
         }
 
         [HttpPost("{id}/images/preview")]
-        public async Task<SkillDto> UpdateSkillPreviewImage(int id, IFormFile previewFile)
+        [ModAuthorize(ManageSkillInfo: true)]
+        public async Task<ActionResult<SkillDto>> UpdateSkillPreviewImage(int id, IFormFile previewFile)
         {
-            return await Mediator.Send(new UploadPreviewImage.Command { File = previewFile, SkillId = id });
+            return await Mediator.Send(new SkillUploadPreviewImage.Command { File = previewFile, SkillId = id });
 
         }
     }

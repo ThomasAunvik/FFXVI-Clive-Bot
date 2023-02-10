@@ -1,4 +1,26 @@
+import { AxiosError } from "axios";
 import { Button, Modal } from "react-bootstrap"
+
+export const getErrorInfo = (error: any): ErrorModalInfo => {
+  if(error instanceof AxiosError) {
+    var errorMessage = error.response?.data?.message; 
+    if(errorMessage == null) {
+      errorMessage = error.message;
+    }
+
+    return {
+      statusCode: error.response?.status ?? 0,
+      statusMessage: error.response?.statusText ?? error.message,
+      message: errorMessage,
+    };
+  } 
+
+  return {
+    statusCode: 0,
+    statusMessage: "Unknown Error",
+    message: error.toString(),
+  };
+}
 
 export interface ErrorModalInfo {
 	statusCode: number;

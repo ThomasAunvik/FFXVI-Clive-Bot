@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CliveBot.Database.Models
 {
@@ -14,5 +9,9 @@ namespace CliveBot.Database.Models
         public required string Name { get; set; }
         public required string ConnectionSource { get; set; }
         public required string ConnectionId { get; set; }
+        
+        public int? PermissionsId { get; set; }
+
+        public BotModeratorPermissions? Permissions { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using CliveBot.Azure;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using CliveBot.Web.Middleware;
+using CliveBot.Web.Policies;
 
 Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Information()
@@ -23,10 +24,13 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
+#if !DEBUG
 builder.Logging.AddApplicationInsights();
+builder.Services.AddApplicationInsightsTelemetry();
+#endif
+
 builder.Logging.AddSerilog();
 
-builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddScoped<XCookieAuthEvents>();
@@ -68,7 +72,11 @@ builder.Services.AddAuthentication(
         options.Cookie.HttpOnly = false; // Needs for JavaScript
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(o =>
+{
+    o.AddCustomPolicies();
+});
+builder.Services.AddPolicyHandlers();
 
 builder.Services.Configure<NextjsStaticHostingOptions>(
     builder.Configuration.GetSection("NextjsStaticHosting")
