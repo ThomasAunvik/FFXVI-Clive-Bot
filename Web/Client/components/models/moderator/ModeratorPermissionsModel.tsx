@@ -7,6 +7,7 @@ export interface IModeratorPermissions {
     manageSkillInfo: boolean;
     manageSkillTranslations: boolean;
 
+
     manageCharacters: boolean;
 
     manageCharacterInfo: boolean;

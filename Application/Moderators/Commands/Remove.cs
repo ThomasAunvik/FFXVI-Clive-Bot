@@ -43,7 +43,6 @@ namespace CliveBot.Application.Moderators.Commands
             public async Task<List<ModeratorDto>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var moderator = await _context.BotModerators
-                    .Include(m => m.Permissions)
                     .FirstOrDefaultAsync(s => s.Id == request.ModeratorId, cancellationToken);
 
                 if (moderator == null)
@@ -59,11 +58,7 @@ namespace CliveBot.Application.Moderators.Commands
                     throw new RestException(HttpStatusCode.InternalServerError, "Database failed to save data");
                 }
 
-                var moderators = await _context.BotModerators
-                    .Include(m => m.Permissions)
-                    .ToListAsync(cancellationToken);
-
-                return moderators.ConvertDto().ToList();
+                return await _mediator.Send(new ModeratorList.Query(), cancellationToken);
             }
         }
     }

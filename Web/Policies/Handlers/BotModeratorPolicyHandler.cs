@@ -17,8 +17,10 @@ namespace CliveBot.Web.Policies.Handlers
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             BotModeratorRequirement requirement
-        )
-        {
+        )   {
+            var scope = _service.CreateScope();
+            var _db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
             if(userId == null)
             {
@@ -27,15 +29,6 @@ namespace CliveBot.Web.Policies.Handlers
                 );
                 return;
             }
-
-            if(Config.Owners.Any(o => o == userId))
-            {
-                context.Succeed(requirement);
-                return;
-            }
-
-            using var scope = _service.CreateScope();
-            using var _db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             var isModerator = await _db.BotModerators.AnyAsync(u => 
                 u.ConnectionSource == "Discord" &&

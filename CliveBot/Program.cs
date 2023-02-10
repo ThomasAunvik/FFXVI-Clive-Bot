@@ -56,7 +56,7 @@ var provider = collection.BuildServiceProvider();
 var migrate = Environment.GetEnvironmentVariable("MIGRATION_MODE");
 if (migrate == "always")
 {
-    using var db = provider.GetRequiredService<ApplicationDbContext>();
+    var db = provider.GetRequiredService<ApplicationDbContext>();
     Log.Logger.Information("Migrating...");
     await db.Database.MigrateAsync();
     Log.Logger.Information("Migrating Finished");

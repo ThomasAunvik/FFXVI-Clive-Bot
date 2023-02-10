@@ -28,7 +28,7 @@ export const skillCategoryList: SkillCategory[] =  Object.values(SkillCategory)
     .map((val) => val as SkillCategory);
 
 export interface ISkill {
-  id: number;
+  id: string;
   name: string;
   description: string;
   localized: ISkillLanguage[];

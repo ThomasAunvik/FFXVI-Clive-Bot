@@ -36,6 +36,7 @@ namespace CliveBot.Application.Moderators
                 ManageCharacters = model.ManageCharacters,
                 ManageCharacterInfo = model.ManageCharacterInfo,
                 ManageCharacterNotes = model.ManageCharacterNotes,
+                Moderator = model.Moderator?.ConvertDto(),
             };
         }
 

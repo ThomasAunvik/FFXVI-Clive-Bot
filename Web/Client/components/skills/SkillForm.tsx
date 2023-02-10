@@ -1,15 +1,15 @@
 import axios, { AxiosError, AxiosProgressEvent, CancelToken } from "axios";
 import { Formik, FormikHelpers } from "formik";
-import _, { isNull } from "lodash";
+import _ from "lodash";
 import { useRef, useState } from "react";
 import { Button, ButtonGroup, Col, Collapse, Form, Row, Spinner } from "react-bootstrap";
 import { replaceCDN } from "../constants";
 import { ErrorModal, ErrorModalInfo, getErrorInfo } from "../errors/ErrorHandler";
-import { ISkill, SkillCategory, skillCategoryList, SkillSummon, summonList } from "../models/skill/SkillModel";
+import { ISkill, skillCategoryList, summonList } from "../models/skill/SkillModel";
 import { UploadProgress } from "../upload/UploadProgress";
 
 export interface ISkillFormProps {
-    skill?: ISkill;
+    skill: ISkill;
 }
 
 interface FormikProps {
@@ -22,17 +22,7 @@ type FormikFormProps = ISkill & FormikProps;
 export const SkillForm = (props: ISkillFormProps) => {
     const { skill } = props;
 
-	const [initialSkill, setInitialSkill] = useState<ISkill>(skill ?? {
-		id: 0,
-		name: "",
-		description: "",
-		localized: [],
-		category: SkillCategory.None,
-		summon: SkillSummon.Ifrit,
-		ratingPhysical: 0,
-		ratingMagical: 0,
-		masterizationPoints: 0,
-	});
+	const [initialSkill, setInitialSkill] = useState(skill);
 
 	const [error, setError] = useState<ErrorModalInfo | null>(null);
 
@@ -43,9 +33,8 @@ export const SkillForm = (props: ISkillFormProps) => {
 	const submitForm = async (values: ISkill & FormikProps, actions: FormikHelpers<FormikFormProps>) => {
 		const {iconFile, previewFile, ...newSkill} = values;
 		
-		var skillId = skill?.id ?? null;
-		if(skill == null) {
-			const res = await axios.post("/api/skill/", newSkill);
+		if(!_.isEqual(newSkill, initialSkill)) {
+			const res = await axios.put("/api/skill/" + skill.id, newSkill);
 			if(res.status != 200){
 				setError({ 
 					statusCode: res.status,
@@ -54,32 +43,16 @@ export const SkillForm = (props: ISkillFormProps) => {
 				});
 				return null;
 			}
-			
-			var newInitialSkill = res.data as ISkill;
-			skillId = newInitialSkill.id;
-			setInitialSkill(newInitialSkill);
-		} else {
-			if(!_.isEqual(newSkill, initialSkill)) {
-				const res = await axios.put("/api/skill/" + skill.id, newSkill);
-				if(res.status != 200){
-					setError({ 
-						statusCode: res.status,
-						statusMessage: res.statusText,
-						message: res.data.message,
-					});
-					return null;
-				}
 
-				var newInitialSkill = res.data as ISkill;
-				setInitialSkill(newInitialSkill);
-			}
+			var newInitialSkill = res.data as ISkill;
+			setInitialSkill(newInitialSkill);
 		}
 		
-		if(iconFile != null && !isNull(skillId)) {
+		if(iconFile != null) {
 			const iconForm = new FormData();
 			iconForm.append("iconFile", iconFile);
 			const res = await axios.postForm(
-				"/api/skill/" + skillId + "/images/icon", 
+				"/api/skill/" + skill.id + "/images/icon", 
 				iconForm,
 				{
 					onDownloadProgress: (prog) => {
@@ -99,11 +72,11 @@ export const SkillForm = (props: ISkillFormProps) => {
 			}
 		}
 
-		if(previewFile != null && !isNull(skillId)) {
+		if(previewFile != null) {
 			const previewForm = new FormData();
 			previewForm.append("previewFile", previewFile);
 			const res = await axios.postForm(
-				"/api/skill/" + skillId + "/images/preview", 
+				"/api/skill/" + skill.id + "/images/preview", 
 				previewForm,
 				{
 					onDownloadProgress: (prog) => {
@@ -122,12 +95,6 @@ export const SkillForm = (props: ISkillFormProps) => {
 				return;
 			}
 		}
-		
-		console.log(skill);
-		if((isNull(skill) || skill === undefined) && !isNull(skillId)) {
-			console.log("test");
-			document.location.replace("/dashboard/skills/" + skillId);
-		}
 
 		return;
 	}
@@ -136,6 +103,7 @@ export const SkillForm = (props: ISkillFormProps) => {
 		initialValues={{ ...initialSkill } as FormikFormProps}
 		enableReinitialize
 		onSubmit={async (values, actions) => {
+			
 			try {
 				await submitForm(values, actions);
 			} catch(err: any) {
@@ -182,11 +150,8 @@ export const SkillForm = (props: ISkillFormProps) => {
             <Form.Control 
                 as="select" 
                 name="category"
-                defaultValue={SkillCategory[values.category]}
-				onChange={(event) => {
-					var value = event.currentTarget.value as unknown;
-					setFieldValue("category", SkillCategory[value as SkillCategory])
-				}}
+                defaultValue={values.category}
+				onChange={handleChange}
 				onBlur={handleBlur}
             >
                 {skillCategoryList.map(s => 
@@ -201,11 +166,8 @@ export const SkillForm = (props: ISkillFormProps) => {
             <Form.Control 
                 as="select" 
                 name="summon"
-                defaultValue={SkillSummon[values.summon]}
-				onChange={(event) => {
-					var value = event.currentTarget.value as unknown;
-					setFieldValue("summon", SkillSummon[value as SkillSummon])
-				}}
+                value={values.summon}
+				onChange={handleChange}
 				onBlur={handleBlur}
             >
                 {summonList.map(s => 
@@ -305,7 +267,7 @@ export const SkillForm = (props: ISkillFormProps) => {
 			</Collapse>
             <Form.Control 
                 name="iconUrl"
-                value={values.iconUrl ?? ""}
+                value={values.iconUrl}
 				onChange={handleChange}
 				onBlur={handleBlur}
             />			
@@ -337,7 +299,7 @@ export const SkillForm = (props: ISkillFormProps) => {
 			</Collapse>
             <Form.Control 
                 name="previewImageUrl"
-                value={values.previewImageUrl ?? ""}
+                value={values.previewImageUrl}
 				onChange={handleChange}
 				onBlur={handleBlur}
             />

@@ -75,11 +75,7 @@ namespace CliveBot.Application.Moderators.Commands
                     throw new RestException(HttpStatusCode.InternalServerError, "Database failed to save data");
                 }
 
-                var moderators = await _context.BotModerators
-                    .Include(m => m.Permissions)
-                    .ToListAsync(cancellationToken);
-
-                return moderators.ConvertDto().ToList();
+                return await _mediator.Send(new ModeratorList.Query(), cancellationToken);
             }
         }
     }
