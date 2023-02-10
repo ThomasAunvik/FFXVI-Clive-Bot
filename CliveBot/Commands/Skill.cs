@@ -78,8 +78,8 @@ namespace CliveBot.Bot.Commands
                 inline: true
             );
 
-            embed.WithThumbnailUrl(Config.UrlCdnConvert(skill.IconUrl));
-            embed.WithImageUrl(Config.UrlCdnConvert(skill.PreviewImageUrl));
+            embed.WithThumbnailUrl(skill.IconUrl);
+            embed.WithImageUrl(skill.PreviewImageUrl);
 
             return embed;
         }
