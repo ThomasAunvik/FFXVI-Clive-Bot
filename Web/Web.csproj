@@ -6,7 +6,6 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<SpaRoot>Client\</SpaRoot>
 		<AssemblyName>CliveBot.Web</AssemblyName>
-		<RootNamespace>CliveBot.Web</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -50,8 +49,8 @@
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
 		<!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npx next build" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npx next export" />
+		<Exec  WorkingDirectory="$(SpaRoot)" Command="npx next build" />
+		<Exec  WorkingDirectory="$(SpaRoot)" Command="npx next export" />
 
 		<!-- Include the newly-built files in the publish output -->
 		<ItemGroup>

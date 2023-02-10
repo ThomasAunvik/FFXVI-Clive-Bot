@@ -3,7 +3,6 @@ using NextjsStaticHosting.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using CliveBot.Web.Events;
 
 Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Information()
@@ -25,8 +24,6 @@ builder.Logging.AddSerilog();
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddHealthChecks();
 
-builder.Services.AddScoped<XCookieAuthEvents>();
-
 builder.Services.AddDbContext<ApplicationDbContext>((config) =>
 {
 #if DEBUG
@@ -41,14 +38,12 @@ var discordClientSecret = discordLogin.GetValue<string>("ClientSecret") ?? "";
 
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme
-    ).AddDiscord(options => {
-        options.AccessDeniedPath = "/error/accessdenied";
+).AddDiscord(options =>
+    {
         options.ClientId = discordClientId;
         options.ClientSecret = discordClientSecret;
     })
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, (options) => {
-        options.EventsType = typeof(XCookieAuthEvents);
-        options.AccessDeniedPath = "/error/accessdenied";
         options.Cookie.SameSite = SameSiteMode.Strict;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.HttpOnly = false; // Needs for JavaScript
@@ -56,12 +51,12 @@ builder.Services.AddAuthentication(
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddControllers();
+
 builder.Services.Configure<NextjsStaticHostingOptions>(
     builder.Configuration.GetSection("NextjsStaticHosting")
 );
 builder.Services.AddNextjsStaticHosting();
-
-builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -80,14 +75,19 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-
 app.MapControllers();
 
-app.UseEndpoints(endpoints =>
+app.Use(async (context, next) =>
 {
-    app.MapNextjsStaticHtmls();
+    if(context.Request.Path.StartsWithSegments("/static"))
+    {
+        context.Response.Headers.Add("Cache-Control", "public, max-age=31536000, immutable");
+    }
+
+    await next.Invoke();
 });
 
+app.MapNextjsStaticHtmls();
 app.UseNextjsStaticHosting();
 
 try
