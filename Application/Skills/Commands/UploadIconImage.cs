@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace CliveBot.Application.Skills.Commands
 {
-    public class UploadIconImage
+    public class SkillUploadIconImage
     {
         public class Command : IRequest<SkillDto>
         {
