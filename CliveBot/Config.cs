@@ -12,5 +12,11 @@
 
         public static string CURRENT_COMMIT = "";
         public static string GIT_STATUS = "";
+
+        public static string? UrlCdnConvert(string? url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return null;
+            return url.Replace("cdn;", "https://cdn.xvibot.com/");
+        }
     }
 }
