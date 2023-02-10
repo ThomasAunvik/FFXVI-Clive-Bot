@@ -17,7 +17,7 @@ namespace CliveBot.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<ModeratorDto>>> AddMod(ModeratorAdd.Command command)
+        public async Task<ActionResult<List<ModeratorDto>>> AddMod(ModeratorCreate.Command command)
         {
             return await Mediator.Send(command);
         }

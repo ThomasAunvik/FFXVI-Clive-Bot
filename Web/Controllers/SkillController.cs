@@ -41,6 +41,14 @@ namespace CliveBot.Web.Controllers
             return await Mediator.Send(new SkillDetails.Query() { SkillId = id });
         }
 
+        [HttpPost]
+        [ModAuthorize(ManageSkills: true)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
+        public async Task<ActionResult<SkillDto>> EditSkill(SkillCreate.Command skill)
+        {
+            return await Mediator.Send(skill);
+        }
+
         /// <summary>
         /// Edits a Skill
         /// </summary>

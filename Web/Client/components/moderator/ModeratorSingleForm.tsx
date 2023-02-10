@@ -101,14 +101,14 @@ export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
                     {Object.keys(values.permissions).map((key, i) => {
                         const allowed = Object.values(values.permissions)[i];
                         const objectKey = "permissions." + key;
-                        return <ListGroupItem key={key}>
+                        return <ListGroupItem key={"permission-" + key}>
                             <Form.Check 
                                 name={objectKey}
                                 label={toSentence(key)}
                                 type="checkbox"
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                value={allowed ?? false}
+                                checked={allowed ?? false}
                                 size={20}
                             />
                         </ListGroupItem>
@@ -149,7 +149,7 @@ export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
     </Formik>
 }
 
-const toSentence = (header: string) => {
+export const toSentence = (header: string) => {
     let newHeader: string[] = [];
     let chars = Array.from(header);
     chars.forEach((char: string) => {

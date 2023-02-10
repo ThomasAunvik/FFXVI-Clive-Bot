@@ -26,6 +26,7 @@ namespace CliveBot.Application.Moderators.Queries
             public async Task<List<ModeratorDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var moderators = await _context.BotModerators
+                    .Include(m => m.Permissions)
                     .ToListAsync(cancellationToken);
 
                 return moderators.ConvertDto().ToList();

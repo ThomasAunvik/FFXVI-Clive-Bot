@@ -1,12 +1,14 @@
 import DashboardNavBar from "@/components/DashboardNavBar";
 import { ErrorModal, ErrorModalInfo, getErrorInfo } from "@/components/errors/ErrorHandler";
+import { ISkillLanguage } from "@/components/models/skill/SkillLanguageModel";
 import { ISkill } from "@/components/models/skill/SkillModel";
 import { SkillForm } from "@/components/skills/SkillForm";
+import { SkillLanguageList } from "@/components/skills/SkillLanguagesList";
 import axios from "axios";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Spinner } from "react-bootstrap";
+import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 
 const DashboardSkillPage = () => {
   const router = useRouter();
@@ -14,6 +16,8 @@ const DashboardSkillPage = () => {
 
   const firstTick = useRef(false);
   const [skill, setSkill] = useState<ISkill | null>(null);
+  const [skillLanguages, setSkillLanguages] = useState<ISkillLanguage[] | null>(null);
+
   const [error, setError] = useState<ErrorModalInfo | null>(null);
 
   const fetchSkill = useCallback(async (skillId: string) => {
@@ -27,12 +31,24 @@ const DashboardSkillPage = () => {
     }
   }, []);
 
+  const fetchSkillLanguages = useCallback(async (skillId: string) => {
+    try {
+      const res = await axios.get("/api/skill/" + skillId + "/languages");
+      if(res.status != 200) return;
+
+      setSkillLanguages(res.data as ISkillLanguage[]);
+    } catch(err: any) {
+      setError(getErrorInfo(err));
+    }
+  }, []);
+
   useEffect(() => {
     if(!id) return;
     if(firstTick.current) return;
     firstTick.current = true;
 
     fetchSkill(id.toString());
+    fetchSkillLanguages(id.toString());
   }, [fetchSkill, id]);
 
   return (
@@ -44,20 +60,31 @@ const DashboardSkillPage = () => {
       <main>
         <DashboardNavBar currentPath="/dashboard/skills" />
         <Container className="mb-4">
-          <Button variant="link" href="/dashboard/skills">Return to Skills</Button>
+          	<Button variant="link" href="/dashboard/skills">Return to Skills</Button>
 
-          <h1>{skill?.name == null ? "Loading..." : skill.name}</h1>
-          <Col md={4}>
-          { skill == null ?
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner> :
-            <SkillForm skill={skill} />
-          }
-          </Col>
-          {error == null ? null :
-            <ErrorModal error={error} onHide={() => setError(null)} />
-          }
+          	<h1>{skill?.name == null ? "Loading..." : skill.name}</h1>
+			<Row>
+				<Col md={4}>
+				{ skill == null ?
+					<Spinner animation="border" role="status">
+					<span className="visually-hidden">Loading...</span>
+					</Spinner> :
+					<SkillForm skill={skill} />
+				}
+				</Col>
+				<Col md={6}>
+					{ !id ?
+						<Spinner animation="border" role="status">
+						<span className="visually-hidden">Loading...</span>
+						</Spinner> :
+						<SkillLanguageList skillId={id as string} />
+					}
+				</Col>
+			</Row>
+
+			{error == null ? null :
+				<ErrorModal error={error} onHide={() => setError(null)} />
+			}
         </Container>
       </main>
     </>
