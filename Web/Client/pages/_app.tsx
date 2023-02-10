@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootswatch/dist/darkly/bootstrap.min.css";
 
-import "../styles/globals.css";
+import "../styles/globals.scss";
 import "../public/static/fonts/finalf.css";
 
 import type { AppProps } from 'next/app'

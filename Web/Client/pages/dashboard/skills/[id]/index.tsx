@@ -23,7 +23,6 @@ const DashboardSkillPage = () => {
 
   useEffect(() => {
     if(!id) return;
-    console.log(id);
     if(firstTick.current) return;
     firstTick.current = true;
 
@@ -38,7 +37,7 @@ const DashboardSkillPage = () => {
       </Head>
       <main>
         <DashboardNavBar currentPath="/dashboard/skills" />
-        <Container>
+        <Container className="mb-4">
           <Button variant="link" href="/dashboard/skills">Return to Skills</Button>
 
           <h1>{skill?.name == null ? "Loading..." : skill.name}</h1>
