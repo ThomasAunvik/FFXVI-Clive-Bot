@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
+import { Container, Nav, Navbar } from "react-bootstrap";
 import styles from "styles/NavBar.module.css";
 import useIsMounted from "./misc/useIsMounted";
 
@@ -43,7 +43,7 @@ const DashboardNavBar = (props: IDashboardNavBarProps) => {
       variant="dark"
       expand="lg"
       className={styles.navbar}
-      sticky={"top"}
+      sticky="top"
     >
       <Container>
         <Navbar.Brand href="/">Clive Bot</Navbar.Brand>
@@ -59,21 +59,6 @@ const DashboardNavBar = (props: IDashboardNavBarProps) => {
             >
               Skills
             </Nav.Link>
-            <NavDropdown title="Misc" id="basic-nav-dropdown">
-              <NavDropdown.Item href="#action/3.1">
-                Something New
-              </NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.2">
-                Something New
-              </NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.3">
-                Something New
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="#action/3.4">
-                Something New 2
-              </NavDropdown.Item>
-            </NavDropdown>
           </Nav>
           <Nav className="mr-auto">
             <Nav.Link href={""}>{username ?? "Loading..."}</Nav.Link>

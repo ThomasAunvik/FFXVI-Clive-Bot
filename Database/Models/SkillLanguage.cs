@@ -2,7 +2,7 @@
 
 namespace CliveBot.Database.Models
 {
-    public class SkillLanguageModel
+    public class SkillLanguage
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }

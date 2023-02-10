@@ -5,21 +5,13 @@ using Microsoft.EntityFrameworkCore.Query;
 
 namespace CliveBot.Web.Controllers
 {
-    /// <summary>
-    /// Creates redirect urls and challanges, and signing out
-    /// </summary>
     public class AuthenticationController : Controller
     {
-        /// <summary>
-        /// Signing in to the application trough Cookie
-        /// </summary>
-        /// <param name="redirect">Path to return to after authentication</param>
-        /// <returns>Challange Result</returns>
         [HttpGet("~/signin")]
         public IActionResult SignIn(string? redirect)
         {
             var redirectUri = "/";
-            if(IsLocalUrl(redirect))
+            if(isLocalUrl(redirect))
             {
                 redirectUri = redirect;
             }
@@ -27,7 +19,7 @@ namespace CliveBot.Web.Controllers
             return Challenge(new AuthenticationProperties { RedirectUri = redirectUri }, "Discord");
         }
 
-        private static bool IsLocalUrl(string? url)
+        private bool isLocalUrl(string? url)
         {
             if (string.IsNullOrEmpty(url))
             {
@@ -35,17 +27,13 @@ namespace CliveBot.Web.Controllers
             }
             else
             {
-                return (url[0] == '/' && (url.Length == 1 ||
+                return ((url[0] == '/' && (url.Length == 1 ||
                         (url[1] != '/' && url[1] != '\\'))) ||   // "/" or "/foo" but not "//" or "/\"
                         (url.Length > 1 &&
-                         url[0] == '~' && url[1] == '/');   // "~/" or "~/foo"
+                         url[0] == '~' && url[1] == '/'));   // "~/" or "~/foo"
             }
         }
 
-        /// <summary>
-        /// Signs off the user
-        /// </summary>
-        /// <returns></returns>
         [HttpGet("~/signout")]
         [HttpPost("~/signout")]
         public IActionResult SignOutCurrentUser()

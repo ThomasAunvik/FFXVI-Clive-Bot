@@ -1,12 +1,9 @@
 using CliveBot.Database;
 using NextjsStaticHosting.AspNetCore;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using CliveBot.Web.Events;
-using CliveBot.Application;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
-using CliveBot.Web.Middleware;
 
 Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Information()
@@ -30,19 +27,17 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddScoped<XCookieAuthEvents>();
 
-var connectionString = builder.Configuration.GetConnectionString("POSTGRES");
-
 builder.Services.AddDbContext<ApplicationDbContext>((config) =>
 {
 #if DEBUG
     config.EnableSensitiveDataLogging();
 #endif
 });
-builder.Services.RegisterMediatR();
 
 var discordLogin = builder.Configuration.GetSection("DiscordLogin");
 var discordClientId = discordLogin.GetValue<string>("ClientId") ?? "";
 var discordClientSecret = discordLogin.GetValue<string>("ClientSecret") ?? "";
+
 
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme
@@ -68,30 +63,6 @@ builder.Services.AddNextjsStaticHosting();
 
 builder.Services.AddControllers();
 
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Version = "v1",
-        Title = "CliveBot Web API",
-        Description = "A Web NextJX Static site with .NET Core Backend",
-        TermsOfService = new Uri("https://example.com/terms"),
-        Contact = new OpenApiContact
-        {
-            Name = "Thomas Aunvik",
-            Url = new Uri("mailto:contact@thaun.dev")
-        },
-        License = new OpenApiLicense
-        {
-            Name = "MIT License",
-            Url = new Uri("https://github.com/ThomasAunvik/FFXVI-Clive-Bot/blob/master/LICENSE")
-        }
-    });
-
-    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -102,16 +73,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
-app.UseExceptionHandler(errorApp =>
-{
-    errorApp.Run(async context =>
-    {
-        await ErrorHandlingMiddleware.HandleExceptionAsync(context);
-    });
-});
-
 app.UseHttpsRedirection();
 app.UseHealthChecks("/healthz");
 
@@ -119,21 +80,12 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllers();
 
-app.UseSwagger(options =>
-{
-    options.RouteTemplate = "api/swagger/{documentname}/swagger.json";
-});
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/api/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = "api/swagger";
-});
+app.MapControllers();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapNextjsStaticHtmls();
+    app.MapNextjsStaticHtmls();
 });
 
 app.UseNextjsStaticHosting();
