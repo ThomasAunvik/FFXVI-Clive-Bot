@@ -25,16 +25,14 @@ namespace CliveBot.Azure
             (new Uri($"{blobUri}?{sasToken}"), null);
         }
 
-        public static string GetBlobServiceConnectionString(
+        public static Uri GetBlobServiceConnectionString(
            string accountName,
            string sasToken
         )
         {
-            if(sasToken.StartsWith("?")) sasToken = sasToken[1..];
+            string blobUri = "https://" + accountName + ".blob.core.windows.net";
 
-            string blobUri = "BlobEndpoint=https://" + accountName + ".blob.core.windows.net;";
-            string sas = "SharedAccessSignature=" + sasToken;
-            return blobUri + sas;
+            return new Uri($"{blobUri}?{sasToken}");
         }
 
         public static IServiceCollection RegisterAzureBlobServices(
@@ -46,7 +44,10 @@ namespace CliveBot.Azure
             serviceCollection.AddAzureClients(clientBuilder =>
             {
                 clientBuilder.AddBlobServiceClient(
-                    GetBlobServiceConnectionString(blobAccountName, blobSasToken)
+                    GetBlobServiceConnectionString(
+                        blobAccountName,
+                        blobSasToken
+                    )
                 );
 
                 clientBuilder.UseCredential(new DefaultAzureCredential());

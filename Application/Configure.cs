@@ -8,7 +8,7 @@ namespace CliveBot.Application
     {
         public static IServiceCollection RegisterMediatR(this IServiceCollection services)
         {
-            services.AddMediatR(typeof(ConfigureApplicationExtensions).Assembly);
+            services.AddMediatR(Assembly.GetExecutingAssembly());
             return services;
         }
     }
