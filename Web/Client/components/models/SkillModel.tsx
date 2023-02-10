@@ -18,15 +18,6 @@ export enum SkillSummon {
   Bahamut,
 }
 
-export const summonList: SkillSummon[] =  Object.values(SkillSummon)
-    .filter((val) => isNaN(Number(val)))
-    .filter((val) => val != SkillSummon[SkillSummon.None])
-    .map((val) => val as SkillSummon);
-
-export const skillCategoryList: SkillCategory[] =  Object.values(SkillCategory)
-    .filter((val) => isNaN(Number(val)))
-    .map((val) => val as SkillCategory);
-
 export interface ISkill {
   id: string;
   name: string;

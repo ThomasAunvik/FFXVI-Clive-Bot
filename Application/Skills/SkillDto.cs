@@ -55,5 +55,10 @@ namespace CliveBot.Application.Skills
         {
             return listModels.Select(x => x.ConvertDto());
         }
+
+        public static IQueryable<SkillDto> ConvertDto(this IQueryable<SkillModel> listModels)
+        {
+            return listModels.Select(x => x.ConvertDto());
+        }
     }
 }

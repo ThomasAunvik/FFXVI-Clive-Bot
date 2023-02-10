@@ -43,12 +43,5 @@ namespace CliveBot.Web.Controllers
         {
             return await Mediator.Send(new SkillLanguageList.Query() { SkillId = id });
         }
-
-        [HttpPost("{id}/images")]
-        public async Task UpdateSkillImage()
-        {
-            var form = await HttpContext.Request.ReadFormAsync();
-            
-        }
     }
 }
