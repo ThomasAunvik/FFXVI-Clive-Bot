@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Accordion, Col, ListGroup, Row, Spinner } from "react-bootstrap";
 import { ISkill, SkillSummon, summonList } from "../models/SkillModel";
 import Image from 'next/image';
+import { replaceCDN } from "../constants";
 
 export const SkillSummonList = () => {    
     const [allSkills, setSkills] = useState<{summon: SkillSummon, skills: ISkill[]}[]>([]);
@@ -40,7 +41,7 @@ export const SkillSummonList = () => {
                     <ListGroup variant="flush">
                         {skills.skills.map(s => {
                             return <ListGroup.Item  key={"skill-" + s.id} action href={"/dashboard/skills/" + s.id}>
-                                <Image alt="" src={s.iconUrl ?? ""} width={30} height={30} />
+                                <Image alt="" src={replaceCDN(s.iconUrl ?? "")} width={30} height={30} />
                                 <span style={{marginLeft: "1em"}}>{s.name}</span>
                             </ListGroup.Item >
                         })}
