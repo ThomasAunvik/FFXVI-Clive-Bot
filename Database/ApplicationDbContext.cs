@@ -24,7 +24,6 @@ namespace CliveBot.Database
         public DbSet<SkillModel> Skills { get; set; }
         public DbSet<SkillLanguageModel> SkillLanguages { get; set; }
         public DbSet<BotModerator> BotModerators { get; set; }
-        public DbSet<BotModeratorPermissions> BotModeratorPermissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

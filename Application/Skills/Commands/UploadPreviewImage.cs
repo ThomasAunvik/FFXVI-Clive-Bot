@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace CliveBot.Application.Skills.Commands
 {
-    public class SkillUploadPreviewImage
+    public class UploadPreviewImage
     {
         public class Command : IRequest<SkillDto>
         {

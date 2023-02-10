@@ -38,9 +38,8 @@ namespace CliveBot.Web.Events
         /// <returns></returns>
         public override Task RedirectToAccessDenied(RedirectContext<CookieAuthenticationOptions> context)
         {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            context.Response.WriteAsJsonAsync(new { Error = "Forbidden" });
-            return Task.CompletedTask;
+            context.RedirectUri = $"/errors/accessdenied";
+            return base.RedirectToAccessDenied(context);
         }
         
         /// <summary>

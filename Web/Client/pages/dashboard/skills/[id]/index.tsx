@@ -1,6 +1,5 @@
 import DashboardNavBar from "@/components/DashboardNavBar";
-import { ErrorModal, ErrorModalInfo, getErrorInfo } from "@/components/errors/ErrorHandler";
-import { ISkill } from "@/components/models/skill/SkillModel";
+import { ISkill } from "@/components/models/SkillModel";
 import { SkillForm } from "@/components/skills/SkillForm";
 import axios from "axios";
 import Head from "next/head";
@@ -14,17 +13,12 @@ const DashboardSkillPage = () => {
 
   const firstTick = useRef(false);
   const [skill, setSkill] = useState<ISkill | null>(null);
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
 
   const fetchSkill = useCallback(async (skillId: string) => {
-    try {
-      const res = await axios.get("/api/skill/" + skillId);
-      if(res.status != 200) return;
+    const res = await axios.get("/api/skill/" + skillId);
+    if(res.status != 200) return;
 
-      setSkill(res.data as ISkill);
-    } catch(err: any) {
-      setError(getErrorInfo(err));
-    }
+    setSkill(res.data as ISkill);
   }, []);
 
   useEffect(() => {
@@ -55,9 +49,6 @@ const DashboardSkillPage = () => {
             <SkillForm skill={skill} />
           }
           </Col>
-          {error == null ? null :
-            <ErrorModal error={error} onHide={() => setError(null)} />
-          }
         </Container>
       </main>
     </>

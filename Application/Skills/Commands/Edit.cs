@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace CliveBot.Application.Skills.Commands
 {
-    public class SkillEdit
+    public class Edit
     {
         public class Command : SkillDto, IRequest<SkillDto>
         {

@@ -14,7 +14,7 @@ namespace CliveBot.Web.Controllers
         /// <returns>Discord Info, UserId, Username, Discriminator and Avatar</returns>
         /// <exception cref="Exception">If not authenticated, but still passes [Authorize], returns an Exception</exception>
         [HttpGet("current")]
-        public ActionResult<DiscordUserDto> GetCurrentUser()
+        public DiscordUserDto GetCurrentUser()
         {
             if(UserId == null || Username == null || Discriminator == null)
             {

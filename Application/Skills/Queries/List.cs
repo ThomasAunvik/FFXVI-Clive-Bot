@@ -4,6 +4,13 @@ using CliveBot.Database.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Npgsql.Internal.TypeHandlers.DateTimeHandlers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace CliveBot.Application.Skills.Queries
 {

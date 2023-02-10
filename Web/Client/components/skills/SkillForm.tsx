@@ -4,8 +4,8 @@ import _ from "lodash";
 import { useRef, useState } from "react";
 import { Button, ButtonGroup, Col, Collapse, Form, Row, Spinner } from "react-bootstrap";
 import { replaceCDN } from "../constants";
-import { ErrorModal, ErrorModalInfo, getErrorInfo } from "../errors/ErrorHandler";
-import { ISkill, skillCategoryList, summonList } from "../models/skill/SkillModel";
+import { ErrorModal, ErrorModalInfo } from "../errors/ErrorHandler";
+import { ISkill, skillCategoryList, summonList } from "../models/SkillModel";
 import { UploadProgress } from "../upload/UploadProgress";
 
 export interface ISkillFormProps {
@@ -107,7 +107,24 @@ export const SkillForm = (props: ISkillFormProps) => {
 			try {
 				await submitForm(values, actions);
 			} catch(err: any) {
-				setError(getErrorInfo(err));
+				if(err instanceof AxiosError) {
+					var errorMessage = err.response?.data?.message; 
+					if(errorMessage == null) {
+						errorMessage = err.message;
+					}
+
+					setError({
+						statusCode: err.response?.status ?? 0,
+						statusMessage: err.response?.statusText ?? err.message,
+						message: errorMessage,
+					});
+				} else {
+					setError({
+						statusCode: 0,
+						statusMessage: "Unknown Error",
+						message: err.toString(),
+					});
+				}
 			}
 
 			actions.setSubmitting(false);

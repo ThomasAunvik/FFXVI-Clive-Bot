@@ -22,75 +22,7 @@ namespace CliveBot.Database.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("CliveBot.Database.Models.BotModerator", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ConnectionId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ConnectionSource")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("PermissionsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PermissionsId")
-                        .IsUnique();
-
-                    b.ToTable("BotModerators");
-                });
-
-            modelBuilder.Entity("CliveBot.Database.Models.BotModeratorPermissions", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("AllPermissions")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ManageCharacterInfo")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ManageCharacterNotes")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ManageCharacters")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ManageModerators")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ManageSkillInfo")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ManageSkillTranslations")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ManageSkills")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BotModeratorPermissions");
-                });
-
-            modelBuilder.Entity("CliveBot.Database.Models.SkillLanguageModel", b =>
+            modelBuilder.Entity("CliveBot.Database.Models.SkillLanguage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -167,17 +99,7 @@ namespace CliveBot.Database.Migrations
                     b.ToTable("Skills");
                 });
 
-            modelBuilder.Entity("CliveBot.Database.Models.BotModerator", b =>
-                {
-                    b.HasOne("CliveBot.Database.Models.BotModeratorPermissions", "Permissions")
-                        .WithOne("Moderator")
-                        .HasForeignKey("CliveBot.Database.Models.BotModerator", "PermissionsId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("Permissions");
-                });
-
-            modelBuilder.Entity("CliveBot.Database.Models.SkillLanguageModel", b =>
+            modelBuilder.Entity("CliveBot.Database.Models.SkillLanguage", b =>
                 {
                     b.HasOne("CliveBot.Database.Models.SkillModel", "Skill")
                         .WithMany("Localized")
@@ -195,11 +117,6 @@ namespace CliveBot.Database.Migrations
                         .HasForeignKey("CliveBot.Database.Models.SkillModel", "MasteredVersionForeignKey");
 
                     b.Navigation("MasteredVersion");
-                });
-
-            modelBuilder.Entity("CliveBot.Database.Models.BotModeratorPermissions", b =>
-                {
-                    b.Navigation("Moderator");
                 });
 
             modelBuilder.Entity("CliveBot.Database.Models.SkillModel", b =>
