@@ -49,7 +49,7 @@ const DashboardSkillPage = () => {
 
     fetchSkill(id.toString());
     fetchSkillLanguages(id.toString());
-  }, [fetchSkill, id]);
+  }, [fetchSkill, fetchSkillLanguages, id]);
 
   return (
     <>

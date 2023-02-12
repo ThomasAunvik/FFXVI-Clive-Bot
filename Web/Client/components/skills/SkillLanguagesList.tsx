@@ -36,7 +36,7 @@ export const SkillLanguageList = (
 		} catch(err: any) {
 			setError(getErrorInfo(err));
 		}
-	}, []);
+	}, [fetchLanguages]);
 
 	return <div>
 		<h3>Languages:</h3>
