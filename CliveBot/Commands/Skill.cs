@@ -114,10 +114,11 @@ namespace CliveBot.Bot.Commands
             } else if(skillName != null)
             {
                 var skillLang = await db.SkillLanguages
-                    .Where(l => l.Name.ToLower().StartsWith(skillName.ToLower()))
+                    .Where((l) => EF.Functions.ILike(l.Name, skillName + "%"))
+                    .OrderBy(l => l.Name)
                     .FirstOrDefaultAsync();
 
-                if(skillLang?.Skill != null)
+                if (skillLang?.Skill != null)
                 {
                     skill = skillLang.Skill;
                     if (locale == null) selectedLocale = skillLang.Locale;

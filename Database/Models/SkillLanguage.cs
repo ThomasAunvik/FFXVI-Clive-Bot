@@ -1,7 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CliveBot.Database.Models
 {
+    [Index(nameof(Name))]
     public class SkillLanguageModel
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -12,5 +15,6 @@ namespace CliveBot.Database.Models
         public string? Description { get; set; }
 
         public SkillModel? Skill { get; set; }
+        
     }
 }

@@ -35,7 +35,7 @@ export const UploadModal = (props: IUploadModalProps) => {
             <Form.Control name="fileinput" type="file" />
             <Form.Text className="text-muted">
               {"We'll never share your email with anyone else."}
-            </Form.Text>
+            </Form.>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>

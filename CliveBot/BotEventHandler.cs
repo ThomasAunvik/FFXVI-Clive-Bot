@@ -81,23 +81,6 @@ namespace CliveBot.Bot
             };
 
             client.ButtonExecuted += ButtonExecuted;
-            client.ModalSubmitted += ModalSubmitted;
-        }
-
-        private async Task ModalSubmitted(SocketModal modal)
-        {
-            var id = modal.Data.CustomId;
-            if (id == null) return;
-            var name = id.Split(":").First();
-
-                var scope = provider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-            if(name == "skilllanguagemodal")
-            {
-                await SkillManager.SkillLanguageModalEdit(modal, db);
-            }
-
         }
 
         internal async Task ButtonExecuted(SocketMessageComponent interaction)

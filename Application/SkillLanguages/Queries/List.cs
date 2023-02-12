@@ -38,7 +38,9 @@ namespace CliveBot.Application.Skills.Queries
                     throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
                 }
 
-                return skill.Localized.ConvertDto().ToList();
+                return skill.Localized
+                    .OrderBy(s => s.Locale)
+                    .ConvertDto().ToList();
             }
         }
     }

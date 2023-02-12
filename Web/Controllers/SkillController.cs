@@ -1,12 +1,11 @@
 ﻿using CliveBot.Application.SkillLanguages;
+using CliveBot.Application.SkillLanguages.Commands;
 using CliveBot.Application.Skills;
 using CliveBot.Application.Skills.Commands;
 using CliveBot.Application.Skills.Queries;
 using CliveBot.Database.Models;
 using CliveBot.Web.Policies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.ConstrainedExecution;
 
 namespace CliveBot.Web.Controllers
 {
@@ -66,11 +65,38 @@ namespace CliveBot.Web.Controllers
         }
 
         [HttpGet("{id}/languages")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SkillLanguageDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<List<SkillLanguageDto>> GetSkillLanguages(int id)
         {
             return await Mediator.Send(new SkillLanguageList.Query() { SkillId = id });
+        }
+
+        [HttpPost("{id}/languages/{locale}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SkillLanguageDto>))]
+        public async Task<List<SkillLanguageDto>> CreateOrUpdateSkillLanguage(
+            int id,
+            string locale,
+            ModeratorCreateOrEdit.Command language
+        )   {
+            language.EditSkillId = id;
+            language.EditLocale = locale;
+            return await Mediator.Send(language);
+        }
+
+        [HttpDelete("{id}/languages/{locale}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SkillLanguageDto>))]
+        public async Task<List<SkillLanguageDto>> RemoveSkillLanguage(
+            int id,
+            string locale
+        )
+        {
+            var language = new SkillLanguageRemove.Command
+            {
+                EditSkillId = id,
+                EditLocale = locale
+            };
+            return await Mediator.Send(language);
         }
 
         [HttpPost("{id}/images/icon")]
@@ -85,7 +111,6 @@ namespace CliveBot.Web.Controllers
         public async Task<ActionResult<SkillDto>> UpdateSkillPreviewImage(int id, IFormFile previewFile)
         {
             return await Mediator.Send(new SkillUploadPreviewImage.Command { File = previewFile, SkillId = id });
-
         }
     }
 }

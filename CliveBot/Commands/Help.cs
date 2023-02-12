@@ -24,7 +24,7 @@ namespace CliveBot.Bot.Commands
             string verbose = "limited"
         )
         {
-            EmbedHandler embed = new EmbedHandler(Context.User);
+            EmbedHandler embed = new(Context.User);
 
 
             bool all = verbose.Equals("all");
@@ -37,7 +37,7 @@ namespace CliveBot.Bot.Commands
                 HelpCommandSearch(embed, search, services, Context);
             }
             
-            await RespondAsync(embed: embed.Build(), ephemeral: true);
+            await Context.Interaction.RespondAsync(embed: embed.Build(), ephemeral: true);
         }
 
         async Task HelpCommandShow(EmbedHandler embed, bool all = false)
@@ -106,7 +106,7 @@ namespace CliveBot.Bot.Commands
                     List<PreconditionAttribute> preconditions = cmd.Preconditions.ToList();
                     preconditions.AddRange(cmd.Module.Preconditions);
 
-                    List<PreconditionAttribute> sameGroup = new List<PreconditionAttribute>();
+                    List<PreconditionAttribute> sameGroup = new();
                     string preconditionString = string.Empty;
                     for (int i = 0; i < preconditions.Count; i++)
                     {
@@ -151,23 +151,25 @@ namespace CliveBot.Bot.Commands
         {
             
             ButtonBuilder joinServer = new("Join FFXVI Server", style: ButtonStyle.Link, url: "https://discord.gg/y34bsEg");
+            ButtonBuilder joinSupportServer = new("Join Support Server", style: ButtonStyle.Link, url: "https://discord.gg/6NhU8Mdp4W");
             ButtonBuilder sendMessage = new("Send Message", "send-message");
             
 
             ActionRowBuilder actionRow = new();
             actionRow.WithButton(joinServer);
+            actionRow.WithButton(joinSupportServer);
             actionRow.WithButton(sendMessage);
 
             ComponentBuilder component = new();
             component.AddRow(actionRow);
 
-            await RespondAsync(components: component.Build(), ephemeral: true);
+            await Context.Interaction.RespondAsync(components: component.Build(), ephemeral: true);
         }
 
         [SlashCommand("github", "Gets the GitHub link of the project")]
         public async Task GithubLink()
         {
-            await ReplyAsync("FFXVI-Clive-Bot Project: https://github.com/ThomasAunvik/FFXVI-Clive-Bot");
+            await Context.Interaction.RespondAsync("FFXVI-Clive-Bot Project: https://github.com/ThomasAunvik/FFXVI-Clive-Bot");
         }
 
         [SlashCommand("gitstatus", "Gets the current patch status for this bot")]
@@ -178,13 +180,13 @@ namespace CliveBot.Bot.Commands
             string commitText = "None";
             if (!string.IsNullOrEmpty(Config.CURRENT_COMMIT))
             {
-                commitText = "[" + Config.CURRENT_COMMIT.Substring(0, 7) + "](" +
+                commitText = "[" + Config.CURRENT_COMMIT[..7] + "](" +
                              "https://github.com/ThomasAunvik/FFXVI-Clive-Bot/commit/" + Config.CURRENT_COMMIT + ")";
             }
 
             embed.AddFieldSecure("Commit", commitText);
             embed.AddFieldSecure("Status", string.IsNullOrEmpty(Config.GIT_STATUS) ? "None" : Config.GIT_STATUS);
-            await RespondAsync(embed: embed.Build());
+            await Context.Interaction.RespondAsync(embed: embed.Build());
         }
     }
 }
