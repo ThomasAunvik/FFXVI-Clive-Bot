@@ -1,7 +1,7 @@
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Accordion, Button, ButtonGroup, Col, Collapse, Container, ListGroup, ListGroupItem, Row, Spinner } from "react-bootstrap";
 import { ErrorModal, ErrorModalInfo, getErrorInfo } from "../errors/ErrorHandler";
 import { ISkillLanguage } from "../models/skill/SkillLanguageModel";
@@ -23,20 +23,22 @@ export const SkillLanguageList = (
 		null
 	);
 
-	const fetchLanguages = async () => {
+	const fetchLanguages = useCallback(async () => {
 		const res = await axios.get(`/api/skill/${skillId}/languages`);
 		if(res.status != 200) return;
 
 		setLanguages(res.data as ISkillLanguage[]);
-	}
+	}, []);
 
 	useEffect(() => {
+		if(languages.value != null) return;
+		
 		try {
 			fetchLanguages();
 		} catch(err: any) {
 			setError(getErrorInfo(err));
 		}
-	}, [fetchLanguages]);
+	}, [fetchLanguages, languages]);
 
 	return <div>
 		<h3>Languages:</h3>
