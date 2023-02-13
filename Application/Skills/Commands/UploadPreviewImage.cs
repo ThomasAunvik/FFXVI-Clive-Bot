@@ -66,7 +66,7 @@ namespace CliveBot.Application.Skills.Commands
                 );
                 fileStream.Close();
 
-                skill.IconUrl = $"cdn;{filePath}";
+                skill.PreviewImageUrl = $"cdn;{filePath}";
 
                 var result = await _context.SaveChangesAsync(cancellationToken);
                 if (result == 0)

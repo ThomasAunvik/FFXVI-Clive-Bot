@@ -19,7 +19,7 @@ namespace CliveBot.Bot
         public static string? UrlCdnConvert(string? url)
         {
             if (string.IsNullOrWhiteSpace(url)) return null;
-            return url.Replace("cdn;", "https://cdn.xvibot.com/");
+            return url.Replace("cdn;", "https://cdn.xvibot.com");
         }
 
         public static async Task ReadConfig()
