@@ -56,7 +56,7 @@ namespace CliveBot.Application.Skills.Commands
                 }
 
                 var extension = Path.GetExtension(request.File.FileName);
-                var filePath = $"/images/skill/{skill.Id}/preview{(extension == null ? "" : $".{extension}")}";
+                var filePath = $"/images/skill/{skill.Id}/preview{extension ?? ""}";
 
                 using var fileStream = request.File.OpenReadStream();
                 await _blob.Upload(
