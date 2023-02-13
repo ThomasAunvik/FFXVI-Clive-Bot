@@ -66,10 +66,12 @@ namespace CliveBot.Application.Skills.Commands
                 );
                 fileStream.Close();
 
-                skill.PreviewImageUrl = $"cdn;{filePath}";
+                var iconUrlFilePath = $"cdn;{filePath}";
+                var isSame = skill.PreviewImageUrl == iconUrlFilePath;
+                skill.PreviewImageUrl = iconUrlFilePath;
 
                 var result = await _context.SaveChangesAsync(cancellationToken);
-                if (result == 0)
+                if (result == 0 && !isSame)
                 {
                     throw new RestException(HttpStatusCode.InternalServerError, "Database failed to save data");
                 }
