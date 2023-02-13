@@ -79,7 +79,6 @@ namespace CliveBot.Bot.Commands
             );
 
             embed.WithThumbnailUrl(Config.UrlCdnConvert(skill.IconUrl));
-            embed.WithImageUrl(Config.UrlCdnConvert(skill.PreviewImageUrl));
 
             return embed;
         }
@@ -161,24 +160,30 @@ namespace CliveBot.Bot.Commands
 
             var embed = SkillEmbedBuild(skill, locale: selectedLocale);
 
-            MessageComponent? component = null;
+            var compBuilder = new ComponentBuilder()
+                .WithButton("Preview", $"skillimgpreview:{skill.Id}", ButtonStyle.Success);
 
             if (skill.MasteredVersion != null || skill.PreviousVersion != null)
             {
-                component = new ComponentBuilder()
+                compBuilder
                     .WithButton(
                         "Masterize",
-                        $"skillview:{skill.MasteredVersion?.Id ?? 0},{selectedLocale}",
+                        $"skillview:{skill.MasteredVersion?.Id ?? 0},{locale}",
+                        ButtonStyle.Primary,
+                        emote: Emote.Parse(emote_mana),
                         disabled: skill.MasteredVersion == null
                     ).WithButton(
                         "Downgrade",
-                        $"skillview:{skill.PreviousVersion?.Id ?? 0},{selectedLocale}",
+                        $"skillview:{skill.PreviousVersion?.Id ?? 0},{locale}",
+                        ButtonStyle.Secondary,
                         disabled: skill.PreviousVersion == null
-                    ).Build();
+                    );
             }
 
-            await RespondAsync(embed: embed.Build(), components: component);
-            
+            await RespondAsync(
+                embed: embed.Build(),
+                components: compBuilder.Build()
+            );
         }
 
         public async Task ListSkills(SkillSummon skillSummon, int page = 0)
@@ -295,27 +300,66 @@ namespace CliveBot.Bot.Commands
 
             var embed = SkillCommand.SkillEmbedBuild(skill, locale: locale);
 
+            var compBuilder = new ComponentBuilder()
+                .WithButton("Preview", $"skillimgpreview:{skill.Id}", ButtonStyle.Success);
 
-            MessageComponent? component = null;
             if (skill.MasteredVersion != null || skill.PreviousVersion != null)
             {
-                component = new ComponentBuilder()
+                compBuilder
                     .WithButton(
                         "Masterize",
                         $"skillview:{skill.MasteredVersion?.Id ?? 0},{locale}",
+                        ButtonStyle.Primary,
+                        emote: Emote.Parse(SkillCommand.emote_mana),
                         disabled: skill.MasteredVersion == null
                     ).WithButton(
                         "Downgrade",
                         $"skillview:{skill.PreviousVersion?.Id ?? 0},{locale}",
+                        ButtonStyle.Secondary,
                         disabled: skill.PreviousVersion == null
-                    ).Build();
+                    );
             }
 
             await Context.Interaction.UpdateAsync((message) =>
             {
                 message.Embed = embed.Build();
-                message.Components = component;
+                message.Components = compBuilder.Build();
             });
+        }
+
+        [ComponentInteraction("skillimgpreview:*")]
+        public async Task SkillImagePreview(string idlang)
+        {
+            var skillSplit = idlang.Split(",");
+
+            if (!int.TryParse(skillSplit[0], out int skillid))
+            {
+                await Context.Interaction.RespondAsync(embed:
+                    new EmbedBuilder()
+                    .WithTitle("Failed to parse id")
+                    .Build(),
+                    ephemeral: true
+                );
+                return;
+            }
+
+            var skill = await db.Skills
+                    .FirstOrDefaultAsync(s => s.Id == skillid);
+
+            if (skill == null)
+            {
+                await Context.Interaction.RespondAsync(embed:
+                    new EmbedBuilder()
+                        .WithTitle("Failed to find skill")
+                        .Build(),
+                        ephemeral: true
+                );
+                return;
+            }
+
+            var previewImageUrl = Config.UrlCdnConvert(skill.PreviewImageUrl);
+
+            await Context.Interaction.RespondAsync(previewImageUrl, ephemeral: true);
         }
     }
 }
