@@ -55,7 +55,8 @@ namespace CliveBot.Application.Skills.Commands
                     throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
                 }
 
-                var filePath = $"/images/skill/{skill.Id}/preview";
+                var extension = Path.GetExtension(request.File.FileName);
+                var filePath = $"/images/skill/{skill.Id}/preview{(extension == null ? "" : $".{extension}")}";
 
                 using var fileStream = request.File.OpenReadStream();
                 await _blob.Upload(
