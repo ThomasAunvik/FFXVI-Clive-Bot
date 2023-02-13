@@ -31,7 +31,7 @@ export const SkillLanguageList = (
 	}, []);
 
 	useEffect(() => {
-		if(languages.value != null) return;
+		if(languages != null) return;
 		
 		try {
 			fetchLanguages();
