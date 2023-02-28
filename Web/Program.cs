@@ -148,10 +148,7 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = "api/swagger";
 });
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapNextjsStaticHtmls();
-});
+app.MapNextjsStaticHtmls();
 
 app.UseNextjsStaticHosting();
 
@@ -160,5 +157,5 @@ try
     app.Run();
 }catch(Exception e)
 {
-    Log.Logger.Fatal(e, "Error! {e}");
+    Log.Logger.Fatal("Error! {e}", e);
 }

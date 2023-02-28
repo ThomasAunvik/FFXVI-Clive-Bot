@@ -13,14 +13,12 @@ namespace CliveBot.Database.Models
         public int Id { get; set; }
         public int CharacterId { get; set; }
         public required string Description { get; set; }
+        public bool DefaultVariant { get; set; } = false;
 
         public int? Age { get; set; }
-        public string? Faction { get; set; }
-        public string? Eikon { get; set; }
-
+        public IEnumerable<CharacterVariantField> AdditionalFields { get; set; } = new List<CharacterVariantField>();
 
         public string? PreviewImageUrl { get; set; }
-
 
         public Character? Character { get; set; }
     }

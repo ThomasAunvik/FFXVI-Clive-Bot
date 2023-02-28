@@ -26,6 +26,11 @@ namespace CliveBot.Database
         public DbSet<BotModerator> BotModerators { get; set; }
         public DbSet<BotModeratorPermissions> BotModeratorPermissions { get; set; }
 
+        public DbSet<Character> Characters { get; set; }
+        public DbSet<CharacterNote> CharacterNotes { get; set; }
+        public DbSet<CharacterVariant> CharacterVariants { get; set; }
+        public DbSet<CharacterVariantField> CharacterVariantFields { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

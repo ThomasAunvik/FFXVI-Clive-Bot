@@ -16,6 +16,8 @@ namespace CliveBot.Database.Models
         public required string NoteName { get; set; }
         public required string NoteDescription { get; set; }
 
+        public required string Locale { get; set; }
+
 
         public string? PreviewImageUrl { get; set; }
 

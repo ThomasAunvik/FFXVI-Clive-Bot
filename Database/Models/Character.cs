@@ -13,6 +13,9 @@ namespace CliveBot.Database.Models
         public int Id { get; set; }
         public required string Name { get; set; }
 
+        public int? DefaultVariantFk;
+        public CharacterVariant? DefaultVariant;
+
         public IEnumerable<CharacterVariant> Variants { get; set; } = new List<CharacterVariant>();
         public IEnumerable<CharacterNote> Notes { get; set; } = new List<CharacterNote>();
     }
