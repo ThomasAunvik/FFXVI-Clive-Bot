@@ -1,4 +1,6 @@
-export interface ICharacter {
+import { ICharacterVariantField } from "./CharacterVariantField";
+
+export interface ICharacterVariant {
     id: number;
     characterId: number;
 

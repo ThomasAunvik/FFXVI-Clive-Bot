@@ -1,4 +1,4 @@
-export interface ICharacter {
+export interface ICharacterVariantField {
     id: number;
     title: string;
     description: string;

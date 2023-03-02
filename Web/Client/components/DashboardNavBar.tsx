@@ -59,6 +59,12 @@ const DashboardNavBar = (props: IDashboardNavBarProps) => {
             >
               Skills
             </Nav.Link>
+            <Nav.Link
+              href="/dashboard/characters"
+              active={currentPath == "/dashboard/characters"}
+            >
+              Characters
+            </Nav.Link>
             <NavDropdown 
               title="Settings" 
               id="basic-nav-dropdown"

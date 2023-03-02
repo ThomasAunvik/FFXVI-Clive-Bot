@@ -4,21 +4,14 @@ using CliveBot.Database;
 using CliveBot.Database.Models;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace CliveBot.Application.Skills.Commands
+namespace CliveBot.Application.Characters.Commands
 {
-    public class SkillCreate
+    public class CharacterCreate
     {
-        public class Command : SkillDto, IRequest<SkillDto> { }
+        public class Command : CharacterDto, IRequest<CharacterDto> { }
 
         public class CommandValidator : AbstractValidator<Command>
         {
@@ -28,37 +21,29 @@ namespace CliveBot.Application.Skills.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, SkillDto>
+        public class Handler : BaseHandler, IRequestHandler<Command, CharacterDto>
         {
             public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config)
             {
 
             }
 
-            public async Task<SkillDto> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<CharacterDto> Handle(Command request, CancellationToken cancellationToken)
             {
-                var skill = new SkillModel
+                var character = new Character
                 {
                     Name = request.Name,
-                    Description = request.Description,
-                    Category = request.Category,
-                    Summon = request.Summon,
-                    RatingMagical = request.RatingMagical,
-                    RatingPhysical = request.RatingPhysical,
-                    MasterizationPoints = request.MasterizationPoints,
-                    IconUrl = request.IconUrl,
-                    PreviewImageUrl = request.PreviewImageUrl,
-                    Localized = new() {
-                        new SkillLanguageModel
+                    Variants = new List<CharacterVariant>()
+                    {
+                        new CharacterVariant()
                         {
-                            Locale = "en",
-                            Name = request.Name,
-                            Description = request.Description
+                            Description = "",
+                            Age = 0,
                         }
-                    },
+                    }
                 };
 
-                await _context.Skills.AddAsync(skill, cancellationToken);
+                await _context.Characters.AddAsync(character, cancellationToken);
 
                 var result = await _context.SaveChangesAsync(cancellationToken);
                 if (result == 0)
@@ -66,7 +51,7 @@ namespace CliveBot.Application.Skills.Commands
                     throw new RestException(HttpStatusCode.InternalServerError, "Database failed to save data");
                 }
 
-                return skill.ConvertDto();
+                return character.ConvertDto();
             }
         }
     }

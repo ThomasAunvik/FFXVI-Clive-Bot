@@ -1,10 +1,4 @@
-﻿using CliveBot.Application.SkillLanguages;
-using CliveBot.Database.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CliveBot.Database.Models;
 
 namespace CliveBot.Application.Characters
 {
@@ -13,7 +7,7 @@ namespace CliveBot.Application.Characters
         public int Id { get; set; }
         public required string Name { get; set; }
 
-        public CharacterVariant? DefaultVariant;
+        public CharacterVariantDto? DefaultVariant;
 
         public IEnumerable<CharacterVariantDto>? Variants { get; set; }
         public IEnumerable<CharacterNoteDto>? Notes { get; set; }
@@ -27,7 +21,6 @@ namespace CliveBot.Application.Characters
             {
                 Id = model.Id,
                 Name = model.Name,
-                DefaultVariant = model.DefaultVariant.ConvertDto(),
                 Variants = model.Variants.ConvertDto(),
                 Notes = model.Notes.ConvertDto(),
             };

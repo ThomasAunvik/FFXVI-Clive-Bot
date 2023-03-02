@@ -20,6 +20,7 @@ namespace CliveBot.Application.Characters.Queries
                 var charactersQuery = _context.Characters.AsQueryable();
 
                 var characters = await charactersQuery
+                    .Include(c => c.Variants.Where(v => v.DefaultVariant))
                     .ToListAsync(cancellationToken);
 
                 return characters.ConvertDto().ToList();

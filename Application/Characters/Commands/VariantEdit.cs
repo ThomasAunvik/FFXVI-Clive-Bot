@@ -40,13 +40,10 @@ namespace CliveBot.Application.Characters.Commands
 
             public async Task<CharacterVariantDto> Handle(Command request, CancellationToken cancellationToken)
             {
-                var variant = await _context.CharacterVariants
-                    .FirstOrDefaultAsync(s => s.Id == request.VariantId, cancellationToken);
-
-                if (variant == null)
-                {
-                    throw new RestException(HttpStatusCode.NotFound, "Could not find any variant with id: " + request.VariantId);
-                }
+                var variant = await _context.CharacterVariants.FirstOrDefaultAsync(s => 
+                        s.Id == request.VariantId, 
+                        cancellationToken
+                ) ?? throw new RestException(HttpStatusCode.NotFound, "Could not find any variant with id: " + request.VariantId);
 
                 variant.Description = request.Description;
                 variant.Age = request.Age;
@@ -61,10 +58,10 @@ namespace CliveBot.Application.Characters.Commands
 
                 variant.DefaultVariant = request.DefaultVariant;
 
-                var current = variant.AdditionalFields.Select(af => af.Id);
+                var current = variant.AdditionalFields?.Select(af => af.Id);
 
                 var newVariants = request.AdditionalFields?
-                    .Where(f => !current.Contains(f.Id))
+                    .Where(f => current == null || !current.Contains(f.Id))
                     .Select(v =>
                         new CharacterVariantField {
                         Variant = variant,

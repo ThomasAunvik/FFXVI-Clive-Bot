@@ -37,7 +37,10 @@ namespace CliveBot.Application.Characters.Queries
                     throw new RestException(HttpStatusCode.NotFound, "Could not find any character with id: " + request.CharacterId);
                 }
 
-                return character.ConvertDto();
+                var characterDto =  character.ConvertDto();
+
+                characterDto.DefaultVariant = characterDto.Variants?.FirstOrDefault(v => v.DefaultVariant);
+                return characterDto;
             }
         }
     }
