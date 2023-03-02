@@ -18,9 +18,7 @@ namespace CliveBot.Database.Models
 
         public required string Locale { get; set; }
 
-
         public string? PreviewImageUrl { get; set; }
-
 
         public Character? Character { get; set; }
     }
