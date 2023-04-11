@@ -107,6 +107,7 @@ builder.Services.AddSwaggerGen(options =>
 
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    options.CustomSchemaIds(type => type.ToString().Replace("+", "."));
 });
 
 var app = builder.Build();
