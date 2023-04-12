@@ -24,7 +24,7 @@ namespace CliveBot.Application.Characters.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, CharacterDto>
+        public class Handler : BaseHandler, IRequestHandler<Command, CharacterNoteDto>
         {
             public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config)
             {

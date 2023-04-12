@@ -19,7 +19,7 @@ interface FormikProps {
 
 type FormikFormProps = ISkill & FormikProps;
 
-export const SkillForm = (props: ISkillFormProps) => {
+export const CharacterForm = (props: ISkillFormProps) => {
     const { character } = props;
 
 	const [initialCharacter, setInitialCharacter] = useState<ICharacter>(character ?? {
@@ -30,15 +30,14 @@ export const SkillForm = (props: ISkillFormProps) => {
 	const [error, setError] = useState<ErrorModalInfo | null>(null);
 
 	const cancelUploads = useRef(new AbortController());
-    const [iconFileProgress, setIconFileProgress] = useState<AxiosProgressEvent | null>(null);
     const [previewFileProgress, setPreviewFileProgress] = useState<AxiosProgressEvent | null>(null);
 
-	const submitForm = async (values: ISkill & FormikProps, actions: FormikHelpers<FormikFormProps>) => {
-		const {iconFile, previewFile, ...newSkill} = values;
+	const submitForm = async (values: ICharacter & FormikProps, actions: FormikHelpers<FormikFormProps>) => {
+		const {previewFile, ...newCharacter} = values;
 		
-		var skillId = skill?.id ?? null;
-		if(skill == null) {
-			const res = await axios.post("/api/skill/", newSkill);
+		let characterId = character?.id ?? null;
+		if(character == null) {
+            const res = await axios.post("/api/character/", newCharacter);
 			if(res.status != 200){
 				setError({ 
 					statusCode: res.status,
@@ -48,12 +47,12 @@ export const SkillForm = (props: ISkillFormProps) => {
 				return null;
 			}
 			
-			var newInitialSkill = res.data as ISkill;
-			skillId = newInitialSkill.id;
-			setInitialSkill(newInitialSkill);
+			let newInitialCharacter = res.data as ICharacter;
+            characterId = newInitialCharacter.id;
+            setInitialCharacter(newInitialCharacter);
 		} else {
-			if(!_.isEqual(newSkill, initialSkill)) {
-				const res = await axios.put("/api/skill/" + skill.id, newSkill);
+            if(!_.isEqual(newCharacter, initialCharacter)) {
+                const res = await axios.put("/api/character/" + character.id, newCharacter);
 				if(res.status != 200){
 					setError({ 
 						statusCode: res.status,
@@ -63,40 +62,16 @@ export const SkillForm = (props: ISkillFormProps) => {
 					return null;
 				}
 
-				var newInitialSkill = res.data as ISkill;
-				setInitialSkill(newInitialSkill);
-			}
-		}
-		
-		if(iconFile != null && !isNull(skillId)) {
-			const iconForm = new FormData();
-			iconForm.append("iconFile", iconFile);
-			const res = await axios.postForm(
-				"/api/skill/" + skillId + "/images/icon", 
-				iconForm,
-				{
-					onDownloadProgress: (prog) => {
-						setIconFileProgress({ ...prog });
-					},
-					signal: cancelUploads.current.signal,
-				}
-			);
-			
-			if(res.status != 200){
-				setError({ 
-					statusCode: res.status,
-					statusMessage: res.statusText,
-					message: res.data.message,
-				});
-				return;
+				let newInitialCharacter = res.data as ICharacter;
+                setInitialCharacter(newInitialCharacter);
 			}
 		}
 
-		if(previewFile != null && !isNull(skillId)) {
+		if(previewFile != null && !isNull(characterId)) {
 			const previewForm = new FormData();
 			previewForm.append("previewFile", previewFile);
 			const res = await axios.postForm(
-				"/api/skill/" + skillId + "/images/preview", 
+                "/api/character/" + characterId + "/images/preview",
 				previewForm,
 				{
 					onDownloadProgress: (prog) => {
@@ -116,17 +91,15 @@ export const SkillForm = (props: ISkillFormProps) => {
 			}
 		}
 		
-		console.log(skill);
-		if((isNull(skill) || skill === undefined) && !isNull(skillId)) {
-			console.log("test");
-			document.location.replace("/dashboard/skills/" + skillId);
+        if((isNull(character) || character === undefined) && !isNull(characterId)) {
+            document.location.replace("/dashboard/characters/" + characterId);
 		}
 
 		return;
 	}
 
 	const formik = (<Formik<FormikFormProps>
-		initialValues={{ ...initialSkill } as FormikFormProps}
+		initialValues={{ ...initialCharacter } as FormikFormProps}
 		enableReinitialize
 		onSubmit={async (values, actions) => {
 			try {
@@ -158,158 +131,6 @@ export const SkillForm = (props: ISkillFormProps) => {
 				onBlur={handleBlur}
 				value={values.name}
 			 />
-        </Form.Group>
-        <Form.Group className="mb-3">
-            <Form.Label>Description</Form.Label>
-            <Form.Control 
-				name="description"
-				as={"textarea"}
-				rows={3}
-				value={values.description} 
-				onChange={handleChange}
-				onBlur={handleBlur}
-			/>
-        </Form.Group>
-        <Form.Group className="mb-3">
-            <Form.Label>Category</Form.Label>
-            <Form.Control 
-                as="select" 
-                name="category"
-                defaultValue={SkillCategory[values.category]}
-				onChange={(event) => {
-					var value = event.currentTarget.value as unknown;
-					setFieldValue("category", SkillCategory[value as SkillCategory])
-				}}
-				onBlur={handleBlur}
-            >
-                {skillCategoryList.map(s => 
-                    <option value={s} key={"category-" + s}>
-                        {s}
-                    </option>
-                )}
-            </Form.Control>
-        </Form.Group>
-        <Form.Group className="mb-3">
-            <Form.Label>Summon</Form.Label>
-            <Form.Control 
-                as="select" 
-                name="summon"
-                defaultValue={SkillSummon[values.summon]}
-				onChange={(event) => {
-					var value = event.currentTarget.value as unknown;
-					setFieldValue("summon", SkillSummon[value as SkillSummon])
-				}}
-				onBlur={handleBlur}
-            >
-                {summonList.map(s => 
-                    <option value={s} key={"summon-" + s}>
-                        {s}
-                    </option>
-                )}
-            </Form.Control>
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-            <Form.Label>Physical Rating</Form.Label>
-            <Row>
-                <Col xs="4">
-                    <Form.Control 
-                        name="ratingPhysical" 
-                        type="number"
-                        value={values.ratingPhysical} 
-						onChange={handleChange}
-						onBlur={handleBlur}
-                        min={0} 
-                        max={10} 
-                        step={1}
-                    />
-                </Col>
-                <Col xs="8">
-                    <Form.Range 
-                        name="ratingPhysical"
-                        value={values.ratingPhysical} 
-						onChange={handleChange}
-						onBlur={handleBlur}
-                        min={0} 
-                        max={10} 
-                        step={1}
-                    />
-                </Col>
-            </Row>
-        </Form.Group>
-
-        
-        <Form.Group className="mb-3">
-            <Form.Label>Magical Rating</Form.Label>
-            <Row>
-                <Col xs="4">
-                    <Form.Control 
-                        name="ratingMagical"
-                        type="number"
-                        value={values.ratingMagical} 
-						onChange={handleChange}
-						onBlur={handleBlur}
-                        min={0} 
-                        max={10} 
-                        step={1}
-                    />
-                </Col>
-                <Col xs="8">
-                    <Form.Range 
-                        name="ratingMagical"
-                        value={values.ratingMagical} 
-						onChange={handleChange}
-						onBlur={handleBlur}
-                        min={0} 
-                        max={10} 
-                        step={1}
-                    />
-                </Col>
-            </Row>
-        </Form.Group>
-        
-        <Form.Group className="mb-3">
-            <Form.Label>MASTERization Points</Form.Label>
-            <Form.Control 
-				name="masterizationPoints" 
-				type="number"
-				value={values.masterizationPoints} 
-				onChange={handleChange}
-				onBlur={handleBlur}
-			/>
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-            <Form.Label>Icon</Form.Label>
-            <Form.Control 
-                name="iconFile"
-                type="file"
-                accept="image/*"
-                className="mb-2"
-				onChange={(event) => {
-					setFieldValue("iconFile", (event.currentTarget as any).files[0]);
-				}}
-				onBlur={handleBlur}
-            />
-			<Collapse in={iconFileProgress != null}>
-				<div>
-					<UploadProgress progress={iconFileProgress} />
-				</div>
-			</Collapse>
-            <Form.Control 
-                name="iconUrl"
-                value={values.iconUrl ?? ""}
-				onChange={handleChange}
-				onBlur={handleBlur}
-            />			
-			<Button 
-				variant="link"
-				disabled={values.iconUrl == null}
-				href={replaceCDN(values.iconUrl ?? "")}
-				target="_blank"
-			>
-				Preview Image
-			</Button>
         </Form.Group>
         <Form.Group className="mb-3">
             <Form.Label>Preview Image</Form.Label>
@@ -354,7 +175,7 @@ export const SkillForm = (props: ISkillFormProps) => {
             Submit
         </Button>
 		
-		{(values.iconFile != null || values.previewFile != null) && isSubmitting ?
+		{(values.previewFile != null) && isSubmitting ?
 			<Button 
 				variant="secondary"
 				onClick={() => {
@@ -388,5 +209,8 @@ export const SkillForm = (props: ISkillFormProps) => {
 		)}
 	</Formik>);
 
-    return formik;
+    return (<div>
+        <h1>{character?.name ?? "New Character"}</h1>
+        {formik}
+    </div>);
 }

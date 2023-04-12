@@ -35,19 +35,18 @@ export const CharacterList = () => {
     	</Spinner>	:
 			<Row>
 				{characters.map((s, i) => {
-					return <Col style={{ marginBottom: "2em"}}>
+                    return <Col style={{ marginBottom: "2em"}} key={"character-" + s.id}>
 						<Card style={{ width: "90vw", maxWidth: "18rem" }} >
 							<Card.Img variant="top" src="/static/images/features/char-bg.webp" />
 							<Card.ImgOverlay>
 								<Card.Img src="https://cdn.discordapp.com/attachments/1075203421696700488/1075205728505167883/cliveRosfield_art_pc.png" />
 							</Card.ImgOverlay>
 							<Card.Body style={{ backgroundColor: "var(--bs-card-bg)", zIndex: 1 }}>
-								<Card.Title>Card Title</Card.Title>
+								<Card.Title>{s.name}</Card.Title>
 								<Card.Text>
-								Some quick example text to build on the card title and make up the
-								bulk of the card's content.
+								    {s.defaultVariant?.description ?? "No Description"}
 								</Card.Text>
-								<Button variant="primary">Edit</Button>
+                                <Button href={"/dashboard/characters/" + s.id} variant="primary">Edit</Button>
 							</Card.Body>
 						</Card>
 					</Col>
