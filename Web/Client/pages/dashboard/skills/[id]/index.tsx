@@ -82,12 +82,12 @@ const DashboardSkillPage = () => {
               )}
             </Col>
             <Col md={6}>
-              {!id ? (
+              {!skill?.id ? (
                 <Spinner animation="border" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </Spinner>
               ) : (
-                <SkillLanguageList skillId={id as string} />
+                <SkillLanguageList skillId={skill.id.toString()} />
               )}
             </Col>
           </Row>
