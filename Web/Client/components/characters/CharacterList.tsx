@@ -49,6 +49,8 @@ export const CharacterList = () => {
       ) : (
         <Row>
           {characters.map((s, i) => {
+            const variant = s.variants?.find((v) => v.defaultVariant);
+
             return (
               <Col style={{ marginBottom: "2em" }} key={"character-" + s.id}>
                 <Card style={{ width: "90vw", maxWidth: "18rem" }}>
@@ -57,14 +59,21 @@ export const CharacterList = () => {
                     src="/static/images/features/char-bg.webp"
                   />
                   <Card.ImgOverlay>
-                    <Card.Img src="https://cdn.discordapp.com/attachments/1075203421696700488/1075205728505167883/cliveRosfield_art_pc.png" />
+                    <Card.Img
+                      src={
+                        variant?.previewImageUrl
+                          ? replaceCDN(variant?.previewImageUrl)
+                          : "https://cdn.discordapp.com/attachments/1075203421696700488/1075205728505167883/cliveRosfield_art_pc.png"
+                      }
+                    />
                   </Card.ImgOverlay>
                   <Card.Body
                     style={{ backgroundColor: "var(--bs-card-bg)", zIndex: 1 }}
                   >
                     <Card.Title>{s.name}</Card.Title>
                     <Card.Text>
-                      {s.defaultVariant?.description ?? "No Description"}
+                      {s.variants?.find((v) => v.defaultVariant)?.description ??
+                        "No Description"}
                     </Card.Text>
                     <Button
                       href={"/dashboard/characters/" + s.id}

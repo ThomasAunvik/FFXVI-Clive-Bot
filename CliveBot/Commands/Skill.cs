@@ -95,6 +95,8 @@ namespace CliveBot.Bot.Commands
             [Summary("Locale", "Select a Locale to edit on")]
             LocaleOptions? locale = null
         ) {
+            await Context.Interaction.DeferAsync();
+
             SkillModel? skill = null;
             string? selectedLocale = null;
             if(skillIdLang != null)
@@ -154,7 +156,10 @@ namespace CliveBot.Bot.Commands
 
             if(skill == null)
             {
-                await RespondAsync(embed: new EmbedBuilder().WithTitle("Failed to find skill").Build());
+                await Context.Interaction.ModifyOriginalResponseAsync((r) =>
+                {
+                    r.Embed = new EmbedBuilder().WithTitle("Failed to find skill").Build();
+                });
                 return;
             }
 
@@ -180,10 +185,11 @@ namespace CliveBot.Bot.Commands
                     );
             }
 
-            await RespondAsync(
-                embed: embed.Build(),
-                components: compBuilder.Build()
-            );
+            await Context.Interaction.ModifyOriginalResponseAsync((r) =>
+            {
+                r.Embed = embed.Build();
+                r.Components = compBuilder.Build();
+            });
         }
 
         public async Task ListSkills(SkillSummon skillSummon, int page = 0)
@@ -214,7 +220,10 @@ namespace CliveBot.Bot.Commands
                 text
             );
 
-            await RespondAsync(embed: embed.Build());
+            await Context.Interaction.ModifyOriginalResponseAsync((r) =>
+            {
+                r.Embed = embed.Build();
+            });
         }
 
         public async Task ListSummons(IInteractionContext context)
@@ -233,7 +242,10 @@ namespace CliveBot.Bot.Commands
                 $"{emote_eikon_titan} Titan" 
             );
 
-            await RespondAsync(embed: embed.Build());
+            await Context.Interaction.ModifyOriginalResponseAsync((r) =>
+            {
+                r.Embed = embed.Build();
+            });
         }
 
         public static string StarIconGenrator(int value) {
@@ -281,6 +293,8 @@ namespace CliveBot.Bot.Commands
                 return;
             }
 
+            await Context.Interaction.DeferAsync();
+
             var skill = await db.Skills
                     .Include(s => s.MasteredVersion)
                     .Include(s => s.PreviousVersion)
@@ -288,11 +302,12 @@ namespace CliveBot.Bot.Commands
 
             if(skill == null)
             {
-                await ReplyAsync(embed:
-                    new EmbedBuilder()
+                await Context.Interaction.ModifyOriginalResponseAsync((r) =>
+                {
+                    r.Embed = new EmbedBuilder()
                     .WithTitle("Failed to find skill")
-                    .Build()
-                );
+                    .Build();
+                });
                 return;
             }
 
@@ -320,7 +335,7 @@ namespace CliveBot.Bot.Commands
                     );
             }
 
-            await Context.Interaction.UpdateAsync((message) =>
+            await Context.Interaction.ModifyOriginalResponseAsync((message) =>
             {
                 message.Embed = embed.Build();
                 message.Components = compBuilder.Build();
@@ -343,6 +358,8 @@ namespace CliveBot.Bot.Commands
                 return;
             }
 
+            await Context.Interaction.DeferAsync(ephemeral: true);
+
             var skill = await db.Skills
                     .FirstOrDefaultAsync(s => s.Id == skillid);
 
@@ -359,7 +376,10 @@ namespace CliveBot.Bot.Commands
 
             var previewImageUrl = Config.UrlCdnConvert(skill.PreviewImageUrl);
 
-            await Context.Interaction.RespondAsync(previewImageUrl, ephemeral: true);
+            await Context.Interaction.ModifyOriginalResponseAsync((message) =>
+            {
+                message.Content = previewImageUrl;
+            });
         }
     }
 }
