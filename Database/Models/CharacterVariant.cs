@@ -16,7 +16,11 @@ namespace CliveBot.Database.Models
         public bool DefaultVariant { get; set; } = false;
 
         public int? Age { get; set; }
-        public IEnumerable<CharacterVariantField> AdditionalFields { get; set; } = new List<CharacterVariantField>();
+
+        public int FromYear { get; set; }
+        public int ToYear { get; set; }
+
+        public IEnumerable<CharacterVariantField>? AdditionalFields { get; set; } = new List<CharacterVariantField>();
 
         public string? PreviewImageUrl { get; set; }
 

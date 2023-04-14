@@ -1,5 +1,9 @@
 import DashboardNavBar from "@/components/DashboardNavBar";
-import { ErrorModal, ErrorModalInfo, getErrorInfo } from "@/components/errors/ErrorHandler";
+import {
+  ErrorModal,
+  ErrorModalInfo,
+  getErrorInfo,
+} from "@/components/errors/ErrorHandler";
 import { ISkill } from "@/components/models/skill/SkillModel";
 import { SkillForm } from "@/components/skills/SkillForm";
 import axios from "axios";
@@ -18,7 +22,9 @@ const DashboardNewSkillPage = () => {
       <main>
         <DashboardNavBar currentPath="/dashboard/skills" />
         <Container className="mb-4">
-          <Button variant="link" href="/dashboard/skills">Return to Skills</Button>
+          <Button variant="link" href="/dashboard/skills">
+            Return to Skills
+          </Button>
           <h1>New Skill</h1>
           <Col md={4}>
             <SkillForm />

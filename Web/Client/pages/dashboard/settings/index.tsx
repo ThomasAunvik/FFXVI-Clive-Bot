@@ -11,11 +11,11 @@ const DashboardSettingsPage = () => {
       </Head>
       <main>
         <DashboardNavBar currentPath="/dashboard/settings" />
-        <Container style={{ marginTop: "2em"}}>
-            <h2>Settings</h2>
-            <Button variant="link" href="/dashboard/settings/moderator">
-                Moderators
-            </Button>
+        <Container style={{ marginTop: "2em" }}>
+          <h2>Settings</h2>
+          <Button variant="link" href="/dashboard/settings/moderator">
+            Moderators
+          </Button>
         </Container>
       </main>
     </>

@@ -1,12 +1,17 @@
-export interface ICharacter {
-    id: number;
-    characterId: number;
+import { ICharacterVariantField } from "./CharacterVariantField";
 
-    description: string;
-    defaultVariant: boolean;
-    age: number;
+export interface ICharacterVariant {
+  id: number;
+  characterId: number;
 
-    additionalFields: ICharacterVariantField[];
+  description: string;
+  defaultVariant: boolean;
+  age: number;
 
-    previewImageUrl?: string;
+  fromYear: number;
+  toYear: number;
+
+  additionalFields: ICharacterVariantField[];
+
+  previewImageUrl?: string;
 }

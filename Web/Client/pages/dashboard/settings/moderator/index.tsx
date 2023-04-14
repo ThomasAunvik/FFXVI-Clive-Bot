@@ -12,13 +12,13 @@ const DashboardModeratorPage = () => {
       </Head>
       <main>
         <DashboardNavBar currentPath="/dashboard/settings/moderator" />
-        <Container style={{ marginTop: "2em"}}>
-            <h2>Moderators</h2>
-            <Col md={3}>
-                <Row ml={3}>
-                    <ModeratorList />
-                </Row>
-            </Col>
+        <Container style={{ marginTop: "2em" }}>
+          <h2>Moderators</h2>
+          <Col md={3}>
+            <Row ml={3}>
+              <ModeratorList />
+            </Row>
+          </Col>
         </Container>
       </main>
     </>

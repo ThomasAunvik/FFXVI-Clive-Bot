@@ -161,8 +161,14 @@ namespace CliveBot.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("FromYear")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PreviewImageUrl")
                         .HasColumnType("text");
+
+                    b.Property<int>("ToYear")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
