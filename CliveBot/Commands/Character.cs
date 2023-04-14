@@ -82,7 +82,6 @@ namespace CliveBot.Bot.Commands
                 return;
             }
 
-
             var embed = new EmbedBuilder()
                 .WithTitle("Characters")
                 .WithFooter($"Page {page} of {Math.Ceiling(filterCount / 10.0)}. Total: {filterCount}");

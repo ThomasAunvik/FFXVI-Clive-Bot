@@ -18,18 +18,12 @@ namespace CliveBot.Application.Characters.Commands
 
         public class CommandValidator : AbstractValidator<Command>
         {
-            public CommandValidator()
-            {
-
-            }
+            public CommandValidator() { }
         }
 
         public class Handler : BaseHandler, IRequestHandler<Command, CharacterVariantDto>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config)
-            {
-
-            }
+            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config) { }
 
             public async Task<CharacterVariantDto> Handle(Command request, CancellationToken cancellationToken)
             {
@@ -61,7 +55,6 @@ namespace CliveBot.Application.Characters.Commands
                         .Where(v => v.CharacterId == character.Id)
                         .ForEachAsync((v) => v.DefaultVariant = false, cancellationToken);
                 }
-
 
                 var result = await _context.SaveChangesAsync(cancellationToken);
                 if (result == 0)
