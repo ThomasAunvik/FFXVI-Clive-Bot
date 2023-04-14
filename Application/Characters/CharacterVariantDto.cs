@@ -17,6 +17,9 @@ namespace CliveBot.Application.Characters
 
         public int? Age { get; set; }
 
+        public int FromYear { get; set; }
+        public int ToYear { get; set; }
+
         public IEnumerable<CharacterVariantFieldDto>? AdditionalFields { get; set; }
 
         public string? PreviewImageUrl { get; set; }
@@ -33,7 +36,9 @@ namespace CliveBot.Application.Characters
                 Description = model.Description,
                 DefaultVariant = model.DefaultVariant,
                 Age = model.Age,
-                AdditionalFields = model.AdditionalFields.ConvertDto(),
+                FromYear = model.FromYear,
+                ToYear = model.ToYear,
+                AdditionalFields = model.AdditionalFields?.ConvertDto(),
                 PreviewImageUrl = model.PreviewImageUrl,
             };
         }

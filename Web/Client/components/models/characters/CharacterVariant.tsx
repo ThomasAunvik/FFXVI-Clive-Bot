@@ -1,14 +1,17 @@
 import { ICharacterVariantField } from "./CharacterVariantField";
 
 export interface ICharacterVariant {
-    id: number;
-    characterId: number;
+  id: number;
+  characterId: number;
 
-    description: string;
-    defaultVariant: boolean;
-    age: number;
+  description: string;
+  defaultVariant: boolean;
+  age: number;
 
-    additionalFields: ICharacterVariantField[];
+  fromYear: number;
+  toYear: number;
 
-    previewImageUrl?: string;
+  additionalFields: ICharacterVariantField[];
+
+  previewImageUrl?: string;
 }

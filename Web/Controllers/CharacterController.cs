@@ -1,6 +1,8 @@
 using CliveBot.Application.Characters;
 using CliveBot.Application.Characters.Commands;
 using CliveBot.Application.Characters.Queries;
+using CliveBot.Application.Skills.Commands;
+using CliveBot.Application.Skills;
 using CliveBot.Web.Policies;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -87,6 +89,13 @@ namespace CliveBot.Web.Controllers
             });
         }
 
+        [HttpPost("{characterId}/variant/{variantId}/images/preview")]
+        [ModAuthorize(ManageCharacterInfo: true)]
+        public async Task<ActionResult<CharacterVariantDto>> UpdateVariantPreviewImage(int variantId, IFormFile previewFile)
+        {
+            return await Mediator.Send(new CharacterVariantPreviewImage.Command { File = previewFile, VariantId = variantId });
+        }
+
         // Notes
         [HttpGet("{characterId}/notes")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ActionResult<List<CharacterNoteDto>>))]
@@ -121,6 +130,13 @@ namespace CliveBot.Web.Controllers
             {
                 NoteId = noteId
             });
+        }
+
+        [HttpPost("{characterId}/notes/{noteId}/images/preview")]
+        [ModAuthorize(ManageCharacterNotes: true)]
+        public async Task<ActionResult<CharacterNoteDto>> UpdateSkillPreviewImage(int noteId, IFormFile previewFile)
+        {
+            return await Mediator.Send(new CharacterNotePreviewImage.Command { File = previewFile, NoteId = noteId });
         }
     }
 }

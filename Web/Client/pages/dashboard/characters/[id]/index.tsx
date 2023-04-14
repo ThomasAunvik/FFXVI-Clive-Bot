@@ -2,11 +2,13 @@ import { CharacterForm } from "@/components/characters/CharacterForm";
 import DashboardNavBar from "@/components/DashboardNavBar";
 import axios from "axios";
 import Head from "next/head";
-import { Button, Col, Container, Spinner } from "react-bootstrap";
+import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
 import { ICharacter } from "@/components/models/characters/CharacterModel";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ErrorModal, ErrorModalInfo, getErrorInfo } from "@/components/errors/ErrorHandler";
+import { ICharacterVariant } from "@/components/models/characters/CharacterVariant";
+import { CharacterVariantList } from "@/components/characters/CharacterVariantList";
 
 const DashboardCharacterPage = () => {
     const router = useRouter();
@@ -14,28 +16,27 @@ const DashboardCharacterPage = () => {
 
     const firstTick = useRef(false);
     const [character, setCharacter] = useState<ICharacter | null>(null);
-
     const [error, setError] = useState<ErrorModalInfo | null>(null);
 
-    const fetchCharacer = useCallback(async (characterId: string) => {
+    const fetchCharacter = useCallback(async (characterId: string) => {
         try {
             const res = await axios.get("/api/character/" + characterId);
             if(res.status != 200) return;
 
-            setCharacter(res.data as ICharacter);
+			const character = res.data as ICharacter;
+            setCharacter(character);
         } catch(err: any) {
             setError(getErrorInfo(err));
         }
     }, []);
-
 
     useEffect(() => {
         if(!id) return;
         if(firstTick.current) return;
         firstTick.current = true;
 
-        fetchCharacer(id.toString());
-    }, [fetchCharacer, id]);
+        fetchCharacter(id.toString());
+    }, [fetchCharacter, id]);
 
     return (
             <>
@@ -47,7 +48,8 @@ const DashboardCharacterPage = () => {
                 <DashboardNavBar currentPath="/dashboard/characters" />
                 <Container className="mb-4">
                     <Button variant="link" href="/dashboard/characters">Return to Characters</Button>
-                    <Col md={4}>
+                    <Row>
+					<Col md={4}>
 
                         { character == null ?
         					<Spinner animation="border" role="status">
@@ -58,6 +60,17 @@ const DashboardCharacterPage = () => {
                             />
         				}
                     </Col>
+					<Col md={4}>
+					{ character == null ?
+        					<Spinner animation="border" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner> :
+        					<CharacterVariantList
+                                character={character}
+                            />
+        				}
+					</Col>
+					</Row>
                 </Container>
 
                 {error == null ? null :

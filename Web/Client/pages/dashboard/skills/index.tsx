@@ -16,27 +16,24 @@ const DashboardSkillListPage = () => {
 
   return (
     <>
-		<Head>
-			<title>Clive Bot - Dashboard</title>
-			<meta name="description" content="Skill Dashboard" />
-		</Head>
-		<main>
-			<DashboardNavBar currentPath="/dashboard/skills" />
-			<Container style={{ marginTop: "2em"}}>
-				<h2>Summons</h2>
-				<Button
-					href={"/dashboard/skills/new"}
-					className="mb-3"
-				>
-					<FontAwesomeIcon icon={faAdd} width={20} />
-				</Button>
-				<Col md={3}>
-					<Row ml={3}>
-						<SkillSummonList />
-					</Row>
-				</Col>
-			</Container>
-		</main>
+      <Head>
+        <title>Clive Bot - Dashboard</title>
+        <meta name="description" content="Skill Dashboard" />
+      </Head>
+      <main>
+        <DashboardNavBar currentPath="/dashboard/skills" />
+        <Container style={{ marginTop: "2em" }}>
+          <h2>Summons</h2>
+          <Button href={"/dashboard/skills/new"} className="mb-3">
+            <FontAwesomeIcon icon={faAdd} width={20} />
+          </Button>
+          <Col md={3}>
+            <Row ml={3}>
+              <SkillSummonList />
+            </Row>
+          </Col>
+        </Container>
+      </main>
     </>
   );
 };

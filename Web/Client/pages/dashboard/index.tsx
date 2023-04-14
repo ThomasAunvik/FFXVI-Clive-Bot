@@ -9,7 +9,7 @@ const DashboardPage = () => {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  
+
   return (
     <>
       <Head>
@@ -18,11 +18,9 @@ const DashboardPage = () => {
       </Head>
       <main>
         <DashboardNavBar currentPath="/dashboard" />
-		<Container className="mt-3">
-			<h1>
-				Welcome to the FFXVI Clive Discord Bot Dashboard
-			</h1>
-		</Container>
+        <Container className="mt-3">
+          <h1>Welcome to the FFXVI Clive Discord Bot Dashboard</h1>
+        </Container>
       </main>
     </>
   );

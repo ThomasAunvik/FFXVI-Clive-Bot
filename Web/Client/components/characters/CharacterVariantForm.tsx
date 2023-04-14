@@ -1,37 +1,33 @@
-import axios, { AxiosError, AxiosProgressEvent, CancelToken } from "axios";
 import { Formik, FormikHelpers } from "formik";
-import _, { isNull } from "lodash";
-import { useRef, useState } from "react";
+import { ICharacterVariant } from "../models/characters/CharacterVariant";
 import { Button, ButtonGroup, Collapse, Form, Spinner } from "react-bootstrap";
-import { replaceCDN } from "../constants";
 import {
   ErrorModal,
   ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import { ICharacter } from "../models/characters/CharacterModel";
-import { ISkill } from "../models/skill/SkillModel";
+import { useRef, useState } from "react";
+import axios, { AxiosProgressEvent } from "axios";
 import { UploadProgress } from "../upload/UploadProgress";
+import { replaceCDN } from "../constants";
+import { ICharacter } from "../models/characters/CharacterModel";
+import _, { isNull } from "lodash";
 
-export interface ICharacterFormProps {
-  character?: ICharacter;
+interface CharacterVariantFormProps {
+  character: ICharacter;
+  variant?: ICharacterVariant;
+  onSubmit: (variant: ICharacterVariant) => void;
+  onCancel?: () => void;
 }
 
 interface FormikProps {
   previewFile: File | null;
 }
 
-type FormikFormProps = ISkill & FormikProps;
+type FormikFormProps = ICharacterVariant & FormikProps;
 
-export const CharacterForm = (props: ICharacterFormProps) => {
-  const { character } = props;
-
-  const [initialCharacter, setInitialCharacter] = useState<ICharacter>(
-    character ?? {
-      id: 0,
-      name: "",
-    }
-  );
+export const CharacterVariantForm = (props: CharacterVariantFormProps) => {
+  const { variant, character, onSubmit, onCancel } = props;
 
   const [error, setError] = useState<ErrorModalInfo | null>(null);
 
@@ -40,14 +36,17 @@ export const CharacterForm = (props: ICharacterFormProps) => {
     useState<AxiosProgressEvent | null>(null);
 
   const submitForm = async (
-    values: ICharacter & FormikProps,
+    values: ICharacterVariant & FormikProps,
     actions: FormikHelpers<FormikFormProps>
   ) => {
-    const { previewFile, ...newCharacter } = values;
+    const { previewFile, ...newVariant } = values;
 
-    let characterId = character?.id ?? null;
-    if (character == null) {
-      const res = await axios.post("/api/character/", newCharacter);
+    let variantId = variant?.id ?? null;
+    if (variant == null) {
+      const res = await axios.post(
+        `/api/character/${character.id}/variant`,
+        newVariant
+      );
       if (res.status != 200) {
         setError({
           statusCode: res.status,
@@ -57,14 +56,14 @@ export const CharacterForm = (props: ICharacterFormProps) => {
         return null;
       }
 
-      let newInitialCharacter = res.data as ICharacter;
-      characterId = newInitialCharacter.id;
-      setInitialCharacter(newInitialCharacter);
+      let newVariantData = res.data as ICharacterVariant;
+      variantId = newVariantData.id;
+      onSubmit(newVariantData);
     } else {
-      if (!_.isEqual(newCharacter, initialCharacter)) {
+      if (!_.isEqual(newVariant, variant)) {
         const res = await axios.put(
-          "/api/character/" + character.id,
-          newCharacter
+          `/api/character/${character.id}/variant/${variant.id}`,
+          newVariant
         );
         if (res.status != 200) {
           setError({
@@ -75,16 +74,16 @@ export const CharacterForm = (props: ICharacterFormProps) => {
           return null;
         }
 
-        let newInitialCharacter = res.data as ICharacter;
-        setInitialCharacter(newInitialCharacter);
+        let newVariantData = res.data as ICharacterVariant;
+        onSubmit(newVariantData);
       }
     }
 
-    if (previewFile != null && !isNull(characterId)) {
+    if (previewFile != null && !isNull(variantId)) {
       const previewForm = new FormData();
       previewForm.append("previewFile", previewFile);
       const res = await axios.postForm(
-        "/api/character/" + characterId + "/images/preview",
+        `/api/character/${character.id}/variant/${variantId}/images/preview`,
         previewForm,
         {
           onDownloadProgress: (prog) => {
@@ -104,19 +103,12 @@ export const CharacterForm = (props: ICharacterFormProps) => {
       }
     }
 
-    if (
-      (isNull(character) || character === undefined) &&
-      !isNull(characterId)
-    ) {
-      document.location.replace("/dashboard/characters/" + characterId);
-    }
-
     return;
   };
 
   const formik = (
     <Formik<FormikFormProps>
-      initialValues={{ ...initialCharacter } as FormikFormProps}
+      initialValues={{ ...variant } as FormikFormProps}
       enableReinitialize
       onSubmit={async (values, actions) => {
         try {
@@ -139,13 +131,54 @@ export const CharacterForm = (props: ICharacterFormProps) => {
       }) => (
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>Description</Form.Label>
             <Form.Control
-              name="name"
-              type="text"
+              name="description"
+              as="textarea"
+              rows={4}
               onChange={handleChange}
               onBlur={handleBlur}
-              value={values.name}
+              value={values.description}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Default Variant</Form.Label>
+            <Form.Check
+              name="defaultVariant"
+              type="checkbox"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              checked={values.defaultVariant}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Age</Form.Label>
+            <Form.Control
+              name="age"
+              type="number"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.age}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>From Year</Form.Label>
+            <Form.Control
+              name="fromYear"
+              type="number"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.fromYear}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>To Year</Form.Label>
+            <Form.Control
+              name="toYear"
+              type="number"
+              onChange={handleChange}
+              onBlur={handleBlur}
+              value={values.toYear}
             />
           </Form.Group>
           <Form.Group className="mb-3">
@@ -194,6 +227,12 @@ export const CharacterForm = (props: ICharacterFormProps) => {
                 Submit
               </Button>
 
+              {!variant && (
+                <Button variant="secondary" onClick={onCancel}>
+                  Cancel
+                </Button>
+              )}
+
               {values.previewFile != null && isSubmitting ? (
                 <Button
                   variant="secondary"
@@ -228,10 +267,5 @@ export const CharacterForm = (props: ICharacterFormProps) => {
     </Formik>
   );
 
-  return (
-    <div>
-      <h1>{character?.name ?? "New Character"}</h1>
-      {formik}
-    </div>
-  );
+  return <div>{formik}</div>;
 };

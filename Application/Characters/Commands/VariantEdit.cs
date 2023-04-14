@@ -49,7 +49,10 @@ namespace CliveBot.Application.Characters.Commands
                 variant.Age = request.Age;
                 variant.PreviewImageUrl = request.PreviewImageUrl;
 
-                if(request.DefaultVariant)
+                variant.ToYear = request.ToYear;
+                variant.FromYear = request.FromYear;
+
+                if (request.DefaultVariant)
                 {
                     await _context.CharacterVariants
                         .Where(v => v.CharacterId == variant.CharacterId)

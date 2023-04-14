@@ -1,7 +1,7 @@
 export interface ISkillLanguage {
-    id: number;
-    skillId: number;
-    locale: string;
-    name: string;
-    description?: string;
+  id: number;
+  skillId: number;
+  locale: string;
+  name: string;
+  description?: string;
 }
