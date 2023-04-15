@@ -21,6 +21,7 @@ namespace CliveBot.Web.Controllers
         /// <param name="summon">Filter for Skill Summon</param>
         /// <returns>List of Skills</returns>
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ActionResult<SkillDto>>))]
         public async Task<List<SkillDto>> GetAllSkills(SkillSummon? summon)
         {
@@ -33,6 +34,7 @@ namespace CliveBot.Web.Controllers
         /// <param name="id">Id of Skill</param>
         /// <returns>Skill Id</returns>
         [HttpGet("{id}")]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<SkillDto>> GetSkill(int id)
@@ -47,6 +49,7 @@ namespace CliveBot.Web.Controllers
         /// <param name="skillName">Name of skill</param>
         /// <returns>Skill Id</returns>
         [HttpGet("search")]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<SkillDto>> SearchSkill(string skillName)
