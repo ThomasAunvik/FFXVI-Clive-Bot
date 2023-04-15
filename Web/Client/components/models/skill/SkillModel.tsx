@@ -36,11 +36,11 @@ export interface ISkill {
   summon: SkillSummon;
   ratingPhysical: number;
   ratingMagical: number;
-  masterizationPoints: number;
+
+  costBuy: number;
+  costUpgrade: number;
+  costMaster: number;
 
   iconUrl?: string;
   previewImageUrl?: string;
-
-  masteredVersion?: ISkill;
-  previousVersion?: ISkill;
 }

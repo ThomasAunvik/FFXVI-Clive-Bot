@@ -42,13 +42,11 @@ namespace CliveBot.Database.Models
         public int RatingPhysical { get; set; } = 0;
         public int RatingMagical { get; set; } = 0;
 
-        public int MasterizationPoints { get; set; } = 0;
+        public int CostBuy { get; set; } = 0;
+        public int CostUpgrade { get; set; } = 0;
+        public int CostMaster { get; set; } = 0;
 
         public string? IconUrl { get; set; }
         public string? PreviewImageUrl { get; set; }
-
-        public int? MasteredVersionForeignKey { get; set; }
-        public SkillModel? MasteredVersion { get; set; }
-        public SkillModel? PreviousVersion { get; set; }
     }
 }

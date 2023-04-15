@@ -50,7 +50,9 @@ export const SkillForm = (props: ISkillFormProps) => {
       summon: SkillSummon.Ifrit,
       ratingPhysical: 0,
       ratingMagical: 0,
-      masterizationPoints: 0,
+      costBuy: 0,
+      costUpgrade: 0,
+      costMaster: 0,
     }
   );
 
@@ -303,11 +305,33 @@ export const SkillForm = (props: ISkillFormProps) => {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>MASTERization Points</Form.Label>
+            <Form.Label>Cost Buy</Form.Label>
             <Form.Control
-              name="masterizationPoints"
+              name="costBuy"
               type="number"
-              value={values.masterizationPoints}
+              value={values.costBuy}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Cost Upgrade</Form.Label>
+            <Form.Control
+              name="costUpgrade"
+              type="number"
+              value={values.costUpgrade}
+              onChange={handleChange}
+              onBlur={handleBlur}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Cost Master</Form.Label>
+            <Form.Control
+              name="costMaster"
+              type="number"
+              value={values.costMaster}
               onChange={handleChange}
               onBlur={handleBlur}
             />

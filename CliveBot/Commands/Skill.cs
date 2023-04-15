@@ -8,9 +8,12 @@ using Discord.WebSocket;
 using CliveBot.Database;
 using Microsoft.EntityFrameworkCore;
 using CliveBot.Bot.Handler.Autocomplete;
+using System.Text;
 
 namespace CliveBot.Bot.Commands
 {
+
+    [Group("skill", "Skills")]
     public class SkillCommand : InteractionModuleBase
     {
         public const string emote_skill_physical = "<:skill_physical:1070695272960774254>";
@@ -72,9 +75,20 @@ namespace CliveBot.Bot.Commands
                 inline: true
             );
 
+            StringBuilder sb = new($"{emote_mana} {skill.CostBuy}");
+            if(skill.CostUpgrade != 0)
+            {
+                sb.Append($" / {skill.CostUpgrade}");
+            }
+
+            if(skill.CostMaster != 0)
+            {
+                sb.Append($" / {skill.CostMaster}");
+            }
+
             embed.AddField(
-                "MASTERization",
-                $"{emote_mana} {skill.MasterizationPoints}",
+                "Upgrade Cost",
+                sb.ToString(),
                 inline: true
             );
 
@@ -83,78 +97,22 @@ namespace CliveBot.Bot.Commands
             return embed;
         }
 
-        [SlashCommand("skill", "List of skills per summon")]
-        public async Task Skill(
-            [Summary(name: "summon", description: "List the skills of a summon")]
-            SkillSummon? skillSummon = null,
-            [Summary("skill", description: "Select the target skill")]
-            [Autocomplete(typeof(SkillAutocompleteHandler))]
-            string? skillIdLang = null,
+
+        [SlashCommand("detail", "Get details of a skill")]
+        public async Task SkillDetail(
             [Summary("search", description: "Search for the target skill")]
-            string? skillName = null,
-            [Summary("Locale", "Select a Locale to edit on")]
-            LocaleOptions? locale = null
-        ) {
+            string skillName
+        )
+        {
             await Context.Interaction.DeferAsync();
 
-            SkillModel? skill = null;
-            string? selectedLocale = null;
-            if(skillIdLang != null)
-            {
-                var skillSplit = skillIdLang.Split(",");
-                if (int.TryParse(skillSplit[0], out int skillId))
-                {
-                    skill = await db.Skills
-                        .Include(s => s.MasteredVersion)
-                        .Include(s => s.PreviousVersion)
-                        .Include(s => s.Localized)
-                        .FirstOrDefaultAsync(s => s.Id == skillId);
-
-                    selectedLocale = skillSplit[1];
-                }
-            } else if(skillName != null)
-            {
-                var skillLang = await db.SkillLanguages
+            var skillLang = await db.SkillLanguages
                     .Where((l) => EF.Functions.ILike(l.Name, skillName + "%"))
                     .OrderBy(l => l.Name)
                     .FirstOrDefaultAsync();
 
-                if (skillLang?.Skill != null)
-                {
-                    skill = skillLang.Skill;
-                    if (locale == null) selectedLocale = skillLang.Locale;
-                }
-
-                var id = skillLang?.SkillId;
-
-                if (id != null) {
-                    skill = await db.Skills
-                       .Include(s => s.MasteredVersion)
-                       .Include(s => s.PreviousVersion)
-                       .Include(s => s.Localized)
-                       .FirstOrDefaultAsync(s => s.Id == id);
-                }
-            } else if(skillSummon != null)
-            {
-                await ListSkills((SkillSummon)skillSummon);
-                return;
-            } else
-            {
-                await ListSummons(Context);
-                return;
-            }
-
-            if(locale != null)
-            {
-                selectedLocale = Enum.GetName(locale ?? LocaleOptions.en);
-            }
-
-            if(selectedLocale == null)
-            {
-                selectedLocale = "en";
-            }
-
-            if(skill == null)
+            var id = skillLang?.SkillId;
+            if(id == null)
             {
                 await Context.Interaction.ModifyOriginalResponseAsync((r) =>
                 {
@@ -163,33 +121,49 @@ namespace CliveBot.Bot.Commands
                 return;
             }
 
-            var embed = SkillEmbedBuild(skill, locale: selectedLocale);
+            var skill = await db.Skills
+                .Include(s => s.Localized)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+
+            if (skill == null)
+            {
+                await Context.Interaction.ModifyOriginalResponseAsync((r) =>
+                {
+                    r.Embed = new EmbedBuilder().WithTitle("Failed to find skill").Build();
+                });
+                return;
+            }
+
+            var embed = SkillEmbedBuild(skill);
 
             var compBuilder = new ComponentBuilder()
                 .WithButton("Preview", $"skillimgpreview:{skill.Id}", ButtonStyle.Success);
-
-            if (skill.MasteredVersion != null || skill.PreviousVersion != null)
-            {
-                compBuilder
-                    .WithButton(
-                        "Masterize",
-                        $"skillview:{skill.MasteredVersion?.Id ?? 0},{locale}",
-                        ButtonStyle.Primary,
-                        emote: Emote.Parse(emote_mana),
-                        disabled: skill.MasteredVersion == null
-                    ).WithButton(
-                        "Downgrade",
-                        $"skillview:{skill.PreviousVersion?.Id ?? 0},{locale}",
-                        ButtonStyle.Secondary,
-                        disabled: skill.PreviousVersion == null
-                    );
-            }
 
             await Context.Interaction.ModifyOriginalResponseAsync((r) =>
             {
                 r.Embed = embed.Build();
                 r.Components = compBuilder.Build();
             });
+        }
+
+        [SlashCommand("list", "List of skills per summon")]
+        public async Task SkillList(
+            [Summary(name: "summon", description: "List the skills of a summon")]
+            SkillSummon? skillSummon = null
+        ) {
+            await Context.Interaction.DeferAsync();
+            
+            if (skillSummon != null)
+            {
+                await ListSkills((SkillSummon)skillSummon);
+                return;
+            }
+            else
+            {
+                await ListSummons(Context);
+                return;
+            }
         }
 
         public async Task ListSkills(SkillSummon skillSummon, int page = 0)
@@ -210,7 +184,11 @@ namespace CliveBot.Bot.Commands
 
             foreach(var skill in skills)
             {
-                text += $"{skill.Name} ({skill.MasterizationPoints}) [p{skill.RatingPhysical}/10, m{skill.MasterizationPoints}/10]";
+                string costText = $"{skill.CostBuy}";
+                if (skill.CostUpgrade != 0) costText += "/" + skill.CostUpgrade;
+                if (skill.CostMaster != 0) costText += "/" + skill.CostMaster;
+
+                text += $"{skill.Name} ({costText}) [p{skill.RatingPhysical}/10, m{skill.RatingMagical}/10]";
             }
 
             if (string.IsNullOrEmpty(text)) text = "Empty Text";
@@ -276,70 +254,6 @@ namespace CliveBot.Bot.Commands
         public SkillInteractionModule(ApplicationDbContext db)
         {
             this.db = db;
-        }
-
-        [ComponentInteraction("skillview:*")]
-        public async Task SkillAscend(string idlang)
-        {
-            var skillSplit = idlang.Split(",");
-
-            if (!int.TryParse(skillSplit[0], out int skillid))
-            {
-                await ReplyAsync(embed: 
-                    new EmbedBuilder()
-                    .WithTitle("Failed to parse id")
-                    .Build()
-                );
-                return;
-            }
-
-            await Context.Interaction.DeferAsync();
-
-            var skill = await db.Skills
-                    .Include(s => s.MasteredVersion)
-                    .Include(s => s.PreviousVersion)
-                    .FirstOrDefaultAsync(s => s.Id == skillid);
-
-            if(skill == null)
-            {
-                await Context.Interaction.ModifyOriginalResponseAsync((r) =>
-                {
-                    r.Embed = new EmbedBuilder()
-                    .WithTitle("Failed to find skill")
-                    .Build();
-                });
-                return;
-            }
-
-            var locale = skillSplit[1];
-
-            var embed = SkillCommand.SkillEmbedBuild(skill, locale: locale);
-
-            var compBuilder = new ComponentBuilder()
-                .WithButton("Preview", $"skillimgpreview:{skill.Id}", ButtonStyle.Success);
-
-            if (skill.MasteredVersion != null || skill.PreviousVersion != null)
-            {
-                compBuilder
-                    .WithButton(
-                        "Masterize",
-                        $"skillview:{skill.MasteredVersion?.Id ?? 0},{locale}",
-                        ButtonStyle.Primary,
-                        emote: Emote.Parse(SkillCommand.emote_mana),
-                        disabled: skill.MasteredVersion == null
-                    ).WithButton(
-                        "Downgrade",
-                        $"skillview:{skill.PreviousVersion?.Id ?? 0},{locale}",
-                        ButtonStyle.Secondary,
-                        disabled: skill.PreviousVersion == null
-                    );
-            }
-
-            await Context.Interaction.ModifyOriginalResponseAsync((message) =>
-            {
-                message.Embed = embed.Build();
-                message.Components = compBuilder.Build();
-            });
         }
 
         [ComponentInteraction("skillimgpreview:*")]

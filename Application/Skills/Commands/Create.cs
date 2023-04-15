@@ -45,7 +45,9 @@ namespace CliveBot.Application.Skills.Commands
                     Summon = request.Summon,
                     RatingMagical = request.RatingMagical,
                     RatingPhysical = request.RatingPhysical,
-                    MasterizationPoints = request.MasterizationPoints,
+                    CostBuy = request.CostBuy,
+                    CostUpgrade = request.CostUpgrade,
+                    CostMaster = request.CostMaster,
                     IconUrl = request.IconUrl,
                     PreviewImageUrl = request.PreviewImageUrl,
                     Localized = new() {

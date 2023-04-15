@@ -28,8 +28,6 @@ namespace CliveBot.Application.Skills.Queries
             public async Task<SkillDto> Handle(Query request, CancellationToken cancellationToken)
             {
                 var skill = await _context.Skills
-                    .Include(s => s.PreviousVersion)
-                    .Include(s => s.MasteredVersion)
                     .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken);
 
                 if(skill == null)

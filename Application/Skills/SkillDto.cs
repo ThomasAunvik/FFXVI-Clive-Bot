@@ -20,13 +20,12 @@ namespace CliveBot.Application.Skills
         public int RatingPhysical { get; set; } = 0;
         public int RatingMagical { get; set; } = 0;
 
-        public int MasterizationPoints { get; set; } = 0;
+        public int CostBuy { get; set; } = 0;
+        public int CostUpgrade { get; set; } = 0;
+        public int CostMaster { get; set; } = 0;
 
         public string? IconUrl { get; set; }
         public string? PreviewImageUrl { get; set; }
-
-        public SkillDto? MasteredVersion { get; set; }
-        public SkillDto? PreviousVersion { get; set; }
     }
 
     public static class SkillDtoExtension
@@ -43,11 +42,11 @@ namespace CliveBot.Application.Skills
                 Summon = model.Summon,
                 RatingPhysical = model.RatingPhysical,
                 RatingMagical = model.RatingMagical,
-                MasterizationPoints = model.MasterizationPoints,
+                CostBuy = model.CostBuy,
+                CostUpgrade = model.CostUpgrade,
+                CostMaster = model.CostMaster,
                 IconUrl = model.IconUrl,
                 PreviewImageUrl = model.PreviewImageUrl,
-                MasteredVersion = model.MasteredVersion?.ConvertDto(),
-                PreviousVersion = model.PreviousVersion?.ConvertDto(),
             };
         }
 

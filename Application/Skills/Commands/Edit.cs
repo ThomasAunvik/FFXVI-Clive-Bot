@@ -41,8 +41,6 @@ namespace CliveBot.Application.Skills.Commands
             public async Task<SkillDto> Handle(Command request, CancellationToken cancellationToken)
             {
                 var skill = await _context.Skills
-                    .Include(s => s.PreviousVersion)
-                    .Include(s => s.MasteredVersion)
                     .Include(s => s.Localized)
                     .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken);
 
@@ -75,7 +73,9 @@ namespace CliveBot.Application.Skills.Commands
                 skill.RatingMagical = request.RatingMagical;
                 skill.RatingPhysical = request.RatingPhysical;
 
-                skill.MasterizationPoints = request.MasterizationPoints;
+                skill.CostBuy = request.CostBuy;
+                skill.CostUpgrade = request.CostUpgrade;
+                skill.CostMaster = request.CostMaster;
 
                 skill.IconUrl = request.IconUrl;
                 skill.PreviewImageUrl = request.PreviewImageUrl;
