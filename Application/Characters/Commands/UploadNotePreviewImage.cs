@@ -53,8 +53,8 @@ namespace CliveBot.Application.Characters.Commands
                     throw new RestException(HttpStatusCode.NotFound, "Could not find any note with id: " + request.NoteId);
                 }
 
-                var extension = Path.GetExtension(request.File.FileName);
-                var filePath = $"/images/characters/{note.CharacterId}/notes/{note.Id}/preview{extension ?? ""}";
+                string extension = Path.GetExtension(request.File.FileName);
+                string filePath = $"/images/characters/{note.CharacterId}/notes/{note.Id}/preview{extension ?? ""}";
 
                 await using (var fileStream = request.File.OpenReadStream()){
                     var blob = await _blob.Upload(
@@ -65,6 +65,8 @@ namespace CliveBot.Application.Characters.Commands
                         );
 
                     fileStream.Close();
+
+                    filePath = blob.Path;
                 }
 
                 var previewUrlFilePath = $"cdn;{filePath}";

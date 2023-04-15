@@ -42,13 +42,9 @@ namespace CliveBot.Application.Skills.Commands
             {
                 var skill = await _context.Skills
                     .Include(s => s.Localized)
-                    .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken);
-
-                if (skill == null)
-                {
-                    throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
-                }
-
+                    .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken) 
+                    ?? throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
+                
                 var enL = skill.Localized.FirstOrDefault(s => s.Locale == "en");
                 if (enL == null)
                 {

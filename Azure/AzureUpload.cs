@@ -11,18 +11,30 @@ namespace CliveBot.Azure
 {
     public class AzureUpload
     {
+        public class UploadResult
+        {
+            public required BlobContentInfo Blob { get; set; }
+            public required string Path { get; set; }
+        }
+
         private readonly BlobServiceClient _blobServiceClient;
 
         public AzureUpload(BlobServiceClient blobClient) { 
             _blobServiceClient = blobClient;
         }
 
-        public async Task<BlobContentInfo> Upload(
+        public async Task<UploadResult> Upload(
             string pathName, 
             Stream content, 
             string contentType,
             CancellationToken c = new()
         )   {
+
+            var filePath = pathName;
+#if DEBUG
+            filePath = "/test" + pathName;
+#endif
+
             var blobContainer = _blobServiceClient.GetBlobContainerClient("$web");
             var blobClient = blobContainer.GetBlobClient(pathName);
 
@@ -36,7 +48,12 @@ namespace CliveBot.Azure
                 },
                 cancellationToken: c
             );
-            return blob.Value;
+
+            return new()
+            {
+                Blob = blob.Value,
+                Path = pathName,
+            };
         }
     }
 }

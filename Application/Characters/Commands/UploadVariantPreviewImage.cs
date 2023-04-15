@@ -49,8 +49,8 @@ namespace CliveBot.Application.Characters.Commands
                     .FirstOrDefaultAsync(s => s.Id == request.VariantId, cancellationToken) ?? throw new RestException(HttpStatusCode.NotFound, "Could not find any variant with id: " + request.VariantId);
 
 
-                var extension = Path.GetExtension(request.File.FileName);
-                var filePath = $"/images/characters/{variant.CharacterId}/variant/{variant.Id}/preview{extension ?? ""}";
+                string extension = Path.GetExtension(request.File.FileName);
+                string filePath = $"/images/characters/{variant.CharacterId}/variant/{variant.Id}/preview{extension ?? ""}";
 
                 await using (var fileStream = request.File.OpenReadStream()){
                     var blob = await _blob.Upload(
@@ -58,9 +58,11 @@ namespace CliveBot.Application.Characters.Commands
                         fileStream,
                         request.File.ContentType,
                         cancellationToken
-                        );
+                    );
 
                     fileStream.Close();
+
+                    filePath = blob.Path;
                 }
 
                 var previewUrlFilePath = $"cdn;{filePath}";

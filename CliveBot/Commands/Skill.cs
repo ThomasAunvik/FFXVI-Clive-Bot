@@ -97,10 +97,10 @@ namespace CliveBot.Bot.Commands
             return embed;
         }
 
-
         [SlashCommand("detail", "Get details of a skill")]
         public async Task SkillDetail(
             [Summary("search", description: "Search for the target skill")]
+            [Autocomplete(typeof(SkillAutocompleteHandler))]
             string skillName
         )
         {
@@ -272,7 +272,7 @@ namespace CliveBot.Bot.Commands
                 return;
             }
 
-            await Context.Interaction.DeferAsync(ephemeral: true);
+            await Context.Interaction.RespondAsync("Loading...", ephemeral: true);
 
             var skill = await db.Skills
                     .FirstOrDefaultAsync(s => s.Id == skillid);
@@ -290,10 +290,7 @@ namespace CliveBot.Bot.Commands
 
             var previewImageUrl = Config.UrlCdnConvert(skill.PreviewImageUrl);
 
-            await Context.Interaction.ModifyOriginalResponseAsync((message) =>
-            {
-                message.Content = previewImageUrl;
-            });
+            await Context.Interaction.ModifyOriginalResponseAsync(m => m.Content = previewImageUrl);
         }
     }
 }

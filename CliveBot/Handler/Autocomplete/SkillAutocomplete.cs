@@ -27,11 +27,11 @@ namespace CliveBot.Bot.Handler.Autocomplete
             var userInput = autoComplete.Data.Current.Value.ToString();
             if (userInput == null) return AutocompletionResult.FromSuccess();
 
-            var results = await db.SkillLanguages
+            var results = await db.Skills
                 .Where((l) => EF.Functions.ILike(l.Name, userInput + "%"))
                 .OrderBy(l => l.Name)
                 .Take(25)
-                .Select((l) => new AutocompleteResult(l.Name, $"{l.SkillId},{l.Locale}"))
+                .Select((l) => new AutocompleteResult(l.Name, l.Name))
                 .ToListAsync();
 
             return AutocompletionResult.FromSuccess(results);

@@ -44,13 +44,9 @@ namespace CliveBot.Application.Moderators.Commands
             {
                 var moderator = await _context.BotModerators
                     .Include(m => m.Permissions)
-                    .FirstOrDefaultAsync(s => s.Id == request.ModeratorId, cancellationToken);
-
-                if (moderator == null)
-                {
-                    throw new RestException(HttpStatusCode.NotFound, "Could not find any moderator with id: " + request.ModeratorId);
-                }
-
+                    .FirstOrDefaultAsync(s => s.Id == request.ModeratorId, cancellationToken) 
+                    ?? throw new RestException(HttpStatusCode.NotFound, "Could not find any moderator with id: " + request.ModeratorId);
+                
                 _context.BotModerators.Remove(moderator);
 
                 var result = await _context.SaveChangesAsync(cancellationToken);

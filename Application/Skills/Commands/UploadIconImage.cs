@@ -46,18 +46,15 @@ namespace CliveBot.Application.Skills.Commands
             public async Task<SkillDto> Handle(Command request, CancellationToken cancellationToken)
             {
                 var skill = await _context.Skills
-                    .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken);
+                    .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken) 
+                    ?? throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
+                
+                string extension = Path.GetExtension(request.File.FileName);
 
-                if (skill == null)
-                {
-                    throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
-                }
-
-                var extension = Path.GetExtension(request.File.FileName);
-                var filePath = $"/images/skill/{skill.Id}/icon{extension ?? ""}";
+                string filePath = $"/images/skill/{skill.Id}/icon{extension ?? ""}";
 
                 using var fileStream = request.File.OpenReadStream();
-                var blob = await _blob.Upload(
+                var blobResult = await _blob.Upload(
                     filePath,
                     fileStream, 
                     request.File.ContentType, 
@@ -66,7 +63,7 @@ namespace CliveBot.Application.Skills.Commands
 
                 fileStream.Close();
 
-                var iconUrlFilePath = $"cdn;{filePath}";
+                var iconUrlFilePath = $"cdn;{blobResult.Path}";
                 var isSame = skill.IconUrl == iconUrlFilePath;
                 skill.IconUrl = iconUrlFilePath;
 
