@@ -18,7 +18,8 @@ namespace CliveBot.Application.Skills.Queries
     {
         public class Query : IRequest<SkillDto>
         {
-            public int SkillId { get; set; }
+            public int? SkillId { get; set; }
+            public string? SkillName { get; set; }
         }
 
         public class Handler : BaseHandler, IRequestHandler<Query, SkillDto>
@@ -27,12 +28,23 @@ namespace CliveBot.Application.Skills.Queries
 
             public async Task<SkillDto> Handle(Query request, CancellationToken cancellationToken)
             {
-                var skill = await _context.Skills
-                    .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken);
-
-                if(skill == null)
+                SkillModel? skill = null;
+                if(request.SkillId != null)
                 {
-                    throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
+                    skill = await _context.Skills
+                        .FirstOrDefaultAsync(s => s.Id == request.SkillId, cancellationToken) 
+                        ?? throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
+
+                } else if(!string.IsNullOrEmpty(request.SkillName))
+                {
+                    skill = await _context.Skills
+                        .FirstOrDefaultAsync((s) => EF.Functions.ILike(s.Name, request.SkillName + "%"), cancellationToken)
+                        ?? throw new RestException(HttpStatusCode.NotFound, "Could not find any skill with id: " + request.SkillId);
+                }
+
+                if (skill == null)
+                {
+                    throw new RestException(HttpStatusCode.NotFound, "Could not find any skill");
                 }
 
                 return skill.ConvertDto();

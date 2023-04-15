@@ -5,6 +5,7 @@ using CliveBot.Application.Skills.Commands;
 using CliveBot.Application.Skills.Queries;
 using CliveBot.Database.Models;
 using CliveBot.Web.Policies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CliveBot.Web.Controllers
@@ -12,7 +13,6 @@ namespace CliveBot.Web.Controllers
     /// <summary>
     /// Skills of Clive and it's Eikons
     /// </summary>
-    [ModAuthorize]
     public class SkillController : ApiBaseController
     {
         /// <summary>
@@ -38,6 +38,20 @@ namespace CliveBot.Web.Controllers
         public async Task<ActionResult<SkillDto>> GetSkill(int id)
         {
             return await Mediator.Send(new SkillDetails.Query() { SkillId = id });
+        }
+
+
+        /// <summary>
+        /// Searches for Skill
+        /// </summary>
+        /// <param name="skillName">Name of skill</param>
+        /// <returns>Skill Id</returns>
+        [HttpGet("search")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<SkillDto>> SearchSkill(string skillName)
+        {
+            return await Mediator.Send(new SkillDetails.Query() { SkillName = skillName });
         }
 
         [HttpPost]
@@ -73,6 +87,7 @@ namespace CliveBot.Web.Controllers
         }
 
         [HttpPost("{id}/languages/{locale}")]
+        [ModAuthorize(ManageSkillInfo: true)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SkillLanguageDto>))]
         public async Task<List<SkillLanguageDto>> CreateOrUpdateSkillLanguage(
             int id,
@@ -85,6 +100,7 @@ namespace CliveBot.Web.Controllers
         }
 
         [HttpDelete("{id}/languages/{locale}")]
+        [ModAuthorize(ManageSkillInfo: true)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SkillLanguageDto>))]
         public async Task<List<SkillLanguageDto>> RemoveSkillLanguage(
             int id,
