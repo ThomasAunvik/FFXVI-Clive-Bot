@@ -147,9 +147,9 @@ namespace CliveBot.Bot.Commands
             });
         }
 
-        [SlashCommand("list", "List of skills per summon")]
+        [SlashCommand("list", "List of skills")]
         public async Task SkillList(
-            [Summary(name: "summon", description: "List the skills of a summon")]
+            [Summary(name: "summon", description: "Filter skills to a summon")]
             SkillSummon? skillSummon = null
         ) {
             await Context.Interaction.DeferAsync();
@@ -180,7 +180,7 @@ namespace CliveBot.Bot.Commands
             var embed = new EmbedBuilder()
                 .WithTitle("Skills");
 
-            string text = "";
+            StringBuilder skillListText = new();
 
             foreach(var skill in skills)
             {
@@ -188,8 +188,10 @@ namespace CliveBot.Bot.Commands
                 if (skill.CostUpgrade != 0) costText += "/" + skill.CostUpgrade;
                 if (skill.CostMaster != 0) costText += "/" + skill.CostMaster;
 
-                text += $"{skill.Name} ({costText}) [p{skill.RatingPhysical}/10, m{skill.RatingMagical}/10]";
+                skillListText.AppendLine($"{skill.Name} ({costText}) [p{skill.RatingPhysical}/10, m{skill.RatingMagical}/10]");
             }
+
+            string text = skillListText.ToString();
 
             if (string.IsNullOrEmpty(text)) text = "Empty Text";
 
