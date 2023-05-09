@@ -7,7 +7,7 @@ Last updated May 10, 2023
 
 The use of the FFXVI Clive Reddit Appplication is an application used for Moderation of the r/FFXVI (https://www.reddit.com/r/ffxvi).
 
-The other use of FFXVI Clive Reddit Application is to request data from the FFXVI Clive Website (https://ffxvibot.com), to be shown in a comment in Reddit.
+The other use of FFXVI Clive Reddit Application is to request data from the FFXVI Clive Website (https://xvibot.com), to be shown in a comment in Reddit.
 
 Storage of Data:
 
