@@ -8,15 +8,9 @@ using System.Threading.Tasks;
 
 namespace CliveBot.Application.Infrastructure
 {
-    public class BaseHandler
+    public class BaseHandler(ApplicationDbContext context, IConfiguration config)
     {
-        protected readonly ApplicationDbContext _context;
-        protected readonly IConfiguration _config;
-
-        public BaseHandler(ApplicationDbContext context, IConfiguration config)
-        {
-            _context = context;
-            _config = config;
-        }
+        protected readonly ApplicationDbContext _context = context;
+        protected readonly IConfiguration _config = config;
     }
 }

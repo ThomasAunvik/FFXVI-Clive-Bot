@@ -34,15 +34,8 @@ namespace CliveBot.Application.Characters.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, CharacterNoteDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config, AzureUpload blobClient) : BaseHandler(context, config), IRequestHandler<Command, CharacterNoteDto>
         {
-            private readonly AzureUpload _blob;
-
-            public Handler(ApplicationDbContext context, IConfiguration config, AzureUpload blobClient) : base(context, config)
-            {
-                _blob = blobClient;
-            }
-
             public async Task<CharacterNoteDto> Handle(Command request, CancellationToken cancellationToken)
             {
                 var note = await _context.CharacterNotes
@@ -57,7 +50,7 @@ namespace CliveBot.Application.Characters.Commands
                 string filePath = $"/images/characters/{note.CharacterId}/notes/{note.Id}/preview{extension ?? ""}";
 
                 await using (var fileStream = request.File.OpenReadStream()){
-                    var blob = await _blob.Upload(
+                    var blob = await blobClient.Upload(
                         filePath,
                         fileStream,
                         request.File.ContentType,

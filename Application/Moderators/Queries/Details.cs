@@ -21,10 +21,8 @@ namespace CliveBot.Application.Moderators.Queries
             public int ModeratorId { get; set; }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Query, ModeratorDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Query, ModeratorDto>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config) { }
-
             public async Task<ModeratorDto> Handle(Query request, CancellationToken cancellationToken)
             {
                 var moderator = await _context.BotModerators

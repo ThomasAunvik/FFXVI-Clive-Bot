@@ -24,14 +24,8 @@ namespace CliveBot.Application.Characters.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, Unit>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Command, Unit>
         {
-            private readonly IMediator _mediator;
-            public Handler(ApplicationDbContext context, IConfiguration config, IMediator mediator) : base(context, config)
-            {
-                _mediator = mediator;
-            }
-
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
                 var note = await _context.CharacterNotes.FirstOrDefaultAsync(

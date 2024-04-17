@@ -28,13 +28,8 @@ namespace CliveBot.Application.Skills.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, SkillDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Command, SkillDto>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config)
-            {
-
-            }
-
             public async Task<SkillDto> Handle(Command request, CancellationToken cancellationToken)
             {
                 var skill = new SkillModel
@@ -50,14 +45,14 @@ namespace CliveBot.Application.Skills.Commands
                     CostMaster = request.CostMaster,
                     IconUrl = request.IconUrl,
                     PreviewImageUrl = request.PreviewImageUrl,
-                    Localized = new() {
+                    Localized = [
                         new SkillLanguageModel
                         {
                             Locale = "en",
                             Name = request.Name,
                             Description = request.Description
                         }
-                    },
+                    ]
                 };
 
                 await _context.Skills.AddAsync(skill, cancellationToken);

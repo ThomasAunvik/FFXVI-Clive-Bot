@@ -21,10 +21,8 @@ namespace CliveBot.Application.Characters.Queries
             public int CharacterId { get; set; }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Query, CharacterDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Query, CharacterDto>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config) { }
-
             public async Task<CharacterDto> Handle(Query request, CancellationToken cancellationToken)
             {
                 var character = await _context.Characters

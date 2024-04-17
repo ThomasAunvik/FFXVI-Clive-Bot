@@ -7,16 +7,10 @@ using System.Threading.Tasks;
 
 namespace CliveBot.Application.Errors
 {
-    public class RestException : Exception
+    public class RestException(HttpStatusCode code, string message) : Exception
     {
-        public RestException(HttpStatusCode code, string message)
-        {
-            Code = code;
-            Message = message;
-        }
+        public HttpStatusCode Code { get; } = code;
 
-        public HttpStatusCode Code { get; }
-
-        public override string Message { get; }
+        public override string Message { get; } = message;
     }
 }

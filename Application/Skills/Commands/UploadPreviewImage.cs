@@ -36,15 +36,8 @@ namespace CliveBot.Application.Skills.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, SkillDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config, AzureUpload blobClient) : BaseHandler(context, config), IRequestHandler<Command, SkillDto>
         {
-            private readonly AzureUpload _blob;
-
-            public Handler(ApplicationDbContext context, IConfiguration config, AzureUpload blobClient) : base(context, config)
-            {
-                _blob = blobClient;
-            }
-
             public async Task<SkillDto> Handle(Command request, CancellationToken cancellationToken)
             {
                 var skill = await _context.Skills
@@ -56,7 +49,7 @@ namespace CliveBot.Application.Skills.Commands
                 string filePath = $"/images/skill/{skill.Id}/preview{extension ?? ""}";
 
                 using var fileStream = request.File.OpenReadStream();
-                var blobResult = await _blob.Upload(
+                var blobResult = await blobClient.Upload(
                     filePath, 
                     fileStream,
                     request.File.ContentType,

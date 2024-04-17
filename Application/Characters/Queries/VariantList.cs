@@ -14,10 +14,8 @@ namespace CliveBot.Application.Characters.Queries
             public int CharacterId {get; set;}
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Query, List<CharacterVariantDto>>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Query, List<CharacterVariantDto>>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config) { }
-
             public async Task<List<CharacterVariantDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var charactersQuery = _context.CharacterVariants.AsQueryable();

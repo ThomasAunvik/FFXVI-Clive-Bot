@@ -26,14 +26,8 @@ namespace CliveBot.Application.SkillLanguages.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, List<SkillLanguageDto>>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Command, List<SkillLanguageDto>>
         {
-            private readonly IMediator _mediator;
-            public Handler(ApplicationDbContext context, IConfiguration config, IMediator mediator) : base(context, config)
-            {
-                _mediator = mediator;
-            }
-
             public async Task<List<SkillLanguageDto>> Handle(Command request, CancellationToken cancellationToken)
             {
 
