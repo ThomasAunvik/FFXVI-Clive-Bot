@@ -1,11 +1,11 @@
 import DashboardNavBar from "@/components/DashboardNavBar";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "@/components/errors/ErrorHandler";
-import { ISkillLanguage } from "@/components/models/skill/SkillLanguageModel";
-import { ISkill } from "@/components/models/skill/SkillModel";
+import type { ISkillLanguage } from "@/components/models/skill/SkillLanguageModel";
+import type { ISkill } from "@/components/models/skill/SkillModel";
 import { SkillForm } from "@/components/skills/SkillForm";
 import { SkillLanguageList } from "@/components/skills/SkillLanguagesList";
 import axios from "axios";
@@ -28,22 +28,22 @@ const DashboardSkillPage = () => {
 
   const fetchSkill = useCallback(async (skillId: string) => {
     try {
-      const res = await axios.get("/api/skill/" + skillId);
-      if (res.status != 200) return;
+      const res = await axios.get(`/api/skill/${skillId}`);
+      if (res.status !== 200) return;
 
       setSkill(res.data as ISkill);
-    } catch (err: any) {
+    } catch (err) {
       setError(getErrorInfo(err));
     }
   }, []);
 
   const fetchSkillLanguages = useCallback(async (skillId: string) => {
     try {
-      const res = await axios.get("/api/skill/" + skillId + "/languages");
-      if (res.status != 200) return;
+      const res = await axios.get(`/api/skill/${skillId}/languages`);
+      if (res.status !== 200) return;
 
       setSkillLanguages(res.data as ISkillLanguage[]);
-    } catch (err: any) {
+    } catch (err) {
       setError(getErrorInfo(err));
     }
   }, []);

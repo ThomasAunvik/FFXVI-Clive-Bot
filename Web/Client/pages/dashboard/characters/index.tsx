@@ -1,6 +1,5 @@
 import { CharacterList } from "@/components/characters/CharacterList";
 import DashboardNavBar from "@/components/DashboardNavBar";
-import { SkillSummonList } from "@/components/skills/SkillSummonList";
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Head from "next/head";

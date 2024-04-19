@@ -12,8 +12,6 @@ const DashboardSkillListPage = () => {
 
   const [skills, setSkills] = useState([]);
 
-  useEffect(() => {}, [isMounted]);
-
   return (
     <>
       <Head>

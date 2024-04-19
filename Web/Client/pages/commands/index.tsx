@@ -2,15 +2,16 @@ import Aux from "@/components/Auxillary";
 import { commandCategories } from "@/components/Commands";
 import MainPageNavBar from "@/components/MainPageNavBar";
 import Head from "next/head";
+import type { MouseEvent } from "react";
 import { Container, Table } from "react-bootstrap";
 
 import styles from "styles/Commands.module.css";
 
-interface ICommand {}
-
 export default function CommandsPage() {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const collapseClick = (e: any) => {
     const hiddenElement = e.currentTarget.nextSibling;
+	if(!hiddenElement) return;
     hiddenElement.className.indexOf("collapse show") > -1
       ? hiddenElement.classList.remove("show")
       : hiddenElement.classList.add("show");
@@ -30,7 +31,7 @@ export default function CommandsPage() {
         <Container style={{ marginTop: "20px" }}>
           <h1>Commands</h1>
           {commandCategories.map((category) => (
-            <Aux key={"category-" + category.name}>
+            <Aux key={`category-${category.name}`}>
               <h2>{category.name}</h2>
               <Table>
                 <thead>
@@ -42,8 +43,9 @@ export default function CommandsPage() {
                 </thead>
                 <tbody>
                   {category.commands.map((command) => (
-                    <Aux key={"command-" + command.command}>
-                      <tr onClick={collapseClick} className={styles.tablerow}>
+                    <Aux key={`command-${command.command}`}>
+                      {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+					<tr onClick={collapseClick} className={styles.tablerow}>
                         <td>/{command.command}</td>
                         <td>{command.description}</td>
                         <td>
@@ -52,7 +54,7 @@ export default function CommandsPage() {
                       </tr>
                       <tr
                         className="collapse"
-                        key={"command-collapse-" + command.command}
+                        key={`command-collapse-${command.command}`}
                       >
                         <td colSpan={3}>
                           <Table>
@@ -68,10 +70,7 @@ export default function CommandsPage() {
                               {command.arguments.map((arg) => (
                                 <tr
                                   key={
-                                    "command-" +
-                                    command.command +
-                                    "-arg-" +
-                                    arg.parameter
+                                    `command-${command.command}-arg-${arg.parameter}`
                                   }
                                 >
                                   <td>{arg.parameter}</td>

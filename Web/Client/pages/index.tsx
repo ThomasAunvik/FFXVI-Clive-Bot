@@ -41,11 +41,11 @@ export default function Home() {
 										src="/static/images/discord/discord-mark-white.svg"
 										width={20}
 										height={20}
-										className={"pull-right "}
+										className={"pull-right"}
 									/>
 								</span>
 							</Button>
-							<br></br>
+							<br />
 							<Button
 								style={{ marginTop: "30px" }}
 								variant="primary"

@@ -17,7 +17,9 @@ namespace CliveBot.Database.Models
 		public SkillModel? Skill { get; set; }
 
 		public string? Detail { get; set; }
-		public string? Mastery { get; set; }
+        public string? Cooldown { get; set; }
+        public string? Upgrade { get; set; }
+        public string? Mastery { get; set; }
         public ICollection<SkillDetailTechniques> BattleTechniques { get; set; } = [];
 	}
 }

@@ -24,7 +24,8 @@ const DashboardPage = () => {
             {rest.map((line, i) => (
               // React.Fragment doesn’t create a wrapper element in the DOM.
               // If you don’t care about that, you can use div instead
-              <React.Fragment key={"line-" + i}>
+			  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+              <React.Fragment key={`line-${i}`}>
                 <br />
                 {line}
               </React.Fragment>

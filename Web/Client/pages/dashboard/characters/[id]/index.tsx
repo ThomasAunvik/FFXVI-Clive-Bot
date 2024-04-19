@@ -3,10 +3,10 @@ import DashboardNavBar from "@/components/DashboardNavBar";
 import axios from "axios";
 import Head from "next/head";
 import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
-import { ICharacter } from "@/components/models/characters/CharacterModel";
+import type { ICharacter } from "@/components/models/characters/CharacterModel";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ErrorModal, ErrorModalInfo, getErrorInfo } from "@/components/errors/ErrorHandler";
+import { ErrorModal, type ErrorModalInfo, getErrorInfo } from "@/components/errors/ErrorHandler";
 import { ICharacterVariant } from "@/components/models/characters/CharacterVariant";
 import { CharacterVariantList } from "@/components/characters/CharacterVariantList";
 
@@ -20,12 +20,12 @@ const DashboardCharacterPage = () => {
 
     const fetchCharacter = useCallback(async (characterId: string) => {
         try {
-            const res = await axios.get("/api/character/" + characterId);
-            if(res.status != 200) return;
+            const res = await axios.get(`/api/character/${characterId}`);
+            if(res.status !== 200) return;
 
 			const character = res.data as ICharacter;
             setCharacter(character);
-        } catch(err: any) {
+        } catch(err) {
             setError(getErrorInfo(err));
         }
     }, []);
