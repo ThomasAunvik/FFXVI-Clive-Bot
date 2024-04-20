@@ -1,4 +1,5 @@
 import axios from "axios";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
   Accordion,
@@ -9,15 +10,18 @@ import {
   Row,
   Spinner,
 } from "react-bootstrap";
-import { ISkill, SkillSummon, summonList } from "../models/skill/SkillModel";
-import Image from "next/image";
+import type { ICharacter } from "../../lib/models/characters/CharacterModel";
+import {
+  ISkill,
+  SkillSummon,
+  summonList,
+} from "../../lib/models/skill/SkillModel";
 import { replaceCDN } from "../constants";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import { ICharacter } from "../models/characters/CharacterModel";
 
 export const CharacterList = () => {
   const [characters, setCharacters] = useState<ICharacter[] | null>(null);

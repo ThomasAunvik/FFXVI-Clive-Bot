@@ -243,10 +243,9 @@ In order to resolve a complaint regarding the Services or to receive further inf
 
 Thomas Aunvik
 Norway
-Phone: +47 41 47 25 56
 contact@thaun.dev
 
-Discord: Thaun_#0001
+Discord: Thaun_
 Discord: https://discord.gg/aYbmFfg
 
 Reddit: Thaun_

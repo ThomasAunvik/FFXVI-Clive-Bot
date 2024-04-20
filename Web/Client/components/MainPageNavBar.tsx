@@ -1,57 +1,36 @@
-import axios from "axios";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Container, Nav, Navbar } from "react-bootstrap";
-import styles from "styles/NavBar.module.css";
-import useIsMounted from "./misc/useIsMounted";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { NavigationMenuLogin } from "./NavigationMenuLogin";
 
-interface IMainPageProps {
-  currentPath: string;
-}
-
-const MainPageNavBar = (props: IMainPageProps) => {
-  const { currentPath } = props;
-
-  const isMounted = useIsMounted();
-
-  var [isLoggedIn, setLoggedIn] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (document.cookie.includes(".AspNetCore.Cookies")) {
-      setLoggedIn(true);
-    }
-  }, [isMounted]);
-
+const MainPageNavBar = async () => {
   return (
-    <Navbar
-      bg="dark"
-      variant="dark"
-      expand="lg"
-      className={styles.navbar}
-      sticky="top"
-    >
-      <Container>
-        <Navbar.Brand href="/">Clive Bot</Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            <Nav.Link href="/" active={currentPath == "/"}>
-              Home
-            </Nav.Link>
-            <Nav.Link href="/commands" active={currentPath == "/commands"}>
-              Commands
-            </Nav.Link>
-          </Nav>
-          <Nav className="mr-auto">
-            <Nav.Link href={!isLoggedIn ? "/signin" : "/dashboard"}>
-              {!isLoggedIn ? "" : "Dashboard"}
-            </Nav.Link>
-            <Nav.Link href={!isLoggedIn ? "/signin" : "/signout"}>
-              {!isLoggedIn ? "Login" : "Logout"}
-            </Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+    <div className="absolute flex w-full flex-row justify-between pt-2 pr-4 pl-4">
+      <NavigationMenu className="">
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className="w-60">
+              <span className="flex w-full flex-row">Abilities</span>
+            </NavigationMenuTrigger>
+            <NavigationMenuContent className="h-72 min-w-80 p-4">
+              <NavigationMenuLink>Link</NavigationMenuLink>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>Skills</NavigationMenuTrigger>
+            <NavigationMenuContent className="h-72 min-w-80 p-4">
+              <NavigationMenuLink>Link</NavigationMenuLink>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
+      <NavigationMenuLogin />
+    </div>
   );
 };
 

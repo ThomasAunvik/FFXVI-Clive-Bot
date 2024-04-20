@@ -1,17 +1,17 @@
-import { Formik, FormikHelpers } from "formik";
-import { ICharacterVariant } from "../models/characters/CharacterVariant";
+import axios, { type AxiosProgressEvent } from "axios";
+import { Formik, type FormikHelpers } from "formik";
+import _, { isNull } from "lodash";
+import { useRef, useState } from "react";
 import { Button, ButtonGroup, Collapse, Form, Spinner } from "react-bootstrap";
+import type { ICharacter } from "../../lib/models/characters/CharacterModel";
+import type { ICharacterVariant } from "../../lib/models/characters/CharacterVariant";
+import { replaceCDN } from "../constants";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import { useRef, useState } from "react";
-import axios, { AxiosProgressEvent } from "axios";
 import { UploadProgress } from "../upload/UploadProgress";
-import { replaceCDN } from "../constants";
-import { ICharacter } from "../models/characters/CharacterModel";
-import _, { isNull } from "lodash";
 
 interface CharacterVariantFormProps {
   character: ICharacter;
@@ -37,7 +37,7 @@ export const CharacterVariantForm = (props: CharacterVariantFormProps) => {
 
   const submitForm = async (
     values: ICharacterVariant & FormikProps,
-    actions: FormikHelpers<FormikFormProps>
+    actions: FormikHelpers<FormikFormProps>,
   ) => {
     const { previewFile, ...newVariant } = values;
 
@@ -45,7 +45,7 @@ export const CharacterVariantForm = (props: CharacterVariantFormProps) => {
     if (variant == null) {
       const res = await axios.post(
         `/api/character/${character.id}/variant`,
-        newVariant
+        newVariant,
       );
       if (res.status != 200) {
         setError({
@@ -56,14 +56,14 @@ export const CharacterVariantForm = (props: CharacterVariantFormProps) => {
         return null;
       }
 
-      let newVariantData = res.data as ICharacterVariant;
+      const newVariantData = res.data as ICharacterVariant;
       variantId = newVariantData.id;
       onSubmit(newVariantData);
     } else {
       if (!_.isEqual(newVariant, variant)) {
         const res = await axios.put(
           `/api/character/${character.id}/variant/${variant.id}`,
-          newVariant
+          newVariant,
         );
         if (res.status != 200) {
           setError({
@@ -74,7 +74,7 @@ export const CharacterVariantForm = (props: CharacterVariantFormProps) => {
           return null;
         }
 
-        let newVariantData = res.data as ICharacterVariant;
+        const newVariantData = res.data as ICharacterVariant;
         onSubmit(newVariantData);
       }
     }
@@ -90,7 +90,7 @@ export const CharacterVariantForm = (props: CharacterVariantFormProps) => {
             setPreviewFileProgress({ ...prog });
           },
           signal: cancelUploads.current.signal,
-        }
+        },
       );
 
       if (res.status != 200) {
@@ -191,7 +191,7 @@ export const CharacterVariantForm = (props: CharacterVariantFormProps) => {
               onChange={(event) => {
                 setFieldValue(
                   "previewFile",
-                  (event.currentTarget as any).files[0]
+                  (event.currentTarget as any).files[0],
                 );
               }}
               onBlur={handleBlur}

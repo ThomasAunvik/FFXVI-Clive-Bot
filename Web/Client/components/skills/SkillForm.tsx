@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosProgressEvent, CancelToken } from "axios";
-import { Formik, FormikHelpers } from "formik";
+import axios, { AxiosError, type AxiosProgressEvent, CancelToken } from "axios";
+import { Formik, type FormikHelpers } from "formik";
 import _, { isNull } from "lodash";
 import { useRef, useState } from "react";
 import {
@@ -11,19 +11,19 @@ import {
   Row,
   Spinner,
 } from "react-bootstrap";
+import {
+  type ISkill,
+  SkillCategory,
+  SkillSummon,
+  skillCategoryList,
+  summonList,
+} from "../../lib/models/skill/SkillModel";
 import { replaceCDN } from "../constants";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import {
-  ISkill,
-  SkillCategory,
-  skillCategoryList,
-  SkillSummon,
-  summonList,
-} from "../models/skill/SkillModel";
 import { UploadProgress } from "../upload/UploadProgress";
 
 export interface ISkillFormProps {
@@ -53,7 +53,7 @@ export const SkillForm = (props: ISkillFormProps) => {
       costBuy: 0,
       costUpgrade: 0,
       costMaster: 0,
-    }
+    },
   );
 
   const [error, setError] = useState<ErrorModalInfo | null>(null);
@@ -66,7 +66,7 @@ export const SkillForm = (props: ISkillFormProps) => {
 
   const submitForm = async (
     values: ISkill & FormikProps,
-    actions: FormikHelpers<FormikFormProps>
+    actions: FormikHelpers<FormikFormProps>,
   ) => {
     const { iconFile, previewFile, ...newSkill } = values;
 
@@ -113,7 +113,7 @@ export const SkillForm = (props: ISkillFormProps) => {
             setIconFileProgress({ ...prog });
           },
           signal: cancelUploads.current.signal,
-        }
+        },
       );
 
       if (res.status != 200) {
@@ -137,7 +137,7 @@ export const SkillForm = (props: ISkillFormProps) => {
             setPreviewFileProgress({ ...prog });
           },
           signal: cancelUploads.current.signal,
-        }
+        },
       );
 
       if (res.status != 200) {
@@ -214,7 +214,7 @@ export const SkillForm = (props: ISkillFormProps) => {
                 var value = event.currentTarget.value as unknown;
                 setFieldValue(
                   "category",
-                  SkillCategory[value as SkillCategory]
+                  SkillCategory[value as SkillCategory],
                 );
               }}
               onBlur={handleBlur}
@@ -347,7 +347,7 @@ export const SkillForm = (props: ISkillFormProps) => {
               onChange={(event) => {
                 setFieldValue(
                   "iconFile",
-                  (event.currentTarget as any).files[0]
+                  (event.currentTarget as any).files[0],
                 );
               }}
               onBlur={handleBlur}
@@ -382,7 +382,7 @@ export const SkillForm = (props: ISkillFormProps) => {
               onChange={(event) => {
                 setFieldValue(
                   "previewFile",
-                  (event.currentTarget as any).files[0]
+                  (event.currentTarget as any).files[0],
                 );
               }}
               onBlur={handleBlur}

@@ -5,12 +5,12 @@ import { Formik } from "formik";
 import { isUndefined } from "lodash";
 import { useState } from "react";
 import { Button, ButtonGroup, Col, Form, Row, Spinner } from "react-bootstrap";
+import type { ISkillLanguage } from "../../lib/models/skill/SkillLanguageModel";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import { ISkillLanguage } from "../models/skill/SkillLanguageModel";
 
 export interface ISkillLanguageFormProps {
   skillId: string;
@@ -29,7 +29,7 @@ export const SkillLanguageForm = (props: ISkillLanguageFormProps) => {
         locale: "",
         name: "New Skill Name",
         description: "New Skill Description",
-      } as ISkillLanguage)
+      } as ISkillLanguage),
   );
 
   const [error, setError] = useState<ErrorModalInfo | null>(null);
@@ -42,7 +42,7 @@ export const SkillLanguageForm = (props: ISkillLanguageFormProps) => {
         try {
           var res = await axios.post(
             `/api/skill/${skillId}/languages/${values.locale}`,
-            values
+            values,
           );
           if (res.status == 200) {
             var data = res.data as ISkillLanguage[];

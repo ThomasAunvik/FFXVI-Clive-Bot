@@ -1,7 +1,7 @@
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Accordion,
   Button,
@@ -14,12 +14,12 @@ import {
   Row,
   Spinner,
 } from "react-bootstrap";
+import type { ISkillLanguage } from "../../lib/models/skill/SkillLanguageModel";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import { ISkillLanguage } from "../models/skill/SkillLanguageModel";
 import { SkillLanguageForm } from "./SkillLanguageForm";
 
 export interface ISkillLanguageListProps {
@@ -107,7 +107,7 @@ export const SkillLanguageList = (props: ISkillLanguageListProps) => {
                         onDelete={async () => {
                           try {
                             var res = await axios.delete(
-                              `/api/skill/${skillId}/languages/${l.locale}`
+                              `/api/skill/${skillId}/languages/${l.locale}`,
                             );
                             if (res.status == 200) {
                               setLanguages(res.data as ISkillLanguage[]);

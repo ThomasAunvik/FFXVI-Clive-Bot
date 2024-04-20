@@ -28,7 +28,6 @@ Contact Information:
 If there is any other questions, you can send a message at:
 
 Name: Thomas Aunvik
-Phone: +47 41 47 25 56
 Email: contact@thaun.dev
 Github: https://github.com/ThomasAunvik
 

@@ -1,12 +1,16 @@
 import axios from "axios";
+import Image from "next/image";
 import { useState } from "react";
 import { Accordion, Col, ListGroup, Row, Spinner } from "react-bootstrap";
-import { ISkill, SkillSummon, summonList } from "../models/skill/SkillModel";
-import Image from "next/image";
+import {
+  type ISkill,
+  SkillSummon,
+  summonList,
+} from "../../lib/models/skill/SkillModel";
 import { replaceCDN } from "../constants";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
 

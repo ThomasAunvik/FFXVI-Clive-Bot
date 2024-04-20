@@ -4,29 +4,29 @@ import {
   Accordion,
   Button,
   ButtonGroup,
-  ListGroup,
   Col,
   Collapse,
-  ListGroupItem,
   Form,
+  ListGroup,
+  ListGroupItem,
 } from "react-bootstrap";
+import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import { IModerator } from "../models/moderator/ModeratorModel";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPencil,
   faPlus,
   faSave,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useIsMounted from "../misc/useIsMounted";
-import { ModeratorSingleForm, toSentence } from "./ModeratorSingleForm";
 import { ModeratorListForm } from "./ModeratorListForm";
+import { ModeratorSingleForm, toSentence } from "./ModeratorSingleForm";
 
 export const ModeratorList = () => {
   const isMounted = useIsMounted();

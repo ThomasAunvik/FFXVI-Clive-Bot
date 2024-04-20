@@ -1,6 +1,6 @@
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "@/components/errors/ErrorHandler";
 import axios from "axios";
@@ -15,7 +15,7 @@ import {
   ListGroupItem,
   Row,
 } from "react-bootstrap";
-import { IModerator } from "../models/moderator/ModeratorModel";
+import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
 
 export interface IModeratorSingleFormProps {
   onSuccess: (moderators: IModerator[]) => void;
@@ -162,8 +162,8 @@ export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
 };
 
 export const toSentence = (header: string) => {
-  let newHeader: string[] = [];
-  let chars = Array.from(header);
+  const newHeader: string[] = [];
+  const chars = Array.from(header);
   chars.forEach((char: string) => {
     if (char.toUpperCase() && char != char.toLowerCase()) {
       newHeader.push(" ");

@@ -1,16 +1,16 @@
-import axios, { AxiosError, AxiosProgressEvent, CancelToken } from "axios";
-import { Formik, FormikHelpers } from "formik";
+import axios, { AxiosError, type AxiosProgressEvent, CancelToken } from "axios";
+import { Formik, type FormikHelpers } from "formik";
 import _, { isNull } from "lodash";
 import { useRef, useState } from "react";
 import { Button, ButtonGroup, Collapse, Form, Spinner } from "react-bootstrap";
+import type { ICharacter } from "../../lib/models/characters/CharacterModel";
+import type { ISkill } from "../../lib/models/skill/SkillModel";
 import { replaceCDN } from "../constants";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import { ICharacter } from "../models/characters/CharacterModel";
-import { ISkill } from "../models/skill/SkillModel";
 import { UploadProgress } from "../upload/UploadProgress";
 
 export interface ICharacterFormProps {
@@ -30,7 +30,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
     character ?? {
       id: 0,
       name: "",
-    }
+    },
   );
 
   const [error, setError] = useState<ErrorModalInfo | null>(null);
@@ -41,7 +41,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
 
   const submitForm = async (
     values: ICharacter & FormikProps,
-    actions: FormikHelpers<FormikFormProps>
+    actions: FormikHelpers<FormikFormProps>,
   ) => {
     const { previewFile, ...newCharacter } = values;
 
@@ -57,14 +57,14 @@ export const CharacterForm = (props: ICharacterFormProps) => {
         return null;
       }
 
-      let newInitialCharacter = res.data as ICharacter;
+      const newInitialCharacter = res.data as ICharacter;
       characterId = newInitialCharacter.id;
       setInitialCharacter(newInitialCharacter);
     } else {
       if (!_.isEqual(newCharacter, initialCharacter)) {
         const res = await axios.put(
           "/api/character/" + character.id,
-          newCharacter
+          newCharacter,
         );
         if (res.status != 200) {
           setError({
@@ -75,7 +75,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
           return null;
         }
 
-        let newInitialCharacter = res.data as ICharacter;
+        const newInitialCharacter = res.data as ICharacter;
         setInitialCharacter(newInitialCharacter);
       }
     }
@@ -91,7 +91,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
             setPreviewFileProgress({ ...prog });
           },
           signal: cancelUploads.current.signal,
-        }
+        },
       );
 
       if (res.status != 200) {
@@ -158,7 +158,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
               onChange={(event) => {
                 setFieldValue(
                   "previewFile",
-                  (event.currentTarget as any).files[0]
+                  (event.currentTarget as any).files[0],
                 );
               }}
               onBlur={handleBlur}

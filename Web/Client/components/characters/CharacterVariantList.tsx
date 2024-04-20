@@ -1,3 +1,6 @@
+import { faAdd } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
 import {
   Accordion,
   Button,
@@ -7,10 +10,7 @@ import {
   Container,
   Row,
 } from "react-bootstrap";
-import { ICharacter } from "../models/characters/CharacterModel";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAdd } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import type { ICharacter } from "../../lib/models/characters/CharacterModel";
 import { CharacterVariantForm } from "./CharacterVariantForm";
 
 export interface ICharacterVariantListProps {

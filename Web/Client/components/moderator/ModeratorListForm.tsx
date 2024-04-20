@@ -17,12 +17,12 @@ import {
   ListGroupItem,
   Spinner,
 } from "react-bootstrap";
+import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
 import {
   ErrorModal,
-  ErrorModalInfo,
+  type ErrorModalInfo,
   getErrorInfo,
 } from "../errors/ErrorHandler";
-import { IModerator } from "../models/moderator/ModeratorModel";
 import { toSentence } from "./ModeratorSingleForm";
 
 export interface IModeratorListFormProps {
