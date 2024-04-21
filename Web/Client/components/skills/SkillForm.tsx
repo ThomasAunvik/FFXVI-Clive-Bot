@@ -3,6 +3,7 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import axios, { type AxiosProgressEvent } from "axios";
 import _, { isNull } from "lodash";
 import { LoaderCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -13,7 +14,6 @@ import {
   skillCategoryList,
   summonList,
 } from "../../lib/models/skill/SkillModel";
-import { replaceCDN } from "../constants";
 import { toastError } from "../errors/ErrorHandler";
 import { Button } from "../ui/button";
 import { Collapsible, CollapsibleContent } from "../ui/collapsible";
@@ -44,6 +44,8 @@ export interface ISkillFormProps {
 
 export const SkillForm = (props: ISkillFormProps) => {
   const { skill } = props;
+
+  const router = useRouter();
 
   const [initialSkill, setInitialSkill] = useState<ISkill>(
     skill ?? {
@@ -156,7 +158,7 @@ export const SkillForm = (props: ISkillFormProps) => {
     }
 
     if ((isNull(skill) || skill === undefined) && !isNull(skillId)) {
-      document.location.replace(`/dashboard/skills/${skillId}`);
+      router.replace(`/dashboard/skills/${skillId}`);
     }
 
     return;

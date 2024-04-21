@@ -23,7 +23,7 @@ export const SkillOtherList = () => {
 
     try {
       const params = new URLSearchParams({
-        summon: SkillSummon[SkillSummon.None].toString(),
+        summon: SkillSummon.None.toString(),
       });
 
       const res = await axios.get(`/api/skill?${params.toString()}`);

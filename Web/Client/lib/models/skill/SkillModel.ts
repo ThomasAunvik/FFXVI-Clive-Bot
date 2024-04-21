@@ -22,7 +22,6 @@ export enum SkillSummon {
 
 export const summonList: SkillSummon[] = Object.values(SkillSummon)
   .filter((val) => Number.isNaN(Number(val)))
-  .filter((val) => val !== SkillSummon[SkillSummon.None])
   .map((val) => val as SkillSummon);
 
 export const skillCategoryList: SkillCategory[] = Object.values(SkillCategory)
