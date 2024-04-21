@@ -1,7 +1,6 @@
-import axios from "axios";
-import { Form, ProgressBar, Row } from "react-bootstrap";
+import type { AxiosProgressEvent } from "axios";
 import { humanFileSize, millisecondsToStr } from "../misc/fileSize";
-import { AxiosProgressEvent } from "axios";
+import { Progress } from "../ui/progress";
 
 export interface IUploadProgressProps {
   progress: AxiosProgressEvent | null;
@@ -12,17 +11,17 @@ export const UploadProgress = (props: IUploadProgressProps) => {
 
   return (
     <div className="mb-2">
-      <ProgressBar
-        now={progress?.progress ?? 0}
-        label={`${progress?.progress ?? 0}%`}
+      <Progress
+        value={progress?.progress ?? 0}
+        title={`${progress?.progress ?? 0}%`}
       />
-      <Row>
-        <Form.Text style={{ textAlign: "center" }}>
+      <div>
+        <span className="text-center">
           {humanFileSize(progress?.bytes ?? 0)} /{" "}
           {humanFileSize(progress?.total ?? 0)} -{" "}
           {millisecondsToStr((progress?.estimated ?? 0) * 1000)}
-        </Form.Text>
-      </Row>
+        </span>
+      </div>
     </div>
   );
 };

@@ -1,83 +1,87 @@
+"use client";
 import axios from "axios";
+import { LoaderCircle } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
-import { Accordion, Col, ListGroup, Row, Spinner } from "react-bootstrap";
-import {
-  type ISkill,
-  SkillSummon,
-  summonList,
-} from "../../lib/models/skill/SkillModel";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { type ISkill, SkillSummon } from "../../lib/models/skill/SkillModel";
 import { replaceCDN } from "../constants";
+import { toastError } from "../errors/ErrorHandler";
 import {
-  ErrorModal,
-  type ErrorModalInfo,
-  getErrorInfo,
-} from "../errors/ErrorHandler";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
+import { Skeleton } from "../ui/skeleton";
 
 export const SkillOtherList = () => {
-  const [skills, setSkills] = useState<ISkill[]>([]);
-
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
+  const [skills, setSkills] = useState<ISkill[] | null>(null);
 
   const fetchOtherSkills = async () => {
+    if (skills) return;
+
     try {
       const params = new URLSearchParams({
         summon: SkillSummon[SkillSummon.None].toString(),
       });
 
-      const res = await axios.get("/api/skill?" + params.toString());
-      if (res.status == 200) {
+      const res = await axios.get(`/api/skill?${params.toString()}`);
+      if (res.status === 200) {
         const newSkills = res.data as ISkill[];
         setSkills(newSkills);
       }
-    } catch (err: any) {
-      setError(getErrorInfo(err));
+    } catch (err) {
+      toastError(err);
     }
   };
 
   return (
     <div>
-      <Accordion>
-        <Accordion.Item eventKey={"0"}>
-          <Accordion.Header
+      <Accordion type="single" collapsible>
+        <AccordionItem value="otherskills">
+          <AccordionTrigger
             onClick={async () => {
               await fetchOtherSkills();
             }}
           >
-            {SkillSummon.None}
-          </Accordion.Header>
-          <Accordion.Body>
-            {skills == undefined ? (
-              <Spinner animation="border" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
+            General Skills
+          </AccordionTrigger>
+          <AccordionContent>
+            {!skills ? (
+              <div>
+                <LoaderCircle className="animate-spin" />
+                <span className="sr-only">Loading...</span>
+              </div>
             ) : (
-              <ListGroup variant="flush">
+              <ul className="flex flex-col gap-4">
                 {skills.map((s) => {
                   return (
-                    <ListGroup.Item
-                      key={"skill-" + s.id}
-                      action
-                      href={"/dashboard/skills/" + s.id}
-                    >
-                      <Image
-                        alt=""
-                        src={replaceCDN(s.iconUrl ?? "")}
-                        width={30}
-                        height={30}
-                      />
-                      <span style={{ marginLeft: "1em" }}>{s.name}</span>
-                    </ListGroup.Item>
+                    <li key={`skill-${s.id}`}>
+                      <Link
+                        href={`/dashboard/skills/${s.id}`}
+                        className="flex flex-row"
+                      >
+                        {s.iconUrl ? (
+                          <Image
+                            alt={`Skill ${s.name} Image`}
+                            src={replaceCDN(s.iconUrl)}
+                            width={40}
+                            height={40}
+                          />
+                        ) : (
+                          <Skeleton className="h-10 w-10" />
+                        )}
+                        <span className="mt-2 ml-4 text-base">{s.name}</span>
+                      </Link>
+                    </li>
                   );
                 })}
-              </ListGroup>
+              </ul>
             )}
-          </Accordion.Body>
-        </Accordion.Item>
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
-      {error == null ? null : (
-        <ErrorModal error={error} onHide={() => setError(null)} />
-      )}
     </div>
   );
 };

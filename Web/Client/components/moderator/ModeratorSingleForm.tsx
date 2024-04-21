@@ -3,7 +3,6 @@ import { valibotResolver } from "@hookform/resolvers/valibot";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as v from "valibot";
 import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
 import { toastError } from "../errors/ErrorHandler";
 import { Button } from "../ui/button";
@@ -17,6 +16,13 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { type ModeratorFormData, moderatorFormSchema } from "./validate";
 
 export interface IModeratorSingleFormProps {
@@ -57,7 +63,10 @@ export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-2"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -78,9 +87,20 @@ export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
           render={({ field }) => (
             <FormItem className="pr-2 pl-2">
               <FormLabel>Connection Source</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Source" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {["Discord"].map((l) => (
+                    <SelectItem value={l} key={`source-${l}`}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -100,7 +120,7 @@ export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
           )}
         />
 
-        <ul className="mt-4 flex flex-col gap-1 pr-2 pl-2">
+        <ul className="mt-2 flex flex-col gap-1 pr-2 pl-2">
           {Object.keys(form.getValues().permissions).map((key, i) => {
             return (
               <FormField
@@ -129,7 +149,7 @@ export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
           })}
         </ul>
 
-        <div className="mt-4 flex flex-row gap-2">
+        <div className="mt-2 flex flex-row gap-2">
           <Button
             type="submit"
             disabled={

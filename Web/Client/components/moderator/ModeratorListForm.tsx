@@ -1,6 +1,4 @@
 "use client";
-import { faPencil, faSave, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import axios from "axios";
 import { LoaderCircle, PencilIcon, SaveIcon, TrashIcon } from "lucide-react";
@@ -8,16 +6,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
-import {
-  ErrorModal,
-  type ErrorModalInfo,
-  getErrorInfo,
-  toastError,
-} from "../errors/ErrorHandler";
+import { toastError } from "../errors/ErrorHandler";
 import { Accordion, AccordionContent, AccordionItem } from "../ui/accordion";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import { Collapsible, CollapsibleContent } from "../ui/collapsible";
 import {
   Form,
   FormControl,
@@ -27,6 +19,13 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { toSentence } from "./ModeratorSingleForm";
 import { type ModeratorFormData, moderatorFormSchema } from "./validate";
 
@@ -67,8 +66,11 @@ export const ModeratorListForm = (props: IModeratorListFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="mb-3 flex flex-row justify-end gap-2">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-2"
+      >
+        <div className="flex flex-row justify-end gap-2">
           <Button type="button" onClick={onDelete}>
             <TrashIcon />
           </Button>
@@ -117,9 +119,23 @@ export const ModeratorListForm = (props: IModeratorListFormProps) => {
                 render={({ field }) => (
                   <FormItem className="pr-2 pl-2">
                     <FormLabel>Connection Source</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a Language" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {["Discord"].map((l) => (
+                          <SelectItem value={l} key={`source-${l}`}>
+                            {l}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -142,7 +158,7 @@ export const ModeratorListForm = (props: IModeratorListFormProps) => {
           </AccordionItem>
         </Accordion>
 
-        <ul className="mt-4 flex flex-col gap-1 pr-2 pl-2">
+        <ul className="mt-2 flex flex-col gap-1 pr-2 pl-2">
           {Object.keys(form.getValues().permissions).map((key, i) => {
             if (key === "id" || key === "moderator") return null;
 

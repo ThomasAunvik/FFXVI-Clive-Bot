@@ -1,4 +1,3 @@
-import DashboardNavBar from "@/components/DashboardNavBar";
 import useIsMounted from "@/components/misc/useIsMounted";
 import { SkillSummonList } from "@/components/skills/SkillSummonList";
 import { faAdd } from "@fortawesome/free-solid-svg-icons";

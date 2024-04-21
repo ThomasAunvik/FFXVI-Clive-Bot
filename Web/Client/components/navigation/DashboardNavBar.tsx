@@ -142,7 +142,7 @@ const DashboardNavBar = (props: DashboardProps) => {
                   </div>
                 </label>
               </div>
-              <a href="https://flowbite.com" className="flex ms-2 md:me-24">
+              <a href="https://flowbite.com" className="ms-2 flex md:me-24">
                 <span className="self-center whitespace-nowrap font-semibold text-xl dark:text-white sm:text-2xl">
                   FFXVI Clive Bot
                 </span>
