@@ -1,32 +1,27 @@
+"use client";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import {
-  Accordion,
-  Button,
-  ButtonGroup,
-  Col,
-  Collapse,
-  Form,
-  ListGroup,
-  ListGroupItem,
-} from "react-bootstrap";
 import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
 import {
   ErrorModal,
   type ErrorModalInfo,
   getErrorInfo,
+  toastError,
 } from "../errors/ErrorHandler";
 
-import {
-  faPencil,
-  faPlus,
-  faSave,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PlusIcon } from "lucide-react";
 import useIsMounted from "../misc/useIsMounted";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
+import { Button } from "../ui/button";
 import { ModeratorListForm } from "./ModeratorListForm";
-import { ModeratorSingleForm, toSentence } from "./ModeratorSingleForm";
+import { ModeratorSingleForm } from "./ModeratorSingleForm";
 
 export const ModeratorList = () => {
   const isMounted = useIsMounted();
@@ -40,14 +35,14 @@ export const ModeratorList = () => {
   const fetchModerator = useCallback(async () => {
     try {
       const res = await axios.get("/api/moderator");
-      if (res.status == 200) {
+      if (res.status === 200) {
         const newModerators = res.data as IModerator[];
-        if (isMounted()) {
+        if (isMounted) {
           setModerators(newModerators);
         }
       }
-    } catch (err: any) {
-      setError(getErrorInfo(err));
+    } catch (err) {
+      toastError(err);
     }
   }, [isMounted]);
 
@@ -57,44 +52,37 @@ export const ModeratorList = () => {
 
   return (
     <div className="mb-4">
-      <ButtonGroup className="mb-4">
-        <Button
-          onClick={() => {
-            setOpenAddNew(true);
-          }}
-        >
-          <FontAwesomeIcon icon={faPlus} width={20} />
-        </Button>
-      </ButtonGroup>
-      <Collapse in={openAddNew}>
-        <div>
-          <ModeratorSingleForm
-            onSuccess={(newMods) => {
-              setOpenAddNew(false);
-              setModerators(newMods);
-            }}
-            close={() => setOpenAddNew(false)}
-          />
-        </div>
-      </Collapse>
-
-      <Accordion>
+      <Accordion type="multiple" className="md:max-w-[350px]">
+        <AccordionItem value="create-form">
+          <AccordionTrigger>
+            <PlusIcon />
+            Add Moderator
+          </AccordionTrigger>
+          <AccordionContent>
+            <ModeratorSingleForm
+              onSuccess={(newMods) => {
+                setModerators(newMods);
+              }}
+              close={() => setOpenAddNew(false)}
+            />
+          </AccordionContent>
+        </AccordionItem>
         {moderators.map((s, i) => {
           return (
-            <Accordion.Item eventKey={i.toString()} key={"moderator-" + s.id}>
-              <Accordion.Header>
+            <AccordionItem value={s.id.toString()} key={`moderator-${s.id}`}>
+              <AccordionTrigger>
                 {s.name} ({s.connectionSource})
-              </Accordion.Header>
-              <Accordion.Body>
+              </AccordionTrigger>
+              <AccordionContent>
                 <ModeratorListForm
                   moderator={s}
                   onDelete={async () => {
                     try {
-                      var res = await axios.delete("/api/moderator/" + s.id);
-                      if (res.status == 200) {
+                      const res = await axios.delete(`/api/moderator/${s.id}`);
+                      if (res.status === 200) {
                         setModerators(res.data as IModerator[]);
                       }
-                    } catch (err: any) {
+                    } catch (err) {
                       setError(getErrorInfo(err));
                     }
                   }}
@@ -102,14 +90,11 @@ export const ModeratorList = () => {
                     setModerators(mods);
                   }}
                 />
-              </Accordion.Body>
-            </Accordion.Item>
+              </AccordionContent>
+            </AccordionItem>
           );
         })}
       </Accordion>
-      {error == null ? null : (
-        <ErrorModal error={error} onHide={() => setError(null)} />
-      )}
     </div>
   );
 };

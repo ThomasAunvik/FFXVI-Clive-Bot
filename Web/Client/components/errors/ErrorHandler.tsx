@@ -1,9 +1,11 @@
 import { AxiosError } from "axios";
 import { Button, Modal } from "react-bootstrap";
+import { toast } from "sonner";
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const getErrorInfo = (error: any): ErrorModalInfo => {
   if (error instanceof AxiosError) {
-    var errorMessage = error.response?.data?.message;
+    let errorMessage = error.response?.data?.message;
     if (errorMessage == null) {
       errorMessage = error.message;
     }
@@ -20,6 +22,22 @@ export const getErrorInfo = (error: any): ErrorModalInfo => {
     statusMessage: "Unknown Error",
     message: error.toString(),
   };
+};
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export const toastError = (error: any) => {
+  let errorMessage = "Unknown Error";
+  if (error instanceof AxiosError) {
+    errorMessage = error.response?.data?.message;
+    if (errorMessage == null) {
+      errorMessage = error.message;
+    }
+
+    const statusCode = error.response?.status ?? 0;
+    errorMessage = `Request Error: (${statusCode}) ${errorMessage}`;
+  }
+
+  toast(errorMessage);
 };
 
 export interface ErrorModalInfo {

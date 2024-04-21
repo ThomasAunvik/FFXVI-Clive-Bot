@@ -1,29 +1,34 @@
-import {
-  faPencil,
-  faSave,
-  faSpinner,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+"use client";
+import { faPencil, faSave, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { valibotResolver } from "@hookform/resolvers/valibot";
 import axios from "axios";
-import { Formik } from "formik";
+import { LoaderCircle, PencilIcon, SaveIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
-import {
-  Button,
-  ButtonGroup,
-  Collapse,
-  Form,
-  ListGroup,
-  ListGroupItem,
-  Spinner,
-} from "react-bootstrap";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
 import {
   ErrorModal,
   type ErrorModalInfo,
   getErrorInfo,
+  toastError,
 } from "../errors/ErrorHandler";
+import { Accordion, AccordionContent, AccordionItem } from "../ui/accordion";
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
+import { Collapsible, CollapsibleContent } from "../ui/collapsible";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
 import { toSentence } from "./ModeratorSingleForm";
+import { type ModeratorFormData, moderatorFormSchema } from "./validate";
 
 export interface IModeratorListFormProps {
   moderator: IModerator;
@@ -34,135 +39,138 @@ export interface IModeratorListFormProps {
 export const ModeratorListForm = (props: IModeratorListFormProps) => {
   const { moderator, onDelete, onUpdate } = props;
 
-  const [collapse, setCollapse] = useState(false);
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
+  const [collapse, setCollapse] = useState(true);
+
+  const form = useForm<ModeratorFormData>({
+    resolver: valibotResolver(moderatorFormSchema),
+    defaultValues: {
+      name: moderator.name,
+      connectionId: moderator.connectionId,
+      connectionSource: moderator.connectionSource,
+      permissions: moderator.permissions,
+    },
+  });
+
+  const onSubmit = async (values: ModeratorFormData) => {
+    console.log("Submitting: ", values);
+    try {
+      const res = await axios.put(`/api/moderator/${moderator.id}`, values);
+      if (res.status === 200) {
+        const data = res.data as IModerator[];
+        onUpdate(data);
+        toast("Successfully updated a moderator");
+      }
+    } catch (err) {
+      toastError(err);
+    }
+  };
 
   return (
-    <Formik<IModerator>
-      initialValues={moderator}
-      enableReinitialize
-      onSubmit={async (values, action) => {
-        try {
-          var res = await axios.put("/api/moderator/" + moderator.id, values);
-          if (res.status == 200) {
-            var data = res.data as IModerator[];
-            onUpdate(data);
-          }
-        } catch (err: any) {
-          setError(getErrorInfo(err));
-        }
-        action.setSubmitting(false);
-      }}
-    >
-      {({
-        values,
-        dirty,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        handleReset,
-        isSubmitting,
-      }) => (
-        <Form onSubmit={handleSubmit} onReset={handleReset}>
-          <ButtonGroup className="mb-3">
-            <Button variant="danger" onClick={onDelete}>
-              <FontAwesomeIcon icon={faTrash} width={20} />
-            </Button>
-            <Button variant="secondary" onClick={() => setCollapse(!collapse)}>
-              <FontAwesomeIcon
-                icon={faPencil}
-                width={20}
-                style={{ display: "block" }}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="mb-3 flex flex-row justify-end gap-2">
+          <Button type="button" onClick={onDelete}>
+            <TrashIcon />
+          </Button>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => setCollapse(!collapse)}
+          >
+            <PencilIcon />
+          </Button>
+          <Button
+            type="submit"
+            disabled={!form.formState.isDirty || form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <div>
+                <LoaderCircle className="animate-spin" />
+                <span className="sr-only">Loading...</span>
+              </div>
+            ) : (
+              <SaveIcon />
+            )}
+          </Button>
+        </div>
+
+        <Accordion type="single" value={collapse ? "0" : "namefields"}>
+          <AccordionItem value="namefields" className="border-none">
+            <AccordionContent>
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="pr-2 pl-2">
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </Button>
-            <Button
-              variant="success"
-              type="submit"
-              disabled={!dirty || isSubmitting}
-            >
-              {isSubmitting ? (
-                <div>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              ) : (
-                <FontAwesomeIcon icon={faSave} width={20} />
-              )}
-            </Button>
-          </ButtonGroup>
 
-          <Collapse in={collapse}>
-            <div>
-              <Form.Group>
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  name="name"
-                  type="text"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.name}
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Connection Source</Form.Label>
-                <Form.Control
-                  as="select"
-                  name="connectionSource"
-                  defaultValue={values.connectionSource}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                >
-                  {["Discord"].map((s) => (
-                    <option value={s} key={"connectionsource-" + s}>
-                      {s}
-                    </option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Connection Id</Form.Label>
-                <Form.Control
-                  name="connectionId"
-                  type="text"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.connectionId}
-                />
-              </Form.Group>
-            </div>
-          </Collapse>
+              <FormField
+                control={form.control}
+                name="connectionSource"
+                render={({ field }) => (
+                  <FormItem className="pr-2 pl-2">
+                    <FormLabel>Connection Source</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <ListGroup variant="flush">
-            {Object.keys(values.permissions).map((key) => {
-              if (key == "id" || key == "moderator") return null;
-              const allowed = (values.permissions as any)[key] as boolean;
-              const objectKey = "permissions." + key;
-              return (
-                <ListGroupItem key={"permission-" + key}>
-                  <Form.Check
-                    name={objectKey}
-                    label={toSentence(key)}
-                    type="checkbox"
-                    checked={allowed ?? false}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    size={20}
-                  />
-                </ListGroupItem>
-              );
-            })}
-          </ListGroup>
-          {error == null ? null : (
-            <ErrorModal error={error} onHide={() => setError(null)} />
-          )}
-        </Form>
-      )}
-    </Formik>
+              <FormField
+                control={form.control}
+                name="connectionId"
+                render={({ field }) => (
+                  <FormItem className="pr-2 pl-2">
+                    <FormLabel>Connection Id</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        <ul className="mt-4 flex flex-col gap-1 pr-2 pl-2">
+          {Object.keys(form.getValues().permissions).map((key, i) => {
+            if (key === "id" || key === "moderator") return null;
+
+            return (
+              <FormField
+                key={`permission-${key}`}
+                control={form.control}
+                // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+                {...form.register(`permissions.${key}` as any)}
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal text-sm">
+                      {toSentence(key)}
+                    </FormLabel>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            );
+          })}
+        </ul>
+      </form>
+    </Form>
   );
 };

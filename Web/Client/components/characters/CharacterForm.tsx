@@ -48,7 +48,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
     let characterId = character?.id ?? null;
     if (character == null) {
       const res = await axios.post("/api/character/", newCharacter);
-      if (res.status != 200) {
+      if (res.status !== 200) {
         setError({
           statusCode: res.status,
           statusMessage: res.statusText,
@@ -63,10 +63,10 @@ export const CharacterForm = (props: ICharacterFormProps) => {
     } else {
       if (!_.isEqual(newCharacter, initialCharacter)) {
         const res = await axios.put(
-          "/api/character/" + character.id,
+          `/api/character/${character.id}`,
           newCharacter,
         );
-        if (res.status != 200) {
+        if (res.status !== 200) {
           setError({
             statusCode: res.status,
             statusMessage: res.statusText,
@@ -84,7 +84,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
       const previewForm = new FormData();
       previewForm.append("previewFile", previewFile);
       const res = await axios.postForm(
-        "/api/character/" + characterId + "/images/preview",
+        `/api/character/${characterId}/images/preview`,
         previewForm,
         {
           onDownloadProgress: (prog) => {
@@ -94,7 +94,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
         },
       );
 
-      if (res.status != 200) {
+      if (res.status !== 200) {
         setError({
           statusCode: res.status,
           statusMessage: res.statusText,
@@ -108,7 +108,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
       (isNull(character) || character === undefined) &&
       !isNull(characterId)
     ) {
-      document.location.replace("/dashboard/characters/" + characterId);
+      document.location.replace(`/dashboard/characters/${characterId}`);
     }
 
     return;
@@ -121,7 +121,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
       onSubmit={async (values, actions) => {
         try {
           await submitForm(values, actions);
-        } catch (err: any) {
+        } catch (err) {
           setError(getErrorInfo(err));
         }
 
@@ -158,6 +158,7 @@ export const CharacterForm = (props: ICharacterFormProps) => {
               onChange={(event) => {
                 setFieldValue(
                   "previewFile",
+                  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
                   (event.currentTarget as any).files[0],
                 );
               }}

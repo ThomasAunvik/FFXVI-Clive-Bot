@@ -1,4 +1,4 @@
-import DashboardNavBar from "@/components/DashboardNavBar";
+import DashboardNavBar from "@/components/navigation/DashboardNavBar";
 
 interface LayoutProps {
   children: React.ReactNode;
