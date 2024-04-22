@@ -196,4 +196,4 @@ jobs:
           output_location: "" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
         env:
-          NEXT_PUBLIC_API_URL: https://api.xvibot.com
+          NEXT_PUBLIC_API_URL: ${{ vars.API_URL }}
