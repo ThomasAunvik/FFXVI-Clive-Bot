@@ -56,6 +56,8 @@ var discordClientSecret = discordLogin.GetValue<string>("ClientSecret") ?? "";
 var cookies = builder.Configuration.GetSection("Cookies");
 var cookieDomain = cookies.GetValue<string>("Domain");
 
+var frontendUrl = builder.Configuration.GetValue<string>("FrontendUrl");
+
 builder.Services.AddAuthentication(
         CookieAuthenticationDefaults.AuthenticationScheme
     )
@@ -64,6 +66,7 @@ builder.Services.AddAuthentication(
         options.AccessDeniedPath = "/error/accessdenied";
         options.ClientId = discordClientId;
         options.ClientSecret = discordClientSecret;
+        
     })
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, (options) =>
     {
@@ -76,6 +79,23 @@ builder.Services.AddAuthentication(
         {
             options.Cookie.Domain = cookieDomain;
         }
+        options.Events.OnSignedIn = (ctx) => {
+            if (string.IsNullOrEmpty(frontendUrl))
+            {
+                return Task.CompletedTask;
+            }
+            ctx.Response.Redirect(frontendUrl);
+            return Task.CompletedTask;
+        };
+
+        options.Events.OnSigningOut = (ctx) => {
+            if (string.IsNullOrEmpty(frontendUrl))
+            {
+                return Task.CompletedTask;
+            }
+            ctx.Response.Redirect(frontendUrl);
+            return Task.CompletedTask;
+        };
     });
     //.AddBearerToken();
 
