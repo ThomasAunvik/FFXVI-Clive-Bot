@@ -11,20 +11,19 @@ on:
 
 jobs:
   # BUILDS
-  buildbot:
+  build-bot:
     name: Build Bot
     runs-on: ubuntu-latest
     env:
       botdirectory: ./CliveBot
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.x'
-          include-prerelease: true
+          dotnet-version: '8.x'
 
       - name: Build with dotnet
         working-directory: ${{ env.botdirectory }}
@@ -32,28 +31,27 @@ jobs:
 
       - name: dotnet publish
         working-directory: ${{ env.botdirectory }}
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/clivebot
+        run: dotnet publish -c Release -o ./build/clivebot
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: clivebot
-          path: ${{env.DOTNET_ROOT}}/clivebot
+          path: ./build/clivebot
 
-  buildweb:
-    name: Build Web
+  build-backend-web:
+    name: Build Backend Web
     runs-on: ubuntu-latest
     env:
       webdirectory: ./Web
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.x'
-          include-prerelease: true
+          dotnet-version: '8.x'
 
       - name: Build with dotnet
         working-directory: ${{ env.webdirectory }}
@@ -61,30 +59,66 @@ jobs:
 
       - name: dotnet publish
         working-directory: ${{ env.webdirectory }}
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/web
+        run: dotnet publish -c Release -o ./build/web
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: webapp
-          path: ${{env.DOTNET_ROOT}}/web
+          name: web-backend
+          path: ./build/web
+
+  build-frontend-web:
+    name: Build Backend Web
+    runs-on: ubuntu-latest
+    environment: Production (Web)
+
+    env:
+        webdirectory: ./Web/Client
+        
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+
+      - name: Package Install
+        run: bun install
+
+      - name: Build Web Project
+        run: bun run build --cache-dir=.turbo
+        
+      - name: Test Project
+        run: bun run test --if-present
+
+      - name: Move Build Files
+        run: |
+          mv ./.next/static ./.next/standalone/apps/web/.next/
+          mv ./public ./.next/standalone/apps/web/
+
+      - name: Zip artifact for deployment
+        working-directory: ${{ env.webdirectory }}/.next/standalone
+        run: zip ../../release.zip ./ -r
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-frontend
+          path: ./release.zip
 
   # MIGRATIONS
   migrations:
     name: Database Migrations
     runs-on: ubuntu-latest
-    needs: [buildbot, buildweb]
+    needs: [build-bot, build-backend-web, build-frontend-web]
     env:
       dbdirectory: ./Database
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.x'
-          include-prerelease: true
+          dotnet-version: '8.x'
 
       - name: Set up .NET EF Core Tools
         run: dotnet tool install --global dotnet-ef
@@ -97,10 +131,10 @@ jobs:
 
 
   # DEPLOYMENT
-  deploybot:
+  deploy-bot:
     name: Deploy Bot
     runs-on: ubuntu-latest
-    needs: [buildbot, migrations]
+    needs: [build-bot, migrations]
     environment:
       name: 'Production (Bot)'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
@@ -120,10 +154,10 @@ jobs:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6B7928DA4B7E4D72942283AFBF82D918 }}
           package: .
 
-  deployweb:
-    name: Deploy Web
+  deploy-web-backend:
+    name: Deploy Web Backend
     runs-on: ubuntu-latest
-    needs: [buildweb, migrations]
+    needs: [build-backend-web, migrations]
     environment:
       name: 'Production (Web)'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
@@ -132,7 +166,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v2
         with:
-          name: webapp
+          name: web-backend
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -141,4 +175,27 @@ jobs:
           app-name: 'FFXVI-Clive-Bot-Web'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_963A587B3B4944D7B3B56A788FCE27C1 }}
+          package: .
+
+  deploy-web-frontend:
+    name: Deploy Web Frontend
+    runs-on: ubuntu-latest
+    needs: [build-backend-web, migrations]
+    environment:
+      name: 'Production (Web)'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: web-frontend
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'FFXVI-Clive-Bot-Web'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.DEPLOY_TOKEN }}
           package: .

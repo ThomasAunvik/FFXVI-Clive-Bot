@@ -8,7 +8,7 @@ import {
   NavigationMenuRight,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { getCurrentUser } from "@/lib/api/users";
+import { getCurrentUser } from "@/lib/api/client/users";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 

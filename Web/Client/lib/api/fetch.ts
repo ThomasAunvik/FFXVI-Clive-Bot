@@ -1,4 +1,10 @@
-import { NoAuthError } from "@/lib/errors";
+import { cookies } from "next/headers";
+import "server-only";
+
+const SERVER_API_URL = process.env.SERVER_API_URL;
+if (!SERVER_API_URL || SERVER_API_URL === "") {
+  throw new Error("SERVER_API_URL env is not set");
+}
 
 const LOGIN_COOKIE_NAME = ".AspNetCore.Cookies";
 
@@ -7,19 +13,14 @@ export const apiFetch = <T>(
   method: "GET" | "POST" | "PUT",
   body?: T,
 ) => {
-  const cookieValue = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${LOGIN_COOKIE_NAME}=`))
-    ?.split("=")[1];
+  const cook = cookies();
+  const cookieValue = cook.get(LOGIN_COOKIE_NAME);
+  const loginValue = cookieValue?.value;
 
-  if (!cookieValue) {
-    throw new NoAuthError("User not logged in.");
-  }
-
-  return fetch(path, {
+  return fetch(`${SERVER_API_URL}${path}`, {
     method: method,
     headers: {
-      Cookie: `${LOGIN_COOKIE_NAME}=${cookieValue}`,
+      ...(loginValue ? { Cookie: `${LOGIN_COOKIE_NAME}=${cookieValue}` } : {}),
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
@@ -28,7 +29,9 @@ export const apiFetch = <T>(
 
 export const apiGET = async <T>(path: string) => {
   const res = await apiFetch(path, "GET");
-  const data = await res.json();
+  const text = await res.text();
+  console.log(text);
+  const data = JSON.parse(text);
   return data as T;
 };
 

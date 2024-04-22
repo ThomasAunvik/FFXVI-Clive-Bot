@@ -1,6 +1,4 @@
-"use client";
 import { replaceCDN } from "@/components/constants";
-import { toastError } from "@/components/errors/ErrorHandler";
 import {
   Accordion,
   AccordionContent,
@@ -8,58 +6,27 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  type ISkill,
-  SkillSummon,
-  summonList,
-} from "@/lib/models/skill/SkillModel";
-import axios from "axios";
+import { type ISkill, summonList } from "@/lib/models/skill/SkillModel";
 import { LoaderCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
-export const SkillSummonList = () => {
-  const [allSkills, setSkills] = useState<
-    { summon: SkillSummon; skills: ISkill[] }[]
-  >([]);
+export interface SkillSummonListProps {
+  skills: ISkill[];
+}
 
-  const fetchSummonSkills = async (summon: SkillSummon) => {
-    try {
-      const skillIndex = allSkills.findIndex((s) => s.summon === summon);
-      if (skillIndex !== -1) return;
-
-      const params = new URLSearchParams({
-        summon: SkillSummon[summon].toString(),
-      });
-
-      const res = await axios.get(`/api/skill?${params.toString()}`);
-      if (res.status === 200) {
-        const newSkills = res.data as ISkill[];
-        setSkills((val) => {
-          return [...val, { summon: summon, skills: newSkills }];
-        });
-      }
-    } catch (err) {
-      toastError(err);
-    }
-  };
+export const SkillSummonList = (props: SkillSummonListProps) => {
+  const { skills } = props;
 
   return (
     <div>
       <Accordion type="multiple">
         {summonList.map((s, i) => {
-          const skills = allSkills.find((sk) => sk.summon === s);
+          const summonSkills = skills.filter((sk) => sk.summon === s);
 
           return (
             <AccordionItem value={i.toString()} key={`summon-${s.toString()}`}>
-              <AccordionTrigger
-                onClick={async () => {
-                  await fetchSummonSkills(s);
-                }}
-              >
-                {s}
-              </AccordionTrigger>
+              <AccordionTrigger>{s}</AccordionTrigger>
               <AccordionContent>
                 {skills === undefined ? (
                   <div>
@@ -68,7 +35,7 @@ export const SkillSummonList = () => {
                   </div>
                 ) : (
                   <ul className="flex flex-col gap-4">
-                    {skills.skills.map((s) => {
+                    {summonSkills.map((s) => {
                       return (
                         <li key={`skill-${s.id}`}>
                           <Link
