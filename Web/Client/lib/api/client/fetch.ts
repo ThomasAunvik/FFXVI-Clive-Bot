@@ -1,6 +1,5 @@
+import { NEXT_PUBLIC_API_URL } from "@/lib/env";
 import { NoAuthError } from "@/lib/errors";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const LOGIN_COOKIE_NAME = ".AspNetCore.Cookies";
 
@@ -18,7 +17,7 @@ export const apiClientFetch = <T>(
 		throw new NoAuthError("User not logged in.");
 	}
 
-	return fetch(`${API_URL}${path}`, {
+	return fetch(`${NEXT_PUBLIC_API_URL}${path}`, {
 		method: method,
 		headers: {
 			Cookie: `${LOGIN_COOKIE_NAME}=${cookieValue}`,
