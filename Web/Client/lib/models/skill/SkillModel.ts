@@ -1,4 +1,4 @@
-import type { ISkillLanguage } from "./SkillLanguageModel";
+import type { ISkillLanguage } from "@/lib/models/skill/SkillLanguageModel";
 
 export enum SkillCategory {
   None = 0,

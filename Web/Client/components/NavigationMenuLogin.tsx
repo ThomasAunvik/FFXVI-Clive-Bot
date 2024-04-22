@@ -1,16 +1,16 @@
 "use client";
-import { getCurrentUser } from "@/lib/api/users";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import useIsMounted from "./misc/useIsMounted";
-import { Button } from "./ui/button";
+import useIsMounted from "@/components/misc/useIsMounted";
+import { Button } from "@/components/ui/button";
 import {
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuList,
   NavigationMenuRight,
   NavigationMenuTrigger,
-} from "./ui/navigation-menu";
+} from "@/components/ui/navigation-menu";
+import { getCurrentUser } from "@/lib/api/users";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export const NavigationMenuLogin = () => {
   const isMounted = useIsMounted();

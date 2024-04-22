@@ -1,12 +1,11 @@
 "use client";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import axios from "axios";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
-import { toastError } from "../errors/ErrorHandler";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
+import { toastError } from "@/components/errors/ErrorHandler";
+import {
+  type ModeratorFormData,
+  moderatorFormSchema,
+} from "@/components/moderator/validate";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -14,16 +13,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { type ModeratorFormData, moderatorFormSchema } from "./validate";
+} from "@/components/ui/select";
+import type { IModerator } from "@/lib/models/moderator/ModeratorModel";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import axios from "axios";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export interface IModeratorSingleFormProps {
   onSuccess: (moderators: IModerator[]) => void;

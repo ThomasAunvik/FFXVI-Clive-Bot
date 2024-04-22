@@ -1,6 +1,6 @@
+import { humanFileSize, millisecondsToStr } from "@/components/misc/fileSize";
+import { Progress } from "@/components/ui/progress";
 import type { AxiosProgressEvent } from "axios";
-import { humanFileSize, millisecondsToStr } from "../misc/fileSize";
-import { Progress } from "../ui/progress";
 
 export interface IUploadProgressProps {
   progress: AxiosProgressEvent | null;

@@ -1,25 +1,18 @@
 "use client";
-import { faAdd } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
-import { LoaderCircle, PlusIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import type { ISkillLanguage } from "../../lib/models/skill/SkillLanguageModel";
-import {
-  ErrorModal,
-  type ErrorModalInfo,
-  getErrorInfo,
-  toastError,
-} from "../errors/ErrorHandler";
+import { toastError } from "@/components/errors/ErrorHandler";
+import { SkillLanguageForm } from "@/components/skills/SkillLanguageForm";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
-import { Button } from "../ui/button";
-import { Collapsible, CollapsibleContent } from "../ui/collapsible";
-import { SkillLanguageForm } from "./SkillLanguageForm";
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import type { ISkillLanguage } from "@/lib/models/skill/SkillLanguageModel";
+import axios from "axios";
+import { LoaderCircle, PlusIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 export interface ISkillLanguageListProps {
   skillId: string;
@@ -28,7 +21,6 @@ export interface ISkillLanguageListProps {
 export const SkillLanguageList = (props: ISkillLanguageListProps) => {
   const { skillId } = props;
 
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
   const [collapseNew, setCollapseNew] = useState(false);
 
   const [languages, setLanguages] = useState<ISkillLanguage[] | null>(null);
@@ -41,7 +33,6 @@ export const SkillLanguageList = (props: ISkillLanguageListProps) => {
   }, [skillId]);
 
   useEffect(() => {
-    console.log("Is it not fetching?", languages);
     if (languages) return;
 
     try {
@@ -126,9 +117,6 @@ export const SkillLanguageList = (props: ISkillLanguageListProps) => {
             })}
           </Accordion>
         </div>
-      )}
-      {error == null ? null : (
-        <ErrorModal error={error} onHide={() => setError(null)} />
       )}
     </div>
   );

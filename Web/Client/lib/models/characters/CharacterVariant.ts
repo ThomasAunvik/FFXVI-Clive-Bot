@@ -1,4 +1,4 @@
-import type { ICharacterVariantField } from "./CharacterVariantField";
+import type { ICharacterVariantField } from "@/lib/models/characters/CharacterVariantField";
 
 export interface ICharacterVariant {
   id: number;

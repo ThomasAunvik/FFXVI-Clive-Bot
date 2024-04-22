@@ -1,4 +1,34 @@
 "use client";
+import { toastError } from "@/components/errors/ErrorHandler";
+import { type SkillFormObj, skillForm } from "@/components/skills/validate";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import { UploadProgress } from "@/components/upload/UploadProgress";
+import {
+  type ISkill,
+  SkillCategory,
+  SkillSummon,
+  skillCategoryList,
+  summonList,
+} from "@/lib/models/skill/SkillModel";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import axios, { type AxiosProgressEvent } from "axios";
 import _, { isNull } from "lodash";
@@ -7,36 +37,6 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  type ISkill,
-  SkillCategory,
-  SkillSummon,
-  skillCategoryList,
-  summonList,
-} from "../../lib/models/skill/SkillModel";
-import { toastError } from "../errors/ErrorHandler";
-import { Button } from "../ui/button";
-import { Collapsible, CollapsibleContent } from "../ui/collapsible";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { Slider } from "../ui/slider";
-import { Textarea } from "../ui/textarea";
-import { UploadProgress } from "../upload/UploadProgress";
-import { type SkillFormObj, skillForm } from "./validate";
 
 export interface ISkillFormProps {
   skill?: ISkill;
@@ -93,10 +93,6 @@ export const SkillForm = (props: ISkillFormProps) => {
     try {
       if (skill == null) {
         const res = await axios.post("/api/skill/", newSkill);
-        if (res.status !== 200) {
-          toastError(res.statusText);
-          return null;
-        }
 
         const newInitialSkill = res.data as ISkill;
         skillId = newInitialSkill.id;
@@ -105,60 +101,56 @@ export const SkillForm = (props: ISkillFormProps) => {
       } else {
         if (!_.isEqual(newSkill, initialSkill)) {
           const res = await axios.put(`/api/skill/${skill.id}`, newSkill);
-          if (res.status !== 200) {
-            toastError(res.statusText);
-            return null;
-          }
 
           const newInitialSkill = res.data as ISkill;
           setInitialSkill(newInitialSkill);
           toast("Skill Updated.");
         }
       }
-    } catch (err) {
-      toastError(err);
-    }
 
-    if (iconFile != null && !isNull(skillId)) {
-      const iconForm = new FormData();
-      iconForm.append("iconFile", iconFile);
+      if (iconFile != null && !isNull(skillId)) {
+        const iconForm = new FormData();
+        iconForm.append("iconFile", iconFile);
 
-      try {
-        await axios.postForm(`/api/skill/${skillId}/images/icon`, iconForm, {
-          onDownloadProgress: (prog) => {
-            setIconFileProgress({ ...prog });
-          },
-          signal: cancelUploads.current.signal,
-        });
-        toast("Icon Uploaded.");
-      } catch (err) {
-        toastError(err);
-      }
-    }
-
-    if (previewFile != null && !isNull(skillId)) {
-      const previewForm = new FormData();
-      previewForm.append("previewFile", previewFile);
-      try {
-        await axios.postForm(
-          `/api/skill/${skillId}/images/preview`,
-          previewForm,
-          {
+        try {
+          await axios.postForm(`/api/skill/${skillId}/images/icon`, iconForm, {
             onDownloadProgress: (prog) => {
-              setPreviewFileProgress({ ...prog });
+              setIconFileProgress({ ...prog });
             },
             signal: cancelUploads.current.signal,
-          },
-        );
-
-        toast("Preview Image Uploaded.");
-      } catch (err) {
-        toastError(err);
+          });
+          toast("Icon Uploaded.");
+        } catch (err) {
+          toastError(err);
+        }
       }
-    }
 
-    if ((isNull(skill) || skill === undefined) && !isNull(skillId)) {
-      router.replace(`/dashboard/skills/${skillId}`);
+      if (previewFile != null && !isNull(skillId)) {
+        const previewForm = new FormData();
+        previewForm.append("previewFile", previewFile);
+        try {
+          await axios.postForm(
+            `/api/skill/${skillId}/images/preview`,
+            previewForm,
+            {
+              onDownloadProgress: (prog) => {
+                setPreviewFileProgress({ ...prog });
+              },
+              signal: cancelUploads.current.signal,
+            },
+          );
+
+          toast("Preview Image Uploaded.");
+        } catch (err) {
+          toastError(err);
+        }
+      }
+
+      if ((isNull(skill) || skill === undefined) && !isNull(skillId)) {
+        router.replace(`/dashboard/skills/${skillId}`);
+      }
+    } catch (err) {
+      toastError(err);
     }
 
     return;
@@ -445,7 +437,7 @@ export const SkillForm = (props: ISkillFormProps) => {
             name="previewImageUrl"
             render={({ field }) => (
               <FormItem className="pr-2 pl-2">
-                <FormLabel>Icon Url</FormLabel>
+                <FormLabel>Preview Image Url</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -454,7 +446,7 @@ export const SkillForm = (props: ISkillFormProps) => {
             )}
           />
         </div>
-        <div>
+        <div className="flex flex-row gap-4">
           <Button
             type="submit"
             disabled={!form.formState.isDirty || form.formState.isSubmitting}

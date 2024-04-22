@@ -1,26 +1,20 @@
 "use client";
-import { getCurrentUser } from "@/lib/api/users";
+import { DashboardUser } from "@/components/navigation/DashboardUser";
+import { NavEntry } from "@/components/navigation/NavEntry";
+import type { NavigationEntry } from "@/components/navigation/entry";
+import { Separator } from "@/components/ui/separator";
 import {
   ChevronDown,
-  ChevronUp,
   LayoutDashboardIcon,
   LogOutIcon,
   MenuIcon,
   SettingsIcon,
   ShieldIcon,
   SwordIcon,
-  UserIcon,
   UsersIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type React from "react";
-import { Suspense, useEffect, useState } from "react";
-import useIsMounted from "../misc/useIsMounted";
-import { Separator } from "../ui/separator";
-import { DashboardUser } from "./DashboardUser";
-import { NavEntry } from "./NavEntry";
-import type { NavigationEntry } from "./entry";
 
 interface DashboardProps {
   children: React.ReactNode;

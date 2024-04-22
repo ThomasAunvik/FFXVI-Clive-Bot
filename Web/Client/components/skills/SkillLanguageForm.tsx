@@ -1,13 +1,10 @@
 "use client";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import axios from "axios";
-import { isUndefined } from "lodash";
-import { LoaderCircle, SaveIcon, TrashIcon } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import type { ISkillLanguage } from "../../lib/models/skill/SkillLanguageModel";
-import { toastError } from "../errors/ErrorHandler";
-import { Button } from "../ui/button";
+import { toastError } from "@/components/errors/ErrorHandler";
+import {
+  type SkillLanguageFormObj,
+  skillLanguageForm,
+} from "@/components/skills/validate";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -15,16 +12,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { type SkillLanguageFormObj, skillLanguageForm } from "./validate";
+} from "@/components/ui/select";
+import type { ISkillLanguage } from "@/lib/models/skill/SkillLanguageModel";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import axios from "axios";
+import { isUndefined } from "lodash";
+import { LoaderCircle, SaveIcon, TrashIcon } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 export interface ISkillLanguageFormProps {
   skillId: string;

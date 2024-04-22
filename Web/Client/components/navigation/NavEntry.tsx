@@ -1,6 +1,6 @@
+import type { NavigationEntry } from "@/components/navigation/entry";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { NavigationEntry } from "./entry";
 
 export const NavEntry = ({ entry }: { entry: NavigationEntry }) => {
   const currentPath = usePathname();

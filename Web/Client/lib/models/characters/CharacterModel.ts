@@ -1,5 +1,5 @@
-import type { ICharacterNote } from "./CharacterNote";
-import type { ICharacterVariant } from "./CharacterVariant";
+import type { ICharacterNote } from "@/lib/models/characters/CharacterNote";
+import type { ICharacterVariant } from "@/lib/models/characters/CharacterVariant";
 
 export interface ICharacter {
   id: number;

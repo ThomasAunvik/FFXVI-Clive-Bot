@@ -1,19 +1,19 @@
 "use client";
-import axios from "axios";
-import { LoaderCircle } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { type ISkill, SkillSummon } from "../../lib/models/skill/SkillModel";
-import { replaceCDN } from "../constants";
-import { toastError } from "../errors/ErrorHandler";
+import { replaceCDN } from "@/components/constants";
+import { toastError } from "@/components/errors/ErrorHandler";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
-import { Skeleton } from "../ui/skeleton";
+} from "@/components/ui/accordion";
+import { Skeleton } from "@/components/ui/skeleton";
+import { type ISkill, SkillSummon } from "@/lib/models/skill/SkillModel";
+import axios from "axios";
+import { LoaderCircle } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 export const SkillOtherList = () => {
   const [skills, setSkills] = useState<ISkill[] | null>(null);

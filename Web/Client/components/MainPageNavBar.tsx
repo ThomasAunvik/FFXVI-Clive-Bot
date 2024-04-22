@@ -1,3 +1,4 @@
+import { NavigationMenuLogin } from "@/components/NavigationMenuLogin";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -6,7 +7,6 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { NavigationMenuLogin } from "./NavigationMenuLogin";
 
 const MainPageNavBar = async () => {
   return (

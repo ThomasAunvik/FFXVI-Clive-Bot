@@ -1,23 +1,23 @@
 "use client";
-import axios from "axios";
-import { LoaderCircle } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
-import {
-  type ISkill,
-  SkillSummon,
-  summonList,
-} from "../../lib/models/skill/SkillModel";
-import { replaceCDN } from "../constants";
-import { toastError } from "../errors/ErrorHandler";
+import { replaceCDN } from "@/components/constants";
+import { toastError } from "@/components/errors/ErrorHandler";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
-import { Skeleton } from "../ui/skeleton";
+} from "@/components/ui/accordion";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  type ISkill,
+  SkillSummon,
+  summonList,
+} from "@/lib/models/skill/SkillModel";
+import axios from "axios";
+import { LoaderCircle } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 export const SkillSummonList = () => {
   const [allSkills, setSkills] = useState<
@@ -83,9 +83,9 @@ export const SkillSummonList = () => {
                                 height={40}
                               />
                             ) : (
-                              <Skeleton className="w-10 h-10" />
+                              <Skeleton className="h-10 w-10" />
                             )}
-                            <span className="ml-4 mt-2 text-base">
+                            <span className="mt-2 ml-4 text-base">
                               {s.name}
                             </span>
                           </Link>

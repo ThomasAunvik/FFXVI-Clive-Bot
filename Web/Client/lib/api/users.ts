@@ -1,6 +1,6 @@
+import { apiGET } from "@/lib/api/fetch";
 import { NoAuthError } from "@/lib/errors";
-import type { UserModel } from "../models/user/UserModel";
-import { apiGET } from "./fetch";
+import type { UserModel } from "@/lib/models/user/UserModel";
 
 export const getCurrentUser = async () => {
   try {

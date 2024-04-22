@@ -1,4 +1,4 @@
-import type { IModeratorPermissions } from "./ModeratorPermissionsModel";
+import type { IModeratorPermissions } from "@/lib/models/moderator/ModeratorPermissionsModel";
 
 export interface IModerator {
   id: number;

@@ -1,27 +1,19 @@
 "use client";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import type { IModerator } from "../../lib/models/moderator/ModeratorModel";
-import {
-  ErrorModal,
-  type ErrorModalInfo,
-  getErrorInfo,
-  toastError,
-} from "../errors/ErrorHandler";
 
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { PlusIcon } from "lucide-react";
-import useIsMounted from "../misc/useIsMounted";
+import { toastError } from "@/components/errors/ErrorHandler";
+import useIsMounted from "@/components/misc/useIsMounted";
+import { ModeratorListForm } from "@/components/moderator/ModeratorListForm";
+import { ModeratorSingleForm } from "@/components/moderator/ModeratorSingleForm";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../ui/accordion";
-import { Button } from "../ui/button";
-import { ModeratorListForm } from "./ModeratorListForm";
-import { ModeratorSingleForm } from "./ModeratorSingleForm";
+} from "@/components/ui/accordion";
+import type { IModerator } from "@/lib/models/moderator/ModeratorModel";
+import { PlusIcon } from "lucide-react";
 
 export const ModeratorList = () => {
   const isMounted = useIsMounted();
@@ -29,8 +21,6 @@ export const ModeratorList = () => {
   const [moderators, setModerators] = useState<IModerator[]>([]);
 
   const [openAddNew, setOpenAddNew] = useState(false);
-
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
 
   const fetchModerator = useCallback(async () => {
     try {
@@ -83,7 +73,7 @@ export const ModeratorList = () => {
                         setModerators(res.data as IModerator[]);
                       }
                     } catch (err) {
-                      setError(getErrorInfo(err));
+                      toastError(err);
                     }
                   }}
                   onUpdate={(mods) => {

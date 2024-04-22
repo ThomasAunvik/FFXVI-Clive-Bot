@@ -1,10 +1,9 @@
 "use client";
-import { ErrorModalInfo, toastError } from "@/components/errors/ErrorHandler";
+import { toastError } from "@/components/errors/ErrorHandler";
 import useIsMounted from "@/components/misc/useIsMounted";
 import { SkillForm } from "@/components/skills/SkillForm";
 import { SkillLanguageList } from "@/components/skills/SkillLanguagesList";
 import { Button } from "@/components/ui/button";
-import { ISkillLanguage } from "@/lib/models/skill/SkillLanguageModel";
 import type { ISkill } from "@/lib/models/skill/SkillModel";
 import axios from "axios";
 import { LoaderCircle } from "lucide-react";

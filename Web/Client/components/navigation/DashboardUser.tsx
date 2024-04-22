@@ -1,11 +1,11 @@
 "use client";
+import useIsMounted from "@/components/misc/useIsMounted";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getCurrentUser } from "@/lib/api/users";
 import type { UserModel } from "@/lib/models/user/UserModel";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useReducer, useState } from "react";
-import useIsMounted from "../misc/useIsMounted";
-import { Skeleton } from "../ui/skeleton";
 
 export const DashboardUser = () => {
   const [user, setUser] = useState<UserModel | null>(null);
