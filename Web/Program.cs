@@ -1,5 +1,4 @@
 using CliveBot.Database;
-using NextjsStaticHosting.AspNetCore;
 using Serilog;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using CliveBot.Web.Events;
@@ -46,42 +45,45 @@ builder.Services.AddDbContext<ApplicationDbContext>((config) =>
 builder.Services.RegisterMediatR();
 
 var azureConfig = builder.Configuration.GetSection("Azure");
-var blobAccountName = azureConfig.GetValue<string>("BlobAccountName") ?? "";
-var blobSasToken = azureConfig.GetValue<string>("BlobSasToken") ?? "";
+var blobConnectionString = azureConfig.GetValue<string>("BlobConnectionString") ?? "";
 
-builder.Services.RegisterAzureBlobServices(
-    blobAccountName, blobSasToken
-);
+builder.Services.RegisterAzureBlobServices(blobConnectionString);
 
 var discordLogin = builder.Configuration.GetSection("DiscordLogin");
 var discordClientId = discordLogin.GetValue<string>("ClientId") ?? "";
 var discordClientSecret = discordLogin.GetValue<string>("ClientSecret") ?? "";
 
+var cookies = builder.Configuration.GetSection("Cookies");
+var cookieDomain = cookies.GetValue<string>("Domain");
+
 builder.Services.AddAuthentication(
-    CookieAuthenticationDefaults.AuthenticationScheme
-    ).AddDiscord(options => {
+        CookieAuthenticationDefaults.AuthenticationScheme
+    )
+    .AddDiscord(options =>
+    {
         options.AccessDeniedPath = "/error/accessdenied";
         options.ClientId = discordClientId;
         options.ClientSecret = discordClientSecret;
     })
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, (options) => {
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, (options) =>
+    {
         options.EventsType = typeof(XCookieAuthEvents);
         options.AccessDeniedPath = "/error/accessdenied";
         options.Cookie.SameSite = SameSiteMode.Strict;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.HttpOnly = false; // Needs for JavaScript
+        if (cookieDomain != null)
+        {
+            options.Cookie.Domain = cookieDomain;
+        }
     });
+    //.AddBearerToken();
 
 builder.Services.AddAuthorization(o =>
 {
     o.AddCustomPolicies();
 });
 builder.Services.AddPolicyHandlers();
-
-builder.Services.Configure<NextjsStaticHostingOptions>(
-    builder.Configuration.GetSection("NextjsStaticHosting")
-);
-builder.Services.AddNextjsStaticHosting();
 
 builder.Services.AddControllers();
 
@@ -133,11 +135,7 @@ app.UseExceptionHandler(errorApp =>
 app.UseHttpsRedirection();
 app.UseHealthChecks("/healthz");
 
-app.UseRouting();
-
 app.UseAuthorization();
-
-app.MapControllers();
 
 app.UseSwagger(options =>
 {
@@ -149,9 +147,9 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = "api/swagger";
 });
 
-app.MapNextjsStaticHtmls();
+app.UseRouting();
 
-app.UseNextjsStaticHosting();
+app.MapControllers();
 
 try
 {

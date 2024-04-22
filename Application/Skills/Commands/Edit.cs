@@ -71,11 +71,7 @@ namespace CliveBot.Application.Skills.Commands
                 skill.IconUrl = request.IconUrl;
                 skill.PreviewImageUrl = request.PreviewImageUrl;
 
-                var result = await _context.SaveChangesAsync(cancellationToken);
-                if (result == 0)
-                {
-                    throw new RestException(HttpStatusCode.InternalServerError, "Database failed to save data");
-                }
+                await _context.SaveChangesAsync(cancellationToken);
 
                 return skill.ConvertDto();
             }

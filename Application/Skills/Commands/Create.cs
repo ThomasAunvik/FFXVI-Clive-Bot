@@ -52,7 +52,8 @@ namespace CliveBot.Application.Skills.Commands
                             Name = request.Name,
                             Description = request.Description
                         }
-                    ]
+                    ],
+                    Detail = new SkillDetail(),
                 };
 
                 await _context.Skills.AddAsync(skill, cancellationToken);

@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Azure;
@@ -39,17 +40,12 @@ namespace CliveBot.Azure
 
         public static IServiceCollection RegisterAzureBlobServices(
             this IServiceCollection serviceCollection,
-            string blobAccountName,
-            string blobSasToken
+            string blobConnectionString
         )   {
             serviceCollection.AddScoped<AzureUpload>();
             serviceCollection.AddAzureClients(clientBuilder =>
             {
-                clientBuilder.AddBlobServiceClient(
-                    GetBlobServiceConnectionString(blobAccountName, blobSasToken)
-                );
-
-                clientBuilder.UseCredential(new DefaultAzureCredential());
+                clientBuilder.AddBlobServiceClient(blobConnectionString);
             });
             return serviceCollection;
         }

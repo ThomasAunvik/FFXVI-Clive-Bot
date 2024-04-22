@@ -12,6 +12,7 @@
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
+		<UserSecretsId>6e72770f-ea7b-4f5e-8e14-9a8d17fdaf06</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -31,8 +32,8 @@
 		<PackageReference Include="AspNet.Security.OAuth.Discord" Version="8.0.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights.PerfCounterCollector" Version="2.22.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Logging.ApplicationInsights" Version="2.22.0" />
-		<PackageReference Include="NextjsStaticHosting.AspNetCore" Version="0.9.3-preview" />
 		<PackageReference Include="Serilog" Version="3.1.1" />
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
@@ -44,30 +45,4 @@
 		<ProjectReference Include="..\Azure\Azure.csproj" />
 		<ProjectReference Include="..\Database\Database.csproj" />
 	</ItemGroup>
-
-	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
-		<!-- Ensure Node.js is installed -->
-		<Exec Command="node --version" ContinueOnError="true">
-			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
-		</Exec>
-		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
-		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-	</Target>
-
-	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-		<!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npx next build" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npx next export" />
-
-		<!-- Include the newly-built files in the publish output -->
-		<ItemGroup>
-			<DistFiles Include="$(SpaRoot)out\**" />
-			<ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>%(DistFiles.Identity)</RelativePath>
-				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-			</ResolvedFileToPublish>
-		</ItemGroup>
-	</Target>
 </Project>
