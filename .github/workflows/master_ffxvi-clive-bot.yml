@@ -64,7 +64,7 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: web-backend
+          name: webbackend
           path: ${{env.webdirectory}}/bin/Release/net8.0/publish/
 
   test-build-frontend-web:
@@ -102,6 +102,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: Database
       
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
@@ -129,13 +131,13 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: clivebot
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'FFXVI-Clive-Bot'
           slot-name: 'Production'
@@ -152,13 +154,13 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          name: web-backend
+          name: webbackend
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'FFXVI-Clive-Bot-Web'
           slot-name: 'Production'
