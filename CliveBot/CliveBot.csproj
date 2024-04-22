@@ -32,8 +32,8 @@
 		<ProjectReference Include="..\Database\Database.csproj" />
 	</ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="echo -- POST BUILD START --&#xD;&#xA;echo Current Commit:&#xD;&#xA;git rev-parse HEAD&#xD;&#xA;&#xD;&#xA;mkdir $(TargetPath)&#xD;&#xA;break&gt;$(TargetPath)/current_commit.txt&#xD;&#xA;git rev-parse HEAD &gt;&gt; $(TargetPath)/current_commit.txt&#xD;&#xA;&#xD;&#xA;echo Git Status:&#xD;&#xA;git status&#xD;&#xA;&#xD;&#xA;break&gt;$(TargetPath)/git_status.txt&#xD;&#xA;git status &gt;&gt; $(TargetPath)/git_status.txt&#xD;&#xA;&#xD;&#xA;echo -- PRE BUILD END --" />
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	  <Exec Command="echo -- POST BUILD START --&#xD;&#xA;echo Current Commit:&#xD;&#xA;git rev-parse HEAD&#xD;&#xA;&#xD;&#xA;break&gt;$(ProjectDir)/current_commit.txt&#xD;&#xA;git rev-parse HEAD &gt;&gt; $(ProjectDir)/current_commit.txt&#xD;&#xA;&#xD;&#xA;echo Git Status:&#xD;&#xA;git status&#xD;&#xA;&#xD;&#xA;break&gt;$(ProjectDir)/git_status.txt&#xD;&#xA;git status &gt;&gt; $(ProjectDir)/git_status.txt&#xD;&#xA;&#xD;&#xA;echo -- PRE BUILD END --" />
 	</Target>
 
 
