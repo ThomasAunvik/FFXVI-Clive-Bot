@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: clivebot
-          path: ./bin/Release/net8.0/
+          path: ${{env.botdirectory}}/bin/Release/net8.0/
 
   build-backend-web:
     name: Build Backend Web
@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-backend
-          path: ./bin/Release/net8.0/
+          path: ${{env.webdirectory}}/bin/Release/net8.0/
 
   test-build-frontend-web:
     name: Test Build Frontend Web
