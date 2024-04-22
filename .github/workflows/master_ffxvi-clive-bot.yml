@@ -86,7 +86,7 @@ jobs:
 
       - name: Build Web Project
         working-directory: ${{env.webdirectory}}
-        run: bun run build --cache-dir=.turbo
+        run: bun run build
         
       - name: Test Project
         working-directory: ${{env.webdirectory}}
