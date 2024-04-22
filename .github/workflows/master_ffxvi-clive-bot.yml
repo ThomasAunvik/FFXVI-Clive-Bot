@@ -14,6 +14,7 @@ jobs:
   build-bot:
     name: Build Bot
     runs-on: ubuntu-latest
+    environment: Production (Bot)
     env:
       botdirectory: ./CliveBot
 
@@ -42,6 +43,7 @@ jobs:
   build-backend-web:
     name: Build Backend Web
     runs-on: ubuntu-latest
+    environment: Production (Web)
     env:
       webdirectory: ./Web
 
@@ -193,3 +195,5 @@ jobs:
           api_location: "Web/Client/lib/api/functions/" # Api source code path - optional
           output_location: "" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
+        env:
+          NEXT_PUBLIC_API_URL: https://api.xvibot.com
