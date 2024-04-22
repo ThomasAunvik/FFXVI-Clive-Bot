@@ -11,7 +11,7 @@
 		"updates": "npm-check-updates"
 	},
 	"engines": {
-		"node": ">=18.20.2 <22"
+		"node": ">=18.19.1 <20"
 	},
 	"dependencies": {
 		"@biomejs/biome": "^1.7.0",
