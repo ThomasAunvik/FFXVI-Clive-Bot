@@ -31,13 +31,13 @@ jobs:
 
       - name: dotnet publish
         working-directory: ${{ env.botdirectory }}
-        run: dotnet publish -c Release -o ./build/clivebot
+        run: dotnet publish -c Release
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: clivebot
-          path: ./build/clivebot
+          path: ./bin/Release/net8.0/
 
   build-backend-web:
     name: Build Backend Web
@@ -59,13 +59,13 @@ jobs:
 
       - name: dotnet publish
         working-directory: ${{ env.webdirectory }}
-        run: dotnet publish -c Release -o ./build/web
+        run: dotnet publish -c Release
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: web-backend
-          path: ./build/web
+          path: ./bin/Release/net8.0/
 
   test-build-frontend-web:
     name: Test Build Frontend Web
