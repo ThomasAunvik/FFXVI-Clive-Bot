@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -33,7 +33,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="echo -- POST BUILD START --&#xD;&#xA;echo Current Commit:&#xD;&#xA;git rev-parse HEAD&#xD;&#xA;&#xD;&#xA;mkdir $(PublishDir)&#xD;&#xA;break&gt;$(PublishDir)/current_commit.txt&#xD;&#xA;git rev-parse HEAD &gt;&gt; $(PublishDir)/current_commit.txt&#xD;&#xA;&#xD;&#xA;echo Git Status:&#xD;&#xA;git status&#xD;&#xA;&#xD;&#xA;break&gt;$(PublishDir)/git_status.txt&#xD;&#xA;git status &gt;&gt; $(PublishDir)/git_status.txt&#xD;&#xA;&#xD;&#xA;echo -- PRE BUILD END --" />
+		<Exec Command="echo -- POST BUILD START --&#xD;&#xA;echo Current Commit:&#xD;&#xA;git rev-parse HEAD&#xD;&#xA;&#xD;&#xA;mkdir $(TargetPath)&#xD;&#xA;break&gt;$(TargetPath)/current_commit.txt&#xD;&#xA;git rev-parse HEAD &gt;&gt; $(TargetPath)/current_commit.txt&#xD;&#xA;&#xD;&#xA;echo Git Status:&#xD;&#xA;git status&#xD;&#xA;&#xD;&#xA;break&gt;$(TargetPath)/git_status.txt&#xD;&#xA;git status &gt;&gt; $(TargetPath)/git_status.txt&#xD;&#xA;&#xD;&#xA;echo -- PRE BUILD END --" />
 	</Target>
 
 
