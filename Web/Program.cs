@@ -58,6 +58,16 @@ var cookieDomain = cookies.GetValue<string>("Domain");
 
 var frontendUrl = builder.Configuration.GetValue<string>("FrontendUrl");
 
+builder.Services.AddCors((o) => {
+    if (string.IsNullOrEmpty(frontendUrl)) return;
+    o.AddDefaultPolicy(p => p
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .WithOrigins(frontendUrl)
+    );
+});
+
 builder.Services.AddAuthentication(
         CookieAuthenticationDefaults.AuthenticationScheme
     )
@@ -134,16 +144,6 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -152,10 +152,26 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
-app.UseHealthChecks("/healthz");
+
+app.UseRouting();
+
+app.UseCors();
 
 app.UseAuthorization();
+
+app.UseHealthChecks("/healthz");
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.MapControllers();
 
 app.UseSwagger(options =>
 {
@@ -166,10 +182,6 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/api/swagger/v1/swagger.json", "v1");
     options.RoutePrefix = "api/swagger";
 });
-
-app.UseRouting();
-
-app.MapControllers();
 
 try
 {
