@@ -20,7 +20,7 @@ export const skillForm = v.object({
 	costMaster: v.number([v.integer()]),
 	iconFile: v.optional(v.any()),
 	iconUrl: v.optional(v.string()),
-	previewFile: v.optional(v.instance(File)),
+	previewFile: v.optional(v.any()),
 	previewImageUrl: v.optional(v.string()),
 });
 
