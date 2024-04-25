@@ -64,6 +64,7 @@ export const SkillLanguageList = async (props: ISkillLanguageListProps) => {
 			</div>
 		</div>;
 	} catch (err) {
-		return notFound();
+		console.error(err);
+		return <div>Failed to load languages...</div>;
 	}
 };
