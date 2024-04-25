@@ -41,7 +41,8 @@ const SkillFormServer = async (props: SkillPageProps) => {
 
 		return <SkillForm skill={skill} />;
 	} catch (err) {
-		return notFound();
+		console.error(err);
+		return <div>Failed to load skill</div>;
 	}
 };
 
