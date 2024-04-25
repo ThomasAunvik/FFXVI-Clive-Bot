@@ -76,7 +76,6 @@ builder.Services.AddAuthentication(
         options.AccessDeniedPath = "/error/accessdenied";
         options.ClientId = discordClientId;
         options.ClientSecret = discordClientSecret;
-        
     })
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, (options) =>
     {
@@ -89,23 +88,6 @@ builder.Services.AddAuthentication(
         {
             options.Cookie.Domain = cookieDomain;
         }
-        options.Events.OnSignedIn = (ctx) => {
-            if (string.IsNullOrEmpty(frontendUrl))
-            {
-                return Task.CompletedTask;
-            }
-            ctx.Response.Redirect(frontendUrl);
-            return Task.CompletedTask;
-        };
-
-        options.Events.OnSigningOut = (ctx) => {
-            if (string.IsNullOrEmpty(frontendUrl))
-            {
-                return Task.CompletedTask;
-            }
-            ctx.Response.Redirect(frontendUrl);
-            return Task.CompletedTask;
-        };
     });
     //.AddBearerToken();
 
