@@ -22,20 +22,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { NEXT_PUBLIC_API_URL } from "@/lib/env";
+import { actionAddModerator } from "@/lib/api/actions/moderators";
 import type { IModerator } from "@/lib/models/moderator/ModeratorModel";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export interface IModeratorSingleFormProps {
 	onSuccess: (moderators: IModerator[]) => void;
-	close: () => void;
 }
 
 export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
-	const { close, onSuccess } = props;
+	const { onSuccess } = props;
 
 	const form = useForm<ModeratorFormData>({
 		resolver: valibotResolver(moderatorFormSchema),
@@ -55,14 +53,10 @@ export const ModeratorSingleForm = (props: IModeratorSingleFormProps) => {
 
 	const onSubmit = async (values: ModeratorFormData) => {
 		try {
-			const res = await axios.post(
-				`${NEXT_PUBLIC_API_URL}/api/moderator`,
-				values,
-			);
-			if (res.status === 200) {
-				toast("Successfully added a moderator");
-				onSuccess(res.data as IModerator[]);
-			}
+			const res = await actionAddModerator(values as IModerator);
+
+			toast("Successfully added a moderator");
+			onSuccess(res);
 		} catch (err) {
 			toastError(err);
 		}

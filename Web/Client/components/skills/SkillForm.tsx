@@ -12,6 +12,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import {
 	Select,
 	SelectContent,
@@ -22,6 +23,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { UploadProgress } from "@/components/upload/UploadProgress";
+import { actionCreateSkill, actionUpdateSkill } from "@/lib/api/actions/skills";
 import { NEXT_PUBLIC_API_URL } from "@/lib/env";
 import {
 	type ISkill,
@@ -48,36 +50,20 @@ export const SkillForm = (props: ISkillFormProps) => {
 
 	const router = useRouter();
 
-	const [initialSkill, setInitialSkill] = useState<ISkill>(
-		skill ?? {
-			id: 0,
-			name: "",
-			description: "",
-			localized: [],
-			category: SkillCategory.None,
-			summon: SkillSummon.Ifrit,
-			ratingPhysical: 0,
-			ratingMagical: 0,
-			costBuy: 0,
-			costUpgrade: 0,
-			costMaster: 0,
-		},
-	);
-
 	const form = useForm<SkillFormObj>({
 		resolver: valibotResolver(skillForm),
 		defaultValues: {
-			name: initialSkill?.name,
-			description: initialSkill?.description,
-			category: initialSkill?.category,
-			summon: initialSkill?.summon,
-			ratingPhysical: initialSkill?.ratingPhysical,
-			ratingMagical: initialSkill?.ratingMagical,
-			costBuy: initialSkill?.costBuy,
-			costUpgrade: initialSkill?.costUpgrade,
-			costMaster: initialSkill?.costMaster,
-			iconUrl: initialSkill?.iconUrl,
-			previewImageUrl: initialSkill.previewImageUrl,
+			name: skill?.name,
+			description: skill?.description,
+			category: skill?.category,
+			summon: skill?.summon,
+			ratingPhysical: skill?.ratingPhysical,
+			ratingMagical: skill?.ratingMagical,
+			costBuy: skill?.costBuy,
+			costUpgrade: skill?.costUpgrade,
+			costMaster: skill?.costMaster,
+			iconUrl: skill?.iconUrl,
+			previewImageUrl: skill?.previewImageUrl,
 		},
 	});
 
@@ -90,66 +76,65 @@ export const SkillForm = (props: ISkillFormProps) => {
 	const onSubmit = async (values: SkillFormObj) => {
 		const { iconFile, previewFile, ...newSkill } = values;
 
-		let skillId = skill?.id ?? null;
+		const skillId = skill?.id ?? null;
+
+		let newSkillId: string | null = null;
 		try {
-			if (skill == null) {
-				const res = await axios.post(
-					`${NEXT_PUBLIC_API_URL}/api/skill/`,
-					newSkill,
-				);
-
-				const newInitialSkill = res.data as ISkill;
-				skillId = newInitialSkill.id;
-				setInitialSkill(newInitialSkill);
+			if (skillId == null) {
+				const createdSkill = await actionCreateSkill(newSkill as ISkill);
 				toast("Skill Created");
+				newSkillId = createdSkill.id.toString();
 			} else {
-				if (!_.isEqual(newSkill, initialSkill)) {
-					const res = await axios.put(
-						`${NEXT_PUBLIC_API_URL}/api/skill/${skill.id}`,
-						newSkill,
-					);
-
-					const newInitialSkill = res.data as ISkill;
-					setInitialSkill(newInitialSkill);
+				if (!_.isEqual(newSkill, skill)) {
+					await actionUpdateSkill(skillId.toString(), newSkill as ISkill);
 					toast("Skill Updated.");
 				}
 			}
 
-			if (iconFile != null && !isNull(skillId)) {
+			if (iconFile != null && (!isNull(skillId) || !isNull(newSkillId))) {
 				const iconForm = new FormData();
 				iconForm.append("iconFile", iconFile);
 
 				try {
 					await axios.postForm(
-						`${NEXT_PUBLIC_API_URL}/api/skill/${skillId}/images/icon`,
+						`${NEXT_PUBLIC_API_URL}/api/skill/${
+							newSkillId == null ? skillId : newSkillId
+						}/images/icon`,
 						iconForm,
 						{
 							onDownloadProgress: (prog) => {
 								setIconFileProgress({ ...prog });
 							},
 							signal: cancelUploads.current.signal,
+							withCredentials: true,
 						},
 					);
+
+					setIconFileProgress(null);
 					toast("Icon Uploaded.");
 				} catch (err) {
 					toastError(err);
 				}
 			}
 
-			if (previewFile != null && !isNull(skillId)) {
+			if (previewFile != null && (!isNull(skillId) || !isNull(newSkillId))) {
 				const previewForm = new FormData();
 				previewForm.append("previewFile", previewFile);
 				try {
 					await axios.postForm(
-						`${NEXT_PUBLIC_API_URL}/api/skill/${skillId}/images/preview`,
+						`${NEXT_PUBLIC_API_URL}/api/skill/${
+							newSkillId ?? skillId
+						}/images/preview`,
 						previewForm,
 						{
 							onDownloadProgress: (prog) => {
 								setPreviewFileProgress({ ...prog });
 							},
 							signal: cancelUploads.current.signal,
+							withCredentials: true,
 						},
 					);
+					setPreviewFileProgress(null);
 
 					toast("Preview Image Uploaded.");
 				} catch (err) {
@@ -157,8 +142,8 @@ export const SkillForm = (props: ISkillFormProps) => {
 				}
 			}
 
-			if ((isNull(skill) || skill === undefined) && !isNull(skillId)) {
-				router.replace(`/dashboard/skills/${skillId}`);
+			if (newSkillId) {
+				router.replace(`/dashboard/skills/${newSkillId}`);
 			}
 		} catch (err) {
 			toastError(err);
@@ -210,9 +195,9 @@ export const SkillForm = (props: ISkillFormProps) => {
 								<FormLabel>Category</FormLabel>
 								<Select
 									onValueChange={(event) => {
-										field.onChange(Number.parseInt(event) as SkillCategory);
+										field.onChange(Number.parseInt(event));
 									}}
-									defaultValue={field.value.toString()}
+									defaultValue={`${field.value}`}
 								>
 									<FormControl>
 										<SelectTrigger>
@@ -221,11 +206,8 @@ export const SkillForm = (props: ISkillFormProps) => {
 									</FormControl>
 									<SelectContent>
 										{skillCategoryList.map((l) => (
-											<SelectItem
-												value={SkillCategory[l].toString()}
-												key={`source-${l}`}
-											>
-												{l}
+											<SelectItem value={`${l}`} key={`source-${l}`}>
+												{SkillCategory[l]}
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -243,9 +225,9 @@ export const SkillForm = (props: ISkillFormProps) => {
 								<FormLabel>Summon</FormLabel>
 								<Select
 									onValueChange={(event) => {
-										field.onChange(Number.parseInt(event) as SkillSummon);
+										field.onChange(Number.parseInt(event));
 									}}
-									defaultValue={field.value.toString()}
+									defaultValue={`${field.value}`}
 								>
 									<FormControl>
 										<SelectTrigger>
@@ -254,11 +236,8 @@ export const SkillForm = (props: ISkillFormProps) => {
 									</FormControl>
 									<SelectContent>
 										{summonList.map((l) => (
-											<SelectItem
-												value={SkillSummon[l].toString()}
-												key={`source-${l}`}
-											>
-												{l}
+											<SelectItem value={`${l}`} key={`source-${l}`}>
+												{SkillSummon[l]}
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -394,7 +373,7 @@ export const SkillForm = (props: ISkillFormProps) => {
 							</FormItem>
 						)}
 					/>
-					<Collapsible open={previewFileProgress != null}>
+					<Collapsible open={iconFileProgress != null}>
 						<CollapsibleContent>
 							<UploadProgress progress={iconFileProgress} />
 						</CollapsibleContent>
@@ -443,6 +422,7 @@ export const SkillForm = (props: ISkillFormProps) => {
 							<UploadProgress progress={previewFileProgress} />
 						</CollapsibleContent>
 					</Collapsible>
+
 					<FormField
 						control={form.control}
 						name="previewImageUrl"

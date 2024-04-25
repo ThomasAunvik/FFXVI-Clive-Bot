@@ -21,11 +21,11 @@ export const ModeratorList = () => {
 
 	const [moderators, setModerators] = useState<IModerator[]>([]);
 
-	const [openAddNew, setOpenAddNew] = useState(false);
-
 	const fetchModerator = useCallback(async () => {
 		try {
-			const res = await axios.get(`${NEXT_PUBLIC_API_URL}/api/moderator`);
+			const res = await axios.get(`${NEXT_PUBLIC_API_URL}/api/moderator`, {
+				withCredentials: true,
+			});
 			if (res.status === 200) {
 				const newModerators = res.data as IModerator[];
 				if (isMounted) {
@@ -54,11 +54,10 @@ export const ModeratorList = () => {
 							onSuccess={(newMods) => {
 								setModerators(newMods);
 							}}
-							close={() => setOpenAddNew(false)}
 						/>
 					</AccordionContent>
 				</AccordionItem>
-				{moderators.map((s, i) => {
+				{moderators.map((s) => {
 					return (
 						<AccordionItem value={s.id.toString()} key={`moderator-${s.id}`}>
 							<AccordionTrigger>
@@ -67,18 +66,6 @@ export const ModeratorList = () => {
 							<AccordionContent>
 								<ModeratorListForm
 									moderator={s}
-									onDelete={async () => {
-										try {
-											const res = await axios.delete(
-												`${NEXT_PUBLIC_API_URL}/api/moderator/${s.id}`,
-											);
-											if (res.status === 200) {
-												setModerators(res.data as IModerator[]);
-											}
-										} catch (err) {
-											toastError(err);
-										}
-									}}
 									onUpdate={(mods) => {
 										setModerators(mods);
 									}}

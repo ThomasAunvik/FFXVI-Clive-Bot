@@ -28,6 +28,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	actionDeleteModerator,
+	actionEditModerator,
+} from "@/lib/api/actions/moderators";
 import { NEXT_PUBLIC_API_URL } from "@/lib/env";
 import type { IModerator } from "@/lib/models/moderator/ModeratorModel";
 import { valibotResolver } from "@hookform/resolvers/valibot";
@@ -39,12 +43,11 @@ import { toast } from "sonner";
 
 export interface IModeratorListFormProps {
 	moderator: IModerator;
-	onDelete: () => void;
 	onUpdate: (moderators: IModerator[]) => void;
 }
 
 export const ModeratorListForm = (props: IModeratorListFormProps) => {
-	const { moderator, onDelete, onUpdate } = props;
+	const { moderator, onUpdate } = props;
 
 	const [collapse, setCollapse] = useState(true);
 
@@ -59,17 +62,25 @@ export const ModeratorListForm = (props: IModeratorListFormProps) => {
 	});
 
 	const onSubmit = async (values: ModeratorFormData) => {
-		console.log("Submitting: ", values);
 		try {
-			const res = await axios.put(
-				`${NEXT_PUBLIC_API_URL}/api/moderator/${moderator.id}`,
-				values,
+			const res = await actionEditModerator(
+				moderator.id.toString(),
+				values as IModerator,
 			);
-			if (res.status === 200) {
-				const data = res.data as IModerator[];
-				onUpdate(data);
-				toast("Successfully updated a moderator");
-			}
+
+			toast("Successfully added a moderator");
+			onUpdate(res);
+		} catch (err) {
+			toastError(err);
+		}
+	};
+
+	const onDelete = async () => {
+		try {
+			const res = await actionDeleteModerator(moderator.id.toString());
+
+			toast("Successfully added a moderator");
+			onUpdate(res);
 		} catch (err) {
 			toastError(err);
 		}

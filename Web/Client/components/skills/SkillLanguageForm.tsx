@@ -21,65 +21,46 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { NEXT_PUBLIC_API_URL } from "@/lib/env";
+import {
+	actionDeleteSkillLanguage,
+	actionSetSkillLanguage,
+} from "@/lib/api/actions/skills";
 import type { ISkillLanguage } from "@/lib/models/skill/SkillLanguageModel";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import axios from "axios";
-import { isUndefined } from "lodash";
 import { LoaderCircle, SaveIcon, TrashIcon } from "lucide-react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export interface ISkillLanguageFormProps {
 	skillId: string;
 	language?: ISkillLanguage;
-	onDelete?: () => void;
-	onUpdate: (languages: ISkillLanguage[]) => void;
 }
 
 export const SkillLanguageForm = (props: ISkillLanguageFormProps) => {
-	const { skillId, language, onDelete, onUpdate } = props;
-
-	const [initialValues, setInitialValues] = useState<ISkillLanguage>(
-		language ??
-			({
-				id: 0,
-				locale: "",
-				name: "New Skill Name",
-				description: "New Skill Description",
-			} as ISkillLanguage),
-	);
+	const { skillId, language } = props;
 
 	const form = useForm<SkillLanguageFormObj>({
 		resolver: valibotResolver(skillLanguageForm),
 		defaultValues: {
-			name: initialValues.name,
-			locale: initialValues.locale,
-			description: initialValues.description,
+			name: language?.name,
+			locale: language?.locale,
+			description: language?.description,
 		},
 	});
 
 	const onSubmit = async (values: SkillLanguageFormObj) => {
 		try {
-			const res = await axios.post(
-				`${NEXT_PUBLIC_API_URL}/api/skill/${skillId}/languages/${values.locale}`,
-				values,
-			);
-			if (res.status === 200) {
-				const data = res.data as ISkillLanguage[];
-				onUpdate(data);
-				if (isUndefined(language)) {
-					const newLang = {
-						id: 0,
-						locale: "",
-						name: "New Skill Name",
-						description: "New Skill Description",
-					} as ISkillLanguage;
-					setInitialValues(newLang);
+			await actionSetSkillLanguage(skillId, values.locale, values);
+		} catch (err) {
+			toastError(err);
+		}
+	};
 
-					form.reset(newLang);
-				}
-			}
+	const onDelete = async () => {
+		const locale = language?.locale;
+		if (!locale) return;
+
+		try {
+			await actionDeleteSkillLanguage(skillId, locale);
 		} catch (err) {
 			toastError(err);
 		}
@@ -89,13 +70,13 @@ export const SkillLanguageForm = (props: ISkillLanguageFormProps) => {
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)}>
 				<div className="mb-3 flex flex-row gap-2">
-					{onDelete == null ? null : (
+					{language?.locale ? (
 						<div>
 							<Button type="button" onClick={onDelete}>
 								<TrashIcon />
 							</Button>
 						</div>
-					)}
+					) : null}
 
 					<div style={{ flex: 0 }}>
 						<Button
