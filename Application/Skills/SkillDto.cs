@@ -15,7 +15,7 @@ namespace CliveBot.Application.Skills
         public string Description { get; set; } = "Unknown Descritpion";
         public IEnumerable<SkillLanguageDto> Localized { get; set; } = new List<SkillLanguageDto>();
         public SkillCategory Category { get; set; } = SkillCategory.None;
-        public SkillSummon Summon { get; set; } = SkillSummon.None;
+        public SkillSummon Summon { get; set; } = SkillSummon.General;
 
         public int RatingPhysical { get; set; } = 0;
         public int RatingMagical { get; set; } = 0;
