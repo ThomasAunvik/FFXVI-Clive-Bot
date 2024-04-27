@@ -22,8 +22,7 @@ export enum SkillSummon {
 
 export const summonList = Object.values(SkillSummon)
 	.filter((val) => Number.isInteger(val))
-	.map((val) => val as number)
-	.filter((val) => val !== 0);
+	.map((val) => val as number);
 
 export const skillCategoryList: SkillCategory[] = Object.values(SkillCategory)
 	.filter((val) => Number.isInteger(val))

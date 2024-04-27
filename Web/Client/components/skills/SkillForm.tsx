@@ -57,13 +57,13 @@ export const SkillForm = (props: ISkillFormProps) => {
 			description: skill?.description,
 			category: skill?.category,
 			summon: skill?.summon,
-			ratingPhysical: skill?.ratingPhysical,
-			ratingMagical: skill?.ratingMagical,
-			costBuy: skill?.costBuy,
-			costUpgrade: skill?.costUpgrade,
-			costMaster: skill?.costMaster,
-			iconUrl: skill?.iconUrl,
-			previewImageUrl: skill?.previewImageUrl,
+			ratingPhysical: skill?.ratingPhysical ?? 0,
+			ratingMagical: skill?.ratingMagical ?? 0,
+			costBuy: skill?.costBuy ?? 0,
+			costUpgrade: skill?.costUpgrade ?? 0,
+			costMaster: skill?.costMaster ?? 0,
+			iconUrl: skill?.iconUrl ?? "",
+			previewImageUrl: skill?.previewImageUrl ?? "",
 		},
 	});
 
@@ -257,7 +257,19 @@ export const SkillForm = (props: ISkillFormProps) => {
 								<FormLabel>Damage Rating</FormLabel>
 								<div className="flex flex-row gap-4">
 									<FormControl>
-										<Input {...field} type="number" min={0} max={10} step={1} />
+										<Input
+											{...field}
+											defaultValue={field.value.toString()}
+											onChange={(event) => {
+												field.onChange(
+													Number.parseInt(event.currentTarget.value),
+												);
+											}}
+											type="number"
+											min={0}
+											max={10}
+											step={1}
+										/>
 									</FormControl>
 									<FormControl>
 										<Slider
@@ -284,7 +296,19 @@ export const SkillForm = (props: ISkillFormProps) => {
 								<FormLabel>Stagger Rating</FormLabel>
 								<div className="flex flex-row gap-4">
 									<FormControl>
-										<Input {...field} type="number" min={0} max={10} step={1} />
+										<Input
+											{...field}
+											defaultValue={field.value.toString()}
+											onChange={(event) => {
+												field.onChange(
+													Number.parseInt(event.currentTarget.value),
+												);
+											}}
+											type="number"
+											min={0}
+											max={10}
+											step={1}
+										/>
 									</FormControl>
 									<FormControl>
 										<Slider
@@ -313,7 +337,16 @@ export const SkillForm = (props: ISkillFormProps) => {
 							<FormItem className="pr-2 pl-2">
 								<FormLabel>Cost to Buy</FormLabel>
 								<FormControl>
-									<Input {...field} type="number" />
+									<Input
+										{...field}
+										defaultValue={field.value.toString()}
+										onChange={(event) => {
+											field.onChange(
+												Number.parseInt(event.currentTarget.value),
+											);
+										}}
+										type="number"
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -327,7 +360,16 @@ export const SkillForm = (props: ISkillFormProps) => {
 							<FormItem className="pr-2 pl-2">
 								<FormLabel>Cost to Upgrade</FormLabel>
 								<FormControl>
-									<Input {...field} type="number" />
+									<Input
+										{...field}
+										defaultValue={field.value.toString()}
+										onChange={(event) => {
+											field.onChange(
+												Number.parseInt(event.currentTarget.value),
+											);
+										}}
+										type="number"
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -341,7 +383,16 @@ export const SkillForm = (props: ISkillFormProps) => {
 							<FormItem className="pr-2 pl-2">
 								<FormLabel>Cost to Master</FormLabel>
 								<FormControl>
-									<Input {...field} type="number" />
+									<Input
+										{...field}
+										defaultValue={field.value.toString()}
+										onChange={(event) => {
+											field.onChange(
+												Number.parseInt(event.currentTarget.value),
+											);
+										}}
+										type="number"
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
