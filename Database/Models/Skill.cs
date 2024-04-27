@@ -10,26 +10,28 @@ namespace CliveBot.Database.Models
 {
 	public enum SkillCategory
 	{
-		None,
-		Other,
-		Attack,
-		Magic,
-		Jump,
-		Evade,
+		None = 0,
+        Attack = 1,
+        Magic = 2,
+        Other = 3,
+        Jump = 4,
+        Evade = 5,
 	}
 
 	public enum SkillSummon
 	{
-		None,
-		Ifrit,
-		Pheonix,
-		Garuda,
-		Shiva,
-		Titan,
-		Ramuh,
-		Odin,
-		Bahamut,
-	}
+		General = 0,
+        Ifrit = 1,
+        Pheonix = 2,
+        Garuda = 3,
+        Shiva = 4,
+        Titan = 5,
+        Ramuh = 6,
+        Odin = 7,
+        Bahamut = 8,
+        Leviathan = 9,
+        Ultima = 10,
+    }
 
 	public class SkillModel
 	{
@@ -40,7 +42,7 @@ namespace CliveBot.Database.Models
 		public string Description { get; set; } = "Unknown Description";
 		public ICollection<SkillLanguageModel> Localized { get; set; } = [];
 		public SkillCategory Category { get; set; } = SkillCategory.None;
-		public SkillSummon Summon { get; set; } = SkillSummon.None;
+		public SkillSummon Summon { get; set; } = SkillSummon.General;
 
 		public int RatingPhysical { get; set; } = 0;
 		public int RatingMagical { get; set; } = 0;
