@@ -1,168 +1,214 @@
+"use client";
+import { toastError } from "@/components/errors/ErrorHandler";
+import { toSentence } from "@/components/moderator/ModeratorSingleForm";
 import {
-  faPencil,
-  faSave,
-  faSpinner,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+	type ModeratorFormData,
+	moderatorFormSchema,
+} from "@/components/moderator/validate";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
+	actionDeleteModerator,
+	actionEditModerator,
+} from "@/lib/api/actions/moderators";
+import { NEXT_PUBLIC_API_URL } from "@/lib/env";
+import type { IModerator } from "@/lib/models/moderator/ModeratorModel";
+import { valibotResolver } from "@hookform/resolvers/valibot";
 import axios from "axios";
-import { Formik } from "formik";
+import { LoaderCircle, PencilIcon, SaveIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
-import {
-  Button,
-  ButtonGroup,
-  Collapse,
-  Form,
-  ListGroup,
-  ListGroupItem,
-  Spinner,
-} from "react-bootstrap";
-import {
-  ErrorModal,
-  ErrorModalInfo,
-  getErrorInfo,
-} from "../errors/ErrorHandler";
-import { IModerator } from "../models/moderator/ModeratorModel";
-import { toSentence } from "./ModeratorSingleForm";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export interface IModeratorListFormProps {
-  moderator: IModerator;
-  onDelete: () => void;
-  onUpdate: (moderators: IModerator[]) => void;
+	moderator: IModerator;
+	onUpdate: (moderators: IModerator[]) => void;
 }
 
 export const ModeratorListForm = (props: IModeratorListFormProps) => {
-  const { moderator, onDelete, onUpdate } = props;
+	const { moderator, onUpdate } = props;
 
-  const [collapse, setCollapse] = useState(false);
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
+	const [collapse, setCollapse] = useState(true);
 
-  return (
-    <Formik<IModerator>
-      initialValues={moderator}
-      enableReinitialize
-      onSubmit={async (values, action) => {
-        try {
-          var res = await axios.put("/api/moderator/" + moderator.id, values);
-          if (res.status == 200) {
-            var data = res.data as IModerator[];
-            onUpdate(data);
-          }
-        } catch (err: any) {
-          setError(getErrorInfo(err));
-        }
-        action.setSubmitting(false);
-      }}
-    >
-      {({
-        values,
-        dirty,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        handleReset,
-        isSubmitting,
-      }) => (
-        <Form onSubmit={handleSubmit} onReset={handleReset}>
-          <ButtonGroup className="mb-3">
-            <Button variant="danger" onClick={onDelete}>
-              <FontAwesomeIcon icon={faTrash} width={20} />
-            </Button>
-            <Button variant="secondary" onClick={() => setCollapse(!collapse)}>
-              <FontAwesomeIcon
-                icon={faPencil}
-                width={20}
-                style={{ display: "block" }}
-              />
-            </Button>
-            <Button
-              variant="success"
-              type="submit"
-              disabled={!dirty || isSubmitting}
-            >
-              {isSubmitting ? (
-                <div>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              ) : (
-                <FontAwesomeIcon icon={faSave} width={20} />
-              )}
-            </Button>
-          </ButtonGroup>
+	const form = useForm<ModeratorFormData>({
+		resolver: valibotResolver(moderatorFormSchema),
+		defaultValues: {
+			name: moderator.name,
+			connectionId: moderator.connectionId,
+			connectionSource: moderator.connectionSource,
+			permissions: moderator.permissions,
+		},
+	});
 
-          <Collapse in={collapse}>
-            <div>
-              <Form.Group>
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  name="name"
-                  type="text"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.name}
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Connection Source</Form.Label>
-                <Form.Control
-                  as="select"
-                  name="connectionSource"
-                  defaultValue={values.connectionSource}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                >
-                  {["Discord"].map((s) => (
-                    <option value={s} key={"connectionsource-" + s}>
-                      {s}
-                    </option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Connection Id</Form.Label>
-                <Form.Control
-                  name="connectionId"
-                  type="text"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.connectionId}
-                />
-              </Form.Group>
-            </div>
-          </Collapse>
+	const onSubmit = async (values: ModeratorFormData) => {
+		try {
+			const res = await actionEditModerator(
+				moderator.id.toString(),
+				values as IModerator,
+			);
 
-          <ListGroup variant="flush">
-            {Object.keys(values.permissions).map((key) => {
-              if (key == "id" || key == "moderator") return null;
-              const allowed = (values.permissions as any)[key] as boolean;
-              const objectKey = "permissions." + key;
-              return (
-                <ListGroupItem key={"permission-" + key}>
-                  <Form.Check
-                    name={objectKey}
-                    label={toSentence(key)}
-                    type="checkbox"
-                    checked={allowed ?? false}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    size={20}
-                  />
-                </ListGroupItem>
-              );
-            })}
-          </ListGroup>
-          {error == null ? null : (
-            <ErrorModal error={error} onHide={() => setError(null)} />
-          )}
-        </Form>
-      )}
-    </Formik>
-  );
+			toast("Successfully added a moderator");
+			onUpdate(res);
+		} catch (err) {
+			toastError(err);
+		}
+	};
+
+	const onDelete = async () => {
+		try {
+			const res = await actionDeleteModerator(moderator.id.toString());
+
+			toast("Successfully added a moderator");
+			onUpdate(res);
+		} catch (err) {
+			toastError(err);
+		}
+	};
+
+	return (
+		<Form {...form}>
+			<form
+				onSubmit={form.handleSubmit(onSubmit)}
+				className="flex flex-col gap-2"
+			>
+				<div className="flex flex-row justify-end gap-2">
+					<Button type="button" onClick={onDelete}>
+						<TrashIcon />
+					</Button>
+					<Button
+						variant="secondary"
+						type="button"
+						onClick={() => setCollapse(!collapse)}
+					>
+						<PencilIcon />
+					</Button>
+					<Button
+						type="submit"
+						disabled={!form.formState.isDirty || form.formState.isSubmitting}
+					>
+						{form.formState.isSubmitting ? (
+							<div>
+								<LoaderCircle className="animate-spin" />
+								<span className="sr-only">Loading...</span>
+							</div>
+						) : (
+							<SaveIcon />
+						)}
+					</Button>
+				</div>
+
+				<Accordion type="single" value={collapse ? "0" : "namefields"}>
+					<AccordionItem value="namefields" className="border-none">
+						<AccordionContent>
+							<FormField
+								control={form.control}
+								name="name"
+								render={({ field }) => (
+									<FormItem className="pr-2 pl-2">
+										<FormLabel>Name</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="connectionSource"
+								render={({ field }) => (
+									<FormItem className="pr-2 pl-2">
+										<FormLabel>Connection Source</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Select a Language" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{["Discord"].map((l) => (
+													<SelectItem value={l} key={`source-${l}`}>
+														{l}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="connectionId"
+								render={({ field }) => (
+									<FormItem className="pr-2 pl-2">
+										<FormLabel>Connection Id</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</AccordionContent>
+					</AccordionItem>
+				</Accordion>
+
+				<ul className="mt-2 flex flex-col gap-1 pr-2 pl-2">
+					{Object.keys(form.getValues().permissions).map((key, i) => {
+						if (key === "id" || key === "moderator") return null;
+
+						return (
+							<FormField
+								key={`permission-${key}`}
+								control={form.control}
+								// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+								{...form.register(`permissions.${key}` as any)}
+								render={({ field }) => (
+									<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+										<FormControl>
+											<Checkbox
+												checked={field.value}
+												onCheckedChange={field.onChange}
+											/>
+										</FormControl>
+										<FormLabel className="font-normal text-sm">
+											{toSentence(key)}
+										</FormLabel>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						);
+					})}
+				</ul>
+			</form>
+		</Form>
+	);
 };

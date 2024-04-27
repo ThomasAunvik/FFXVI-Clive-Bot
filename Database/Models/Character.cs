@@ -13,7 +13,7 @@ namespace CliveBot.Database.Models
         public int Id { get; set; }
         public required string Name { get; set; }
 
-        public IEnumerable<CharacterVariant> Variants { get; set; } = new List<CharacterVariant>();
-        public IEnumerable<CharacterNote> Notes { get; set; } = new List<CharacterNote>();
+        public ICollection<CharacterVariant> Variants { get; set; } = [];
+        public ICollection<CharacterNote> Notes { get; set; } = [];
     }
 }

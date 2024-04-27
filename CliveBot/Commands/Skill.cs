@@ -14,7 +14,7 @@ namespace CliveBot.Bot.Commands
 {
 
     [Group("skill", "Skills")]
-    public class SkillCommand : InteractionModuleBase
+    public class SkillCommand(ApplicationDbContext db) : InteractionModuleBase
     {
         public const string emote_skill_physical = "<:skill_physical:1070695272960774254>";
         public const string emote_skill_magical = "<:skill_magical:1070699453863964754>";
@@ -27,22 +27,18 @@ namespace CliveBot.Bot.Commands
         public const string emote_button_x = "<:button_x:1070713713864212491>";
 
 
-        public const string emote_eikon_garuda = "<:eikon_garuda:1070847801816252476>";
         public const string emote_eikon_ifrit = "<:eikon_ifrit:1070847573465759744>";
-        public const string emote_eikon_odin = "<:eikon_odin:1070847455429664880>";
         public const string emote_eikon_pheonix = "<:eikon_pheonix:1070847698560880672>";
+        public const string emote_eikon_garuda = "<:eikon_garuda:1070847801816252476>";
         public const string emote_eikon_ramuh = "<:eikon_ramuh:1070847615329124422>";
-        public const string emote_eikon_shiva = "<:eikon_shiva:1070847762469503056>";
         public const string emote_eikon_titan = "<:eikon_titan:1070847839837622354>";
+        public const string emote_eikon_bahamut = "<:eikon_titan:1070847839837622354>";
+        public const string emote_eikon_shiva = "<:eikon_shiva:1070847762469503056>";
+        public const string emote_eikon_odin = "<:eikon_odin:1070847455429664880>";
 
-        private readonly ApplicationDbContext db;
-        private readonly IServiceProvider services;
+        public const string emote_eikon_leviathan = "<:eikon_titan:1070847839837622354>";
+        public const string emote_eikon_ultima = "<:eikon_titan:1070847839837622354>";
 
-        public SkillCommand(IServiceProvider provider, ApplicationDbContext _db)
-        {
-            services = provider;
-            db = _db;
-        }
 
         public static EmbedBuilder SkillEmbedBuild(SkillModel skill, string? locale = null)
         {
@@ -62,7 +58,9 @@ namespace CliveBot.Bot.Commands
             EmbedBuilder embed = new()
             {
                 Title = name,
-                Description = Enum.GetName(skill.Category)
+                Description = skill.Summon == SkillSummon.General || skill.Category != SkillCategory.None ? 
+                    Enum.GetName(skill.Category) : 
+                    Enum.GetName(skill.Summon) 
             };
 
             embed.AddField("Description", desc);
@@ -75,7 +73,7 @@ namespace CliveBot.Bot.Commands
                 inline: true
             );
 
-            StringBuilder sb = new($"{emote_mana} {skill.CostBuy}");
+            StringBuilder sb = new($"{emote_mana}  {skill.CostBuy}");
             if(skill.CostUpgrade != 0)
             {
                 sb.Append($" / {skill.CostUpgrade}");
@@ -137,13 +135,22 @@ namespace CliveBot.Bot.Commands
 
             var embed = SkillEmbedBuild(skill);
 
-            var compBuilder = new ComponentBuilder()
+            if(!string.IsNullOrEmpty(skill.PreviewImageUrl))
+            {
+                var compBuilder = new ComponentBuilder()
                 .WithButton("Preview", $"skillimgpreview:{skill.Id}", ButtonStyle.Success);
+
+                await Context.Interaction.ModifyOriginalResponseAsync((r) =>
+                {
+                    r.Embed = embed.Build();
+                    r.Components = compBuilder.Build();
+                });
+                return;
+            }
 
             await Context.Interaction.ModifyOriginalResponseAsync((r) =>
             {
                 r.Embed = embed.Build();
-                r.Components = compBuilder.Build();
             });
         }
 
@@ -214,12 +221,15 @@ namespace CliveBot.Bot.Commands
 
             embed.AddField("Summons",
                 $"{emote_eikon_ifrit} Ifrit\n" +
-                $"{emote_eikon_garuda} Garuda\n" +
                 $"{emote_eikon_pheonix} Pheonix\n" +
-                $"{emote_eikon_odin} Odin\n" +
+                $"{emote_eikon_garuda} Garuda\n" +
                 $"{emote_eikon_ramuh} Ramuh\n" +
+                $"{emote_eikon_titan} Titan\n" +
+                $"{emote_eikon_bahamut} Bahamut\n" +
                 $"{emote_eikon_shiva} Shiva\n" +
-                $"{emote_eikon_titan} Titan" 
+                $"{emote_eikon_odin} Odin\n" +
+                $"{emote_eikon_leviathan} Leviathan\n" +
+                $"{emote_eikon_ultima} Ultima"
             );
 
             await Context.Interaction.ModifyOriginalResponseAsync((r) =>

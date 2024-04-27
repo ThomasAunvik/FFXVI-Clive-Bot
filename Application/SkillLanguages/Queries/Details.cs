@@ -23,10 +23,8 @@ namespace CliveBot.Application.Skills.Queries
             public required string Locale { get; set; }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Query, SkillLanguageDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Query, SkillLanguageDto>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config) { }
-
             public async Task<SkillLanguageDto> Handle(Query request, CancellationToken cancellationToken)
             {
                 var skill = await _context.Skills

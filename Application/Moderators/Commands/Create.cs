@@ -23,14 +23,8 @@ namespace CliveBot.Application.Moderators.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, List<ModeratorDto>>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Command, List<ModeratorDto>>
         {
-            private readonly IMediator _mediator;
-            public Handler(ApplicationDbContext context, IConfiguration config, IMediator mediator) : base(context, config)
-            {
-                _mediator = mediator;
-            }
-
             public async Task<List<ModeratorDto>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var moderator = new BotModerator()

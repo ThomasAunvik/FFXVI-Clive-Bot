@@ -1,0 +1,57 @@
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"vcs": {
+		"clientKind": "git",
+		"enabled": true,
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignore": [
+			"dist/**",
+			".astro/**",
+			"assets/**",
+			"public/**",
+			"**/__snapshots__",
+			"**/editors/intellij/**",
+			"*.astro",
+			"*.mdx",
+			"*.md",
+			"*.css",
+			"*.scss",
+			"*.svg",
+			"*.png",
+			"*.yml",
+			"*.yaml",
+			"*.snap",
+			"**/undefined/**",
+			"LICENSE-MIT",
+			"LICENSE-APACHE",
+			"ROME_LICENSE",
+			"ROME-LICENSE-MIT"
+		]
+	},
+	"formatter": {
+		"ignore": [
+			"configuration-schema.json"
+		],
+		"indentStyle": "space",
+		"indentWidth": 2,
+		"lineWidth": 80,
+		"lineEnding": "lf"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"style": {
+				"noNonNullAssertion": "off"
+			},
+			"nursery": {
+				"useSortedClasses": "warn"
+			}
+		}
+	},
+	"organizeImports": {
+		"enabled": true
+	}
+}

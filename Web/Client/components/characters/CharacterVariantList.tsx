@@ -1,17 +1,16 @@
+import { CharacterVariantForm } from "@/components/characters/CharacterVariantForm";
 import {
   Accordion,
-  Button,
-  Card,
-  Col,
-  Collapse,
-  Container,
-  Row,
-} from "react-bootstrap";
-import { ICharacter } from "../models/characters/CharacterModel";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAdd } from "@fortawesome/free-solid-svg-icons";
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import type { ICharacter } from "@/lib/models/characters/CharacterModel";
+import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { CharacterVariantForm } from "./CharacterVariantForm";
 
 export interface ICharacterVariantListProps {
   character: ICharacter;
@@ -32,48 +31,45 @@ export const CharacterVariantList = (props: ICharacterVariantListProps) => {
       <h2>
         Variants{" "}
         <Button onClick={() => setOpenNew(true)}>
-          <FontAwesomeIcon icon={faAdd} width={16} />
+          <PlusIcon />
         </Button>
       </h2>
-      <Collapse in={openNew}>
-        <div>
+      <Collapsible open={openNew}>
+        <CollapsibleContent>
           <Card>
-            <Card.Body>
+            <CardContent>
               <CharacterVariantForm
-                onSubmit={newVariant}
+                onUpdated={newVariant}
                 character={character}
                 onCancel={() => setOpenNew(false)}
               />
-            </Card.Body>
+            </CardContent>
           </Card>
-        </div>
-      </Collapse>
+        </CollapsibleContent>
+      </Collapsible>
 
-      <Accordion>
+      <Accordion type="multiple">
         {variants.map((v) => {
           return (
-            <Accordion.Item
-              key={`variant-${v.id}`}
-              eventKey={`variant-${v.id}`}
-            >
-              <Accordion.Header>
-                <Container>
-                  <Row>
-                    <Col sx={3}>Age: {v.age}</Col>
-                    <Col>
+            <AccordionItem key={`variant-${v.id}`} value={`variant-${v.id}`}>
+              <AccordionTrigger>
+                <div>
+                  <div className="flex flex-row">
+                    <span>Age: {v.age}</span>
+                    <span>
                       Year {v.fromYear} - {v.toYear}
-                    </Col>
-                  </Row>
-                </Container>
-              </Accordion.Header>
-              <Accordion.Body>
+                    </span>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
                 <CharacterVariantForm
                   variant={v}
-                  onSubmit={updateVariant}
+                  onUpdated={updateVariant}
                   character={character}
                 />
-              </Accordion.Body>
-            </Accordion.Item>
+              </AccordionContent>
+            </AccordionItem>
           );
         })}
       </Accordion>

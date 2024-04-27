@@ -1,5 +1,4 @@
 using CliveBot.Database;
-using NextjsStaticHosting.AspNetCore;
 using Serilog;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using CliveBot.Web.Events;
@@ -46,42 +45,57 @@ builder.Services.AddDbContext<ApplicationDbContext>((config) =>
 builder.Services.RegisterMediatR();
 
 var azureConfig = builder.Configuration.GetSection("Azure");
-var blobAccountName = azureConfig.GetValue<string>("BlobAccountName") ?? "";
-var blobSasToken = azureConfig.GetValue<string>("BlobSasToken") ?? "";
+var blobConnectionString = azureConfig.GetValue<string>("BlobConnectionString") ?? "";
 
-builder.Services.RegisterAzureBlobServices(
-    blobAccountName, blobSasToken
-);
+builder.Services.RegisterAzureBlobServices(blobConnectionString);
 
 var discordLogin = builder.Configuration.GetSection("DiscordLogin");
 var discordClientId = discordLogin.GetValue<string>("ClientId") ?? "";
 var discordClientSecret = discordLogin.GetValue<string>("ClientSecret") ?? "";
 
+var cookies = builder.Configuration.GetSection("Cookies");
+var cookieDomain = cookies.GetValue<string>("Domain");
+
+var frontendUrl = builder.Configuration.GetValue<string>("FrontendUrl");
+
+builder.Services.AddCors((o) => {
+    if (string.IsNullOrEmpty(frontendUrl)) return;
+    o.AddDefaultPolicy(p => p
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .WithOrigins(frontendUrl)
+    );
+});
+
 builder.Services.AddAuthentication(
-    CookieAuthenticationDefaults.AuthenticationScheme
-    ).AddDiscord(options => {
+        CookieAuthenticationDefaults.AuthenticationScheme
+    )
+    .AddDiscord(options =>
+    {
         options.AccessDeniedPath = "/error/accessdenied";
         options.ClientId = discordClientId;
         options.ClientSecret = discordClientSecret;
     })
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, (options) => {
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, (options) =>
+    {
         options.EventsType = typeof(XCookieAuthEvents);
         options.AccessDeniedPath = "/error/accessdenied";
         options.Cookie.SameSite = SameSiteMode.Strict;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.HttpOnly = false; // Needs for JavaScript
+        if (cookieDomain != null)
+        {
+            options.Cookie.Domain = cookieDomain;
+        }
     });
+    //.AddBearerToken();
 
 builder.Services.AddAuthorization(o =>
 {
     o.AddCustomPolicies();
 });
 builder.Services.AddPolicyHandlers();
-
-builder.Services.Configure<NextjsStaticHostingOptions>(
-    builder.Configuration.GetSection("NextjsStaticHosting")
-);
-builder.Services.AddNextjsStaticHosting();
 
 builder.Services.AddControllers();
 
@@ -112,16 +126,6 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseMiddleware<ErrorHandlingMiddleware>();
-
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -130,12 +134,24 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
-app.UseHealthChecks("/healthz");
 
 app.UseRouting();
 
+app.UseCors();
+
 app.UseAuthorization();
+
+app.UseHealthChecks("/healthz");
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.MapControllers();
 
@@ -148,10 +164,6 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/api/swagger/v1/swagger.json", "v1");
     options.RoutePrefix = "api/swagger";
 });
-
-app.MapNextjsStaticHtmls();
-
-app.UseNextjsStaticHosting();
 
 try
 {

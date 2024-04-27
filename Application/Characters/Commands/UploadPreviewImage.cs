@@ -34,15 +34,8 @@ namespace CliveBot.Application.Characters.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, CharacterVariantDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config, AzureUpload blobClient) : BaseHandler(context, config), IRequestHandler<Command, CharacterVariantDto>
         {
-            private readonly AzureUpload _blob;
-
-            public Handler(ApplicationDbContext context, IConfiguration config, AzureUpload blobClient) : base(context, config)
-            {
-                _blob = blobClient;
-            }
-
             public async Task<CharacterVariantDto> Handle(Command request, CancellationToken cancellationToken)
             {
                 var variant = await _context.CharacterVariants
@@ -57,7 +50,7 @@ namespace CliveBot.Application.Characters.Commands
                 string filePath = $"/images/characters/{variant.CharacterId}/variants/{variant.Id}/preview{extension ?? ""}";
 
                 await using (var fileStream = request.File.OpenReadStream()){
-                    var blob = await _blob.Upload(
+                    var blob = await blobClient.Upload(
                         filePath,
                         fileStream,
                         request.File.ContentType,

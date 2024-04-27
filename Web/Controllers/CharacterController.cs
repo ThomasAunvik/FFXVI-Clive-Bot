@@ -6,6 +6,7 @@ using CliveBot.Application.Skills;
 using CliveBot.Web.Policies;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CliveBot.Web.Controllers
 {
@@ -20,6 +21,8 @@ namespace CliveBot.Web.Controllers
         /// </summary>
         /// <returns>List of Characters</returns>
         [HttpGet]
+
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ActionResult<List<CharacterDto>>))]
         public async Task<List<CharacterDto>> GetAllCharacters()
         {
@@ -27,6 +30,8 @@ namespace CliveBot.Web.Controllers
         }
 
         [HttpGet("{id}")]
+
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ActionResult<CharacterDto>))]
         public async Task<CharacterDto> GetCharacter(int id)
         {
@@ -98,6 +103,8 @@ namespace CliveBot.Web.Controllers
 
         // Notes
         [HttpGet("{characterId}/notes")]
+
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ActionResult<List<CharacterNoteDto>>))]
         public async Task<List<CharacterNoteDto>> CreateNote(int characterId, CharacterNoteList.Query query)
         {

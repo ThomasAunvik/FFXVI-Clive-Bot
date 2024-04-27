@@ -20,7 +20,7 @@ namespace CliveBot.Database.Models
         public int FromYear { get; set; }
         public int ToYear { get; set; }
 
-        public IEnumerable<CharacterVariantField>? AdditionalFields { get; set; } = new List<CharacterVariantField>();
+        public ICollection<CharacterVariantField>? AdditionalFields { get; set; } = [];
 
         public string? PreviewImageUrl { get; set; }
 

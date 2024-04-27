@@ -1,153 +1,151 @@
-import { faPencil, faSave, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
-import { Formik } from "formik";
-import { isUndefined } from "lodash";
-import { useState } from "react";
-import { Button, ButtonGroup, Col, Form, Row, Spinner } from "react-bootstrap";
+"use client";
+import { toastError } from "@/components/errors/ErrorHandler";
 import {
-  ErrorModal,
-  ErrorModalInfo,
-  getErrorInfo,
-} from "../errors/ErrorHandler";
-import { ISkillLanguage } from "../models/skill/SkillLanguageModel";
+	type SkillLanguageFormObj,
+	skillLanguageForm,
+} from "@/components/skills/validate";
+import { Button } from "@/components/ui/button";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
+	actionDeleteSkillLanguage,
+	actionSetSkillLanguage,
+} from "@/lib/api/actions/skills";
+import type { ISkillLanguage } from "@/lib/models/skill/SkillLanguageModel";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { LoaderCircle, SaveIcon, TrashIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
 
 export interface ISkillLanguageFormProps {
-  skillId: string;
-  language?: ISkillLanguage;
-  onDelete?: () => void;
-  onUpdate: (languages: ISkillLanguage[]) => void;
+	skillId: string;
+	language?: ISkillLanguage;
 }
 
 export const SkillLanguageForm = (props: ISkillLanguageFormProps) => {
-  const { skillId, language, onDelete, onUpdate } = props;
+	const { skillId, language } = props;
 
-  const [initialValues, setInitialValues] = useState<ISkillLanguage>(
-    language ??
-      ({
-        id: 0,
-        locale: "",
-        name: "New Skill Name",
-        description: "New Skill Description",
-      } as ISkillLanguage)
-  );
+	const form = useForm<SkillLanguageFormObj>({
+		resolver: valibotResolver(skillLanguageForm),
+		defaultValues: {
+			name: language?.name,
+			locale: language?.locale,
+			description: language?.description,
+		},
+	});
 
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
+	const onSubmit = async (values: SkillLanguageFormObj) => {
+		try {
+			await actionSetSkillLanguage(skillId, values.locale, values);
+		} catch (err) {
+			toastError(err);
+		}
+	};
 
-  return (
-    <Formik<ISkillLanguage>
-      initialValues={initialValues}
-      enableReinitialize
-      onSubmit={async (values, action) => {
-        try {
-          var res = await axios.post(
-            `/api/skill/${skillId}/languages/${values.locale}`,
-            values
-          );
-          if (res.status == 200) {
-            var data = res.data as ISkillLanguage[];
-            onUpdate(data);
-            if (isUndefined(language)) {
-              setInitialValues({
-                id: 0,
-                locale: "",
-                name: "New Skill Name",
-                description: "New Skill Description",
-              } as ISkillLanguage);
-            }
-          }
-        } catch (err: any) {
-          setError(getErrorInfo(err));
-        }
-        action.setSubmitting(false);
-      }}
-    >
-      {({
-        values,
-        dirty,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        handleReset,
-        isSubmitting,
-      }) => (
-        <Form onSubmit={handleSubmit} onReset={handleReset}>
-          <Row className="mb-3">
-            {onDelete == null ? null : (
-              <Col>
-                <Button variant="danger" onClick={onDelete}>
-                  <FontAwesomeIcon icon={faTrash} width={20} />
-                </Button>
-              </Col>
-            )}
+	const onDelete = async () => {
+		const locale = language?.locale;
+		if (!locale) return;
 
-            <Col style={{ flex: 0 }}>
-              <Button
-                variant="success"
-                type="submit"
-                disabled={!dirty || isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div>
-                    <Spinner
-                      as="span"
-                      animation="border"
-                      size="sm"
-                      role="status"
-                      aria-hidden="true"
-                    />
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                ) : (
-                  <FontAwesomeIcon icon={faSave} width={20} />
-                )}
-              </Button>
-            </Col>
-          </Row>
+		try {
+			await actionDeleteSkillLanguage(skillId, locale);
+		} catch (err) {
+			toastError(err);
+		}
+	};
 
-          <Form.Group className="mb-2">
-            <Form.Label>Locale</Form.Label>
-            <Form.Control
-              name="locale"
-              as="select"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.locale}
-              disabled={language != null}
-            >
-              {["en", "no", "jp", "de", "fr"].map((l) => (
-                <option value={l} key={"locale-" + l}>
-                  {l}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group className="mb-2">
-            <Form.Label>Skill Name</Form.Label>
-            <Form.Control
-              name="name"
-              defaultValue={values.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Skill Description</Form.Label>
-            <Form.Control
-              name="description"
-              as="textarea"
-              rows={3}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.description}
-            />
-          </Form.Group>
+	return (
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)}>
+				<div className="mb-3 flex flex-row gap-2">
+					{language?.locale ? (
+						<div>
+							<Button type="button" onClick={onDelete}>
+								<TrashIcon />
+							</Button>
+						</div>
+					) : null}
 
-          {error == null ? null : (
-            <ErrorModal error={error} onHide={() => setError(null)} />
-          )}
-        </Form>
-      )}
-    </Formik>
-  );
+					<div style={{ flex: 0 }}>
+						<Button
+							type="submit"
+							disabled={!form.formState.isDirty || form.formState.isSubmitting}
+						>
+							{form.formState.isSubmitting ? (
+								<div>
+									<LoaderCircle className="animate-spin" />
+									<span className="sr-only">Loading...</span>
+								</div>
+							) : (
+								<SaveIcon />
+							)}
+						</Button>
+					</div>
+				</div>
+				<FormField
+					control={form.control}
+					name="locale"
+					render={({ field }) => (
+						<FormItem className="pr-2 pl-2">
+							<FormLabel>Locale</FormLabel>
+							<Select onValueChange={field.onChange} defaultValue={field.value}>
+								<FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Select a Language" />
+									</SelectTrigger>
+								</FormControl>
+								<SelectContent>
+									{["en", "no", "jp", "de", "fr"].map((l) => (
+										<SelectItem value={l} key={`locale-${l}`}>
+											{l}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+				<FormField
+					control={form.control}
+					name="name"
+					render={({ field }) => (
+						<FormItem className="pr-2 pl-2">
+							<FormLabel>Skill Name</FormLabel>
+							<FormControl>
+								<Input {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem className="pr-2 pl-2">
+							<FormLabel>Skill Description</FormLabel>
+							<FormControl>
+								<Input {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+			</form>
+		</Form>
+	);
 };

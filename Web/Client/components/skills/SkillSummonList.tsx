@@ -1,95 +1,84 @@
-import axios from "axios";
-import { useState } from "react";
-import { Accordion, Col, ListGroup, Row, Spinner } from "react-bootstrap";
-import { ISkill, SkillSummon, summonList } from "../models/skill/SkillModel";
-import Image from "next/image";
-import { replaceCDN } from "../constants";
+import { replaceCDN } from "@/components/constants";
 import {
-  ErrorModal,
-  ErrorModalInfo,
-  getErrorInfo,
-} from "../errors/ErrorHandler";
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+	type ISkill,
+	SkillSummon,
+	summonList,
+} from "@/lib/models/skill/SkillModel";
+import { LoaderCircle } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
-export const SkillSummonList = () => {
-  const [allSkills, setSkills] = useState<
-    { summon: SkillSummon; skills: ISkill[] }[]
-  >([]);
+export interface SkillSummonListProps {
+	skills: ISkill[];
+}
 
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
+export const SkillSummonList = (props: SkillSummonListProps) => {
+	const { skills } = props;
 
-  const fetchSummonSkills = async (summon: SkillSummon) => {
-    try {
-      const skillIndex = allSkills.findIndex((s) => s.summon == summon);
-      if (skillIndex != -1) return;
+	return (
+		<div>
+			<Accordion type="multiple">
+				{summonList
+					.filter((s) => s !== 0)
+					.map((s, i) => {
+						const summonSkills = skills.filter((sk) => sk.summon === s);
 
-      const params = new URLSearchParams({
-        summon: SkillSummon[summon].toString(),
-      });
-
-      const res = await axios.get("/api/skill?" + params.toString());
-      if (res.status == 200) {
-        const newSkills = res.data as ISkill[];
-        setSkills((val) => {
-          return [...val, { summon: summon, skills: newSkills }];
-        });
-      }
-    } catch (err: any) {
-      setError(getErrorInfo(err));
-    }
-  };
-
-  return (
-    <div>
-      <Accordion>
-        {summonList.map((s, i) => {
-          const skills = allSkills.find((sk) => sk.summon == s);
-
-          return (
-            <Accordion.Item
-              eventKey={i.toString()}
-              key={"summon-" + s.toString()}
-            >
-              <Accordion.Header
-                onClick={async () => {
-                  await fetchSummonSkills(s);
-                }}
-              >
-                {s}
-              </Accordion.Header>
-              <Accordion.Body>
-                {skills == undefined ? (
-                  <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </Spinner>
-                ) : (
-                  <ListGroup variant="flush">
-                    {skills.skills.map((s) => {
-                      return (
-                        <ListGroup.Item
-                          key={"skill-" + s.id}
-                          action
-                          href={"/dashboard/skills/" + s.id}
-                        >
-                          <Image
-                            alt=""
-                            src={replaceCDN(s.iconUrl ?? "")}
-                            width={30}
-                            height={30}
-                          />
-                          <span style={{ marginLeft: "1em" }}>{s.name}</span>
-                        </ListGroup.Item>
-                      );
-                    })}
-                  </ListGroup>
-                )}
-              </Accordion.Body>
-            </Accordion.Item>
-          );
-        })}
-      </Accordion>
-      {error == null ? null : (
-        <ErrorModal error={error} onHide={() => setError(null)} />
-      )}
-    </div>
-  );
+						return (
+							<AccordionItem
+								value={i.toString()}
+								key={`summon-${s.toString()}`}
+							>
+								<AccordionTrigger>{SkillSummon[s]}</AccordionTrigger>
+								<AccordionContent>
+									{skills === undefined ? (
+										<div>
+											<LoaderCircle className="animate-spin" />
+											<span className="sr-only">Loading...</span>
+										</div>
+									) : (
+										<ul className="flex flex-col gap-4">
+											{summonSkills.length <= 0 ? (
+												<Label>There are no skills</Label>
+											) : null}
+											{summonSkills.map((s) => {
+												return (
+													<li key={`skill-${s.id}`}>
+														<Link
+															href={`/dashboard/skills/${s.id}`}
+															className="flex flex-row"
+														>
+															{s.iconUrl ? (
+																<Image
+																	alt={`Skill ${s.name} Image`}
+																	src={replaceCDN(s.iconUrl)}
+																	width={40}
+																	height={40}
+																/>
+															) : (
+																<Skeleton className="h-10 w-10" />
+															)}
+															<span className="mt-2 ml-4 text-base">
+																{s.name}
+															</span>
+														</Link>
+													</li>
+												);
+											})}
+										</ul>
+									)}
+								</AccordionContent>
+							</AccordionItem>
+						);
+					})}
+			</Accordion>
+		</div>
+	);
 };

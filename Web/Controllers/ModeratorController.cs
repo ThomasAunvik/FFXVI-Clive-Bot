@@ -23,7 +23,7 @@ namespace CliveBot.Web.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<List<ModeratorDto>>> AddMod(int id, ModeratorEdit.Command command)
+        public async Task<ActionResult<List<ModeratorDto>>> EditMod(int id, ModeratorEdit.Command command)
         {
             command.ModeratorId = id;
             return await Mediator.Send(command);

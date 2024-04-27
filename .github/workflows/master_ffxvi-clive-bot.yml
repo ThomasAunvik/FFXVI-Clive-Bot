@@ -11,20 +11,20 @@ on:
 
 jobs:
   # BUILDS
-  buildbot:
+  build-bot:
     name: Build Bot
     runs-on: ubuntu-latest
+    environment: Production (Bot)
     env:
       botdirectory: ./CliveBot
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.x'
-          include-prerelease: true
+          dotnet-version: '8.x'
 
       - name: Build with dotnet
         working-directory: ${{ env.botdirectory }}
@@ -32,28 +32,28 @@ jobs:
 
       - name: dotnet publish
         working-directory: ${{ env.botdirectory }}
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/clivebot
+        run: dotnet publish -c Release
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: clivebot
-          path: ${{env.DOTNET_ROOT}}/clivebot
+          path: ${{env.botdirectory}}/bin/Release/net8.0/publish
 
-  buildweb:
-    name: Build Web
+  build-backend-web:
+    name: Build Backend Web
     runs-on: ubuntu-latest
+    environment: Production (Web)
     env:
       webdirectory: ./Web
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.x'
-          include-prerelease: true
+          dotnet-version: '8.x'
 
       - name: Build with dotnet
         working-directory: ${{ env.webdirectory }}
@@ -61,30 +61,56 @@ jobs:
 
       - name: dotnet publish
         working-directory: ${{ env.webdirectory }}
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/web
+        run: dotnet publish -c Release
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: webapp
-          path: ${{env.DOTNET_ROOT}}/web
+          name: webbackend
+          path: ${{env.webdirectory}}/bin/Release/net8.0/publish/
+
+  test-build-frontend-web:
+    name: Test Build Frontend Web
+    runs-on: ubuntu-latest
+    environment: Production (Web)
+
+    env:
+      webdirectory: ./Web/Client
+        
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+
+      - name: Package Install
+        working-directory: ${{env.webdirectory}}
+        run: bun install
+
+      - name: Build Web Project
+        working-directory: ${{env.webdirectory}}
+        run: bun run build
+        
+      - name: Test Project
+        working-directory: ${{env.webdirectory}}
+        run: bun run test --if-present
 
   # MIGRATIONS
   migrations:
     name: Database Migrations
     runs-on: ubuntu-latest
-    needs: [buildbot, buildweb]
+    needs: [build-bot, build-backend-web, test-build-frontend-web]
     env:
       dbdirectory: ./Database
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: Database
       
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.x'
-          include-prerelease: true
+          dotnet-version: '8.x'
 
       - name: Set up .NET EF Core Tools
         run: dotnet tool install --global dotnet-ef
@@ -97,48 +123,77 @@ jobs:
 
 
   # DEPLOYMENT
-  deploybot:
+  deploy-bot:
     name: Deploy Bot
     runs-on: ubuntu-latest
-    needs: [buildbot, migrations]
+    needs: [migrations, build-bot]
     environment:
       name: 'Production (Bot)'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: clivebot
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'FFXVI-Clive-Bot'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6B7928DA4B7E4D72942283AFBF82D918 }}
           package: .
 
-  deployweb:
-    name: Deploy Web
+  deploy-web-backend:
+    name: Deploy Web Backend
     runs-on: ubuntu-latest
-    needs: [buildweb, migrations]
+    needs: [migrations, build-backend-web]
     environment:
       name: 'Production (Web)'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          name: webapp
+          name: webbackend
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'FFXVI-Clive-Bot-Web'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_963A587B3B4944D7B3B56A788FCE27C1 }}
           package: .
+
+  deploy-web-frontend:
+    name: Deploy Web Frontend
+    runs-on: ubuntu-latest
+    needs: [migrations, test-build-frontend-web]
+    environment:
+      name: 'Production (Web)'
+      url: ${{ steps.builddeploy.outputs.static_web_app_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          lfs: false
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_YELLOW_GRASS_0D78F5703 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          action: "upload"
+          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
+          app_location: "Web/Client" # App source code path
+          api_location: "Web/Client/lib/api/functions/" # Api source code path - optional
+          output_location: "" # Built app content directory - optional
+          ###### End of Repository/Build Configurations ######
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.API_URL }}

@@ -17,7 +17,7 @@ namespace CliveBot.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.1")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -203,6 +203,63 @@ namespace CliveBot.Database.Migrations
                     b.ToTable("CharacterVariantFields");
                 });
 
+            modelBuilder.Entity("CliveBot.Database.Models.SkillDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Cooldown")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Mastery")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SkillId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Upgrade")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillId")
+                        .IsUnique();
+
+                    b.ToTable("SkillDetail");
+                });
+
+            modelBuilder.Entity("CliveBot.Database.Models.SkillDetailTechniques", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("SkillDetailId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillDetailId");
+
+                    b.ToTable("SkillDetailTechniques");
+                });
+
             modelBuilder.Entity("CliveBot.Database.Models.SkillLanguageModel", b =>
                 {
                     b.Property<int>("Id")
@@ -323,6 +380,26 @@ namespace CliveBot.Database.Migrations
                     b.Navigation("Variant");
                 });
 
+            modelBuilder.Entity("CliveBot.Database.Models.SkillDetail", b =>
+                {
+                    b.HasOne("CliveBot.Database.Models.SkillModel", "Skill")
+                        .WithOne("Detail")
+                        .HasForeignKey("CliveBot.Database.Models.SkillDetail", "SkillId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+                });
+
+            modelBuilder.Entity("CliveBot.Database.Models.SkillDetailTechniques", b =>
+                {
+                    b.HasOne("CliveBot.Database.Models.SkillDetail", "SkillDetail")
+                        .WithMany("BattleTechniques")
+                        .HasForeignKey("SkillDetailId");
+
+                    b.Navigation("SkillDetail");
+                });
+
             modelBuilder.Entity("CliveBot.Database.Models.SkillLanguageModel", b =>
                 {
                     b.HasOne("CliveBot.Database.Models.SkillModel", "Skill")
@@ -351,8 +428,16 @@ namespace CliveBot.Database.Migrations
                     b.Navigation("AdditionalFields");
                 });
 
+            modelBuilder.Entity("CliveBot.Database.Models.SkillDetail", b =>
+                {
+                    b.Navigation("BattleTechniques");
+                });
+
             modelBuilder.Entity("CliveBot.Database.Models.SkillModel", b =>
                 {
+                    b.Navigation("Detail")
+                        .IsRequired();
+
                     b.Navigation("Localized");
                 });
 #pragma warning restore 612, 618

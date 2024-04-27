@@ -1,457 +1,522 @@
-import axios, { AxiosError, AxiosProgressEvent, CancelToken } from "axios";
-import { Formik, FormikHelpers } from "formik";
+"use client";
+import { toastError } from "@/components/errors/ErrorHandler";
+import { type SkillFormObj, skillForm } from "@/components/skills/validate";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import { UploadProgress } from "@/components/upload/UploadProgress";
+import { actionCreateSkill, actionUpdateSkill } from "@/lib/api/actions/skills";
+import { NEXT_PUBLIC_API_URL } from "@/lib/env";
+import {
+	type ISkill,
+	SkillCategory,
+	SkillSummon,
+	skillCategoryList,
+	summonList,
+} from "@/lib/models/skill/SkillModel";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import axios, { type AxiosProgressEvent } from "axios";
 import _, { isNull } from "lodash";
+import { LoaderCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import {
-  Button,
-  ButtonGroup,
-  Col,
-  Collapse,
-  Form,
-  Row,
-  Spinner,
-} from "react-bootstrap";
-import { replaceCDN } from "../constants";
-import {
-  ErrorModal,
-  ErrorModalInfo,
-  getErrorInfo,
-} from "../errors/ErrorHandler";
-import {
-  ISkill,
-  SkillCategory,
-  skillCategoryList,
-  SkillSummon,
-  summonList,
-} from "../models/skill/SkillModel";
-import { UploadProgress } from "../upload/UploadProgress";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export interface ISkillFormProps {
-  skill?: ISkill;
+	skill?: ISkill;
 }
-
-interface FormikProps {
-  iconFile: File | null;
-  previewFile: File | null;
-}
-
-type FormikFormProps = ISkill & FormikProps;
 
 export const SkillForm = (props: ISkillFormProps) => {
-  const { skill } = props;
+	const { skill } = props;
 
-  const [initialSkill, setInitialSkill] = useState<ISkill>(
-    skill ?? {
-      id: 0,
-      name: "",
-      description: "",
-      localized: [],
-      category: SkillCategory.None,
-      summon: SkillSummon.Ifrit,
-      ratingPhysical: 0,
-      ratingMagical: 0,
-      costBuy: 0,
-      costUpgrade: 0,
-      costMaster: 0,
-    }
-  );
+	const router = useRouter();
 
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
+	const form = useForm<SkillFormObj>({
+		resolver: valibotResolver(skillForm),
+		defaultValues: {
+			name: skill?.name,
+			description: skill?.description,
+			category: skill?.category,
+			summon: skill?.summon,
+			ratingPhysical: skill?.ratingPhysical ?? 0,
+			ratingMagical: skill?.ratingMagical ?? 0,
+			costBuy: skill?.costBuy ?? 0,
+			costUpgrade: skill?.costUpgrade ?? 0,
+			costMaster: skill?.costMaster ?? 0,
+			iconUrl: skill?.iconUrl ?? "",
+			previewImageUrl: skill?.previewImageUrl ?? "",
+		},
+	});
 
-  const cancelUploads = useRef(new AbortController());
-  const [iconFileProgress, setIconFileProgress] =
-    useState<AxiosProgressEvent | null>(null);
-  const [previewFileProgress, setPreviewFileProgress] =
-    useState<AxiosProgressEvent | null>(null);
+	const cancelUploads = useRef(new AbortController());
+	const [iconFileProgress, setIconFileProgress] =
+		useState<AxiosProgressEvent | null>(null);
+	const [previewFileProgress, setPreviewFileProgress] =
+		useState<AxiosProgressEvent | null>(null);
 
-  const submitForm = async (
-    values: ISkill & FormikProps,
-    actions: FormikHelpers<FormikFormProps>
-  ) => {
-    const { iconFile, previewFile, ...newSkill } = values;
+	const onSubmit = async (values: SkillFormObj) => {
+		const { iconFile, previewFile, ...newSkill } = values;
 
-    var skillId = skill?.id ?? null;
-    if (skill == null) {
-      const res = await axios.post("/api/skill/", newSkill);
-      if (res.status != 200) {
-        setError({
-          statusCode: res.status,
-          statusMessage: res.statusText,
-          message: res.data.message,
-        });
-        return null;
-      }
+		const skillId = skill?.id ?? null;
 
-      var newInitialSkill = res.data as ISkill;
-      skillId = newInitialSkill.id;
-      setInitialSkill(newInitialSkill);
-    } else {
-      if (!_.isEqual(newSkill, initialSkill)) {
-        const res = await axios.put("/api/skill/" + skill.id, newSkill);
-        if (res.status != 200) {
-          setError({
-            statusCode: res.status,
-            statusMessage: res.statusText,
-            message: res.data.message,
-          });
-          return null;
-        }
+		let newSkillId: string | null = null;
+		try {
+			if (skillId == null) {
+				const createdSkill = await actionCreateSkill(newSkill as ISkill);
+				toast("Skill Created");
+				newSkillId = createdSkill.id.toString();
+			} else {
+				if (!_.isEqual(newSkill, skill)) {
+					await actionUpdateSkill(skillId.toString(), newSkill as ISkill);
+					toast("Skill Updated.");
+				}
+			}
 
-        var newInitialSkill = res.data as ISkill;
-        setInitialSkill(newInitialSkill);
-      }
-    }
+			if (iconFile != null && (!isNull(skillId) || !isNull(newSkillId))) {
+				const iconForm = new FormData();
+				iconForm.append("iconFile", iconFile);
 
-    if (iconFile != null && !isNull(skillId)) {
-      const iconForm = new FormData();
-      iconForm.append("iconFile", iconFile);
-      const res = await axios.postForm(
-        "/api/skill/" + skillId + "/images/icon",
-        iconForm,
-        {
-          onDownloadProgress: (prog) => {
-            setIconFileProgress({ ...prog });
-          },
-          signal: cancelUploads.current.signal,
-        }
-      );
+				try {
+					await axios.postForm(
+						`${NEXT_PUBLIC_API_URL}/api/skill/${
+							newSkillId == null ? skillId : newSkillId
+						}/images/icon`,
+						iconForm,
+						{
+							onDownloadProgress: (prog) => {
+								setIconFileProgress({ ...prog });
+							},
+							signal: cancelUploads.current.signal,
+							withCredentials: true,
+						},
+					);
 
-      if (res.status != 200) {
-        setError({
-          statusCode: res.status,
-          statusMessage: res.statusText,
-          message: res.data.message,
-        });
-        return;
-      }
-    }
+					setIconFileProgress(null);
+					toast("Icon Uploaded.");
+				} catch (err) {
+					toastError(err);
+				}
+			}
 
-    if (previewFile != null && !isNull(skillId)) {
-      const previewForm = new FormData();
-      previewForm.append("previewFile", previewFile);
-      const res = await axios.postForm(
-        "/api/skill/" + skillId + "/images/preview",
-        previewForm,
-        {
-          onDownloadProgress: (prog) => {
-            setPreviewFileProgress({ ...prog });
-          },
-          signal: cancelUploads.current.signal,
-        }
-      );
+			if (previewFile != null && (!isNull(skillId) || !isNull(newSkillId))) {
+				const previewForm = new FormData();
+				previewForm.append("previewFile", previewFile);
+				try {
+					await axios.postForm(
+						`${NEXT_PUBLIC_API_URL}/api/skill/${
+							newSkillId ?? skillId
+						}/images/preview`,
+						previewForm,
+						{
+							onDownloadProgress: (prog) => {
+								setPreviewFileProgress({ ...prog });
+							},
+							signal: cancelUploads.current.signal,
+							withCredentials: true,
+						},
+					);
+					setPreviewFileProgress(null);
 
-      if (res.status != 200) {
-        setError({
-          statusCode: res.status,
-          statusMessage: res.statusText,
-          message: res.data.message,
-        });
-        return;
-      }
-    }
+					toast("Preview Image Uploaded.");
+				} catch (err) {
+					toastError(err);
+				}
+			}
 
-    console.log(skill);
-    if ((isNull(skill) || skill === undefined) && !isNull(skillId)) {
-      console.log("test");
-      document.location.replace("/dashboard/skills/" + skillId);
-    }
+			if (newSkillId) {
+				router.replace(`/dashboard/skills/${newSkillId}`);
+			}
+		} catch (err) {
+			toastError(err);
+		}
 
-    return;
-  };
+		return;
+	};
 
-  const formik = (
-    <Formik<FormikFormProps>
-      initialValues={{ ...initialSkill } as FormikFormProps}
-      enableReinitialize
-      onSubmit={async (values, actions) => {
-        try {
-          await submitForm(values, actions);
-        } catch (err: any) {
-          setError(getErrorInfo(err));
-        }
+	return (
+		<Form {...form}>
+			<form
+				onSubmit={form.handleSubmit(onSubmit)}
+				className="flex flex-col gap-6"
+			>
+				<div className="flex flex-col gap-2">
+					<FormField
+						control={form.control}
+						name="name"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Name</FormLabel>
+								<FormControl>
+									<Input {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-        actions.setSubmitting(false);
-      }}
-    >
-      {({
-        values,
-        dirty,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        isSubmitting,
-        setFieldValue,
-      }) => (
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              name="name"
-              type="text"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.name}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              name="description"
-              as={"textarea"}
-              rows={3}
-              value={values.description}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Category</Form.Label>
-            <Form.Control
-              as="select"
-              name="category"
-              defaultValue={SkillCategory[values.category]}
-              onChange={(event) => {
-                var value = event.currentTarget.value as unknown;
-                setFieldValue(
-                  "category",
-                  SkillCategory[value as SkillCategory]
-                );
-              }}
-              onBlur={handleBlur}
-            >
-              {skillCategoryList.map((s) => (
-                <option value={s} key={"category-" + s}>
-                  {s}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Summon</Form.Label>
-            <Form.Control
-              as="select"
-              name="summon"
-              defaultValue={SkillSummon[values.summon]}
-              onChange={(event) => {
-                var value = event.currentTarget.value as unknown;
-                setFieldValue("summon", SkillSummon[value as SkillSummon]);
-              }}
-              onBlur={handleBlur}
-            >
-              {summonList.map((s) => (
-                <option value={s} key={"summon-" + s}>
-                  {s}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
+					<FormField
+						control={form.control}
+						name="description"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Description</FormLabel>
+								<FormControl>
+									<Textarea {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Physical Rating</Form.Label>
-            <Row>
-              <Col xs="4">
-                <Form.Control
-                  name="ratingPhysical"
-                  type="number"
-                  value={values.ratingPhysical}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min={0}
-                  max={10}
-                  step={1}
-                />
-              </Col>
-              <Col xs="8">
-                <Form.Range
-                  name="ratingPhysical"
-                  value={values.ratingPhysical}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min={0}
-                  max={10}
-                  step={1}
-                />
-              </Col>
-            </Row>
-          </Form.Group>
+					<FormField
+						control={form.control}
+						name="category"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Category</FormLabel>
+								<Select
+									onValueChange={(event) => {
+										field.onChange(Number.parseInt(event));
+									}}
+									defaultValue={`${field.value}`}
+								>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Select a Category" />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{skillCategoryList.map((l) => (
+											<SelectItem value={`${l}`} key={`source-${l}`}>
+												{SkillCategory[l]}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Magical Rating</Form.Label>
-            <Row>
-              <Col xs="4">
-                <Form.Control
-                  name="ratingMagical"
-                  type="number"
-                  value={values.ratingMagical}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min={0}
-                  max={10}
-                  step={1}
-                />
-              </Col>
-              <Col xs="8">
-                <Form.Range
-                  name="ratingMagical"
-                  value={values.ratingMagical}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min={0}
-                  max={10}
-                  step={1}
-                />
-              </Col>
-            </Row>
-          </Form.Group>
+					<FormField
+						control={form.control}
+						name="summon"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Summon</FormLabel>
+								<Select
+									onValueChange={(event) => {
+										field.onChange(Number.parseInt(event));
+									}}
+									defaultValue={`${field.value}`}
+								>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Select a Summon" />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{summonList.map((l) => (
+											<SelectItem value={`${l}`} key={`source-${l}`}>
+												{SkillSummon[l]}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Cost Buy</Form.Label>
-            <Form.Control
-              name="costBuy"
-              type="number"
-              value={values.costBuy}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-          </Form.Group>
+				<div className="flex flex-col gap-2">
+					<FormField
+						control={form.control}
+						name="ratingPhysical"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Damage Rating</FormLabel>
+								<div className="flex flex-row gap-4">
+									<FormControl>
+										<Input
+											{...field}
+											defaultValue={field.value.toString()}
+											onChange={(event) => {
+												field.onChange(
+													Number.parseInt(event.currentTarget.value),
+												);
+											}}
+											type="number"
+											min={0}
+											max={10}
+											step={1}
+										/>
+									</FormControl>
+									<FormControl>
+										<Slider
+											defaultValue={[field.value]}
+											onValueChange={(e) => {
+												field.onChange(e[0]);
+											}}
+											onBlur={field.onBlur}
+											min={0}
+											max={10}
+											step={1}
+										/>
+									</FormControl>
+								</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="ratingMagical"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Stagger Rating</FormLabel>
+								<div className="flex flex-row gap-4">
+									<FormControl>
+										<Input
+											{...field}
+											defaultValue={field.value.toString()}
+											onChange={(event) => {
+												field.onChange(
+													Number.parseInt(event.currentTarget.value),
+												);
+											}}
+											type="number"
+											min={0}
+											max={10}
+											step={1}
+										/>
+									</FormControl>
+									<FormControl>
+										<Slider
+											defaultValue={[field.value]}
+											onValueChange={(e) => {
+												field.onChange(e[0]);
+											}}
+											onBlur={field.onBlur}
+											min={0}
+											max={10}
+											step={1}
+										/>
+									</FormControl>
+								</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Cost Upgrade</Form.Label>
-            <Form.Control
-              name="costUpgrade"
-              type="number"
-              value={values.costUpgrade}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-          </Form.Group>
+				<div className="flex flex-col gap-2">
+					<FormField
+						control={form.control}
+						name="costBuy"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Cost to Buy</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										defaultValue={field.value.toString()}
+										onChange={(event) => {
+											field.onChange(
+												Number.parseInt(event.currentTarget.value),
+											);
+										}}
+										type="number"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Cost Master</Form.Label>
-            <Form.Control
-              name="costMaster"
-              type="number"
-              value={values.costMaster}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-          </Form.Group>
+					<FormField
+						control={form.control}
+						name="costUpgrade"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Cost to Upgrade</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										defaultValue={field.value.toString()}
+										onChange={(event) => {
+											field.onChange(
+												Number.parseInt(event.currentTarget.value),
+											);
+										}}
+										type="number"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Icon</Form.Label>
-            <Form.Control
-              name="iconFile"
-              type="file"
-              accept="image/*"
-              className="mb-2"
-              onChange={(event) => {
-                setFieldValue(
-                  "iconFile",
-                  (event.currentTarget as any).files[0]
-                );
-              }}
-              onBlur={handleBlur}
-            />
-            <Collapse in={iconFileProgress != null}>
-              <div>
-                <UploadProgress progress={iconFileProgress} />
-              </div>
-            </Collapse>
-            <Form.Control
-              name="iconUrl"
-              value={values.iconUrl ?? ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-            <Button
-              variant="link"
-              disabled={values.iconUrl == null}
-              href={replaceCDN(values.iconUrl ?? "")}
-              target="_blank"
-            >
-              Preview Image
-            </Button>
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Preview Image</Form.Label>
-            <Form.Control
-              name="previewFile"
-              type="file"
-              accept="image/*"
-              className="mb-2"
-              onChange={(event) => {
-                setFieldValue(
-                  "previewFile",
-                  (event.currentTarget as any).files[0]
-                );
-              }}
-              onBlur={handleBlur}
-            />
-            <Collapse in={previewFileProgress != null}>
-              <div>
-                <UploadProgress progress={previewFileProgress} />
-              </div>
-            </Collapse>
-            <Form.Control
-              name="previewImageUrl"
-              value={values.previewImageUrl ?? ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-            <Button
-              variant="link"
-              disabled={values.previewImageUrl == null}
-              href={replaceCDN(values.previewImageUrl ?? "")}
-              target="_blank"
-            >
-              Preview Image
-            </Button>
-          </Form.Group>
+					<FormField
+						control={form.control}
+						name="costMaster"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Cost to Master</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										defaultValue={field.value.toString()}
+										onChange={(event) => {
+											field.onChange(
+												Number.parseInt(event.currentTarget.value),
+											);
+										}}
+										type="number"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
 
-          <Form.Group>
-            <ButtonGroup>
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={!dirty || isSubmitting}
-              >
-                Submit
-              </Button>
+				<div className="flex flex-col gap-2">
+					<FormField
+						control={form.control}
+						name="iconFile"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Icon</FormLabel>
+								<FormControl>
+									<Input
+										type="file"
+										accept="image/*"
+										onChange={(event) => {
+											const files = event.currentTarget.files;
+											if (!files || files.length <= 0) return;
 
-              {(values.iconFile != null || values.previewFile != null) &&
-              isSubmitting ? (
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    cancelUploads.current.abort();
-                  }}
-                >
-                  Cancel Upload
-                </Button>
-              ) : null}
+											field.onChange(files[0]);
+										}}
+										onBlur={field.onBlur}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<Collapsible open={iconFileProgress != null}>
+						<CollapsibleContent>
+							<UploadProgress progress={iconFileProgress} />
+						</CollapsibleContent>
+					</Collapsible>
 
-              {!isSubmitting ? null : (
-                <Button variant="secondary" disabled>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  <span className="visually-hidden">Loading...</span>
-                </Button>
-              )}
-            </ButtonGroup>
-          </Form.Group>
+					<FormField
+						control={form.control}
+						name="iconUrl"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Icon Url</FormLabel>
+								<FormControl>
+									<Input {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-          {error == null ? null : (
-            <ErrorModal error={error} onHide={() => setError(null)} />
-          )}
-        </Form>
-      )}
-    </Formik>
-  );
+					<FormField
+						control={form.control}
+						name="previewFile"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Preview Image</FormLabel>
+								<FormControl>
+									<Input
+										type="file"
+										accept="image/*"
+										onChange={(event) => {
+											const files = event.currentTarget.files;
+											if (!files || files.length <= 0) return;
 
-  return formik;
+											field.onChange(files[0]);
+										}}
+										onBlur={field.onBlur}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<Collapsible open={previewFileProgress != null}>
+						<CollapsibleContent>
+							<UploadProgress progress={previewFileProgress} />
+						</CollapsibleContent>
+					</Collapsible>
+
+					<FormField
+						control={form.control}
+						name="previewImageUrl"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Preview Image Url</FormLabel>
+								<FormControl>
+									<Input {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+				<div className="flex flex-row gap-4">
+					<Button
+						type="submit"
+						disabled={!form.formState.isDirty || form.formState.isSubmitting}
+					>
+						Submit
+					</Button>
+
+					{(form.getValues().iconFile != null ||
+						form.getValues().previewFile != null) &&
+					form.formState.isSubmitting ? (
+						<Button
+							type="button"
+							onClick={() => {
+								cancelUploads.current.abort();
+							}}
+						>
+							Cancel Upload
+						</Button>
+					) : null}
+
+					{!form.formState.isSubmitting ? null : (
+						<Button type="button" disabled>
+							<LoaderCircle className="animate-spin" />
+							<span className="sr-only">Loading...</span>
+						</Button>
+					)}
+				</div>
+			</form>
+		</Form>
+	);
 };

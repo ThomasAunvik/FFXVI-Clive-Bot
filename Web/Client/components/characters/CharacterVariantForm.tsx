@@ -1,271 +1,255 @@
-import { Formik, FormikHelpers } from "formik";
-import { ICharacterVariant } from "../models/characters/CharacterVariant";
-import { Button, ButtonGroup, Collapse, Form, Spinner } from "react-bootstrap";
 import {
-  ErrorModal,
-  ErrorModalInfo,
-  getErrorInfo,
-} from "../errors/ErrorHandler";
-import { useRef, useState } from "react";
-import axios, { AxiosProgressEvent } from "axios";
-import { UploadProgress } from "../upload/UploadProgress";
-import { replaceCDN } from "../constants";
-import { ICharacter } from "../models/characters/CharacterModel";
+	type CharacterVariantFormObj,
+	characterVariantForm,
+} from "@/components/characters/validate";
+import { toastError } from "@/components/errors/ErrorHandler";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { UploadProgress } from "@/components/upload/UploadProgress";
+import { NEXT_PUBLIC_API_URL } from "@/lib/env";
+import type { ICharacter } from "@/lib/models/characters/CharacterModel";
+import type { ICharacterVariant } from "@/lib/models/characters/CharacterVariant";
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import axios, { type AxiosProgressEvent } from "axios";
 import _, { isNull } from "lodash";
+import { LoaderCircle } from "lucide-react";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
 interface CharacterVariantFormProps {
-  character: ICharacter;
-  variant?: ICharacterVariant;
-  onSubmit: (variant: ICharacterVariant) => void;
-  onCancel?: () => void;
+	character: ICharacter;
+	variant?: ICharacterVariant;
+	onUpdated: (variant: ICharacterVariant) => void;
+	onCancel?: () => void;
 }
-
-interface FormikProps {
-  previewFile: File | null;
-}
-
-type FormikFormProps = ICharacterVariant & FormikProps;
 
 export const CharacterVariantForm = (props: CharacterVariantFormProps) => {
-  const { variant, character, onSubmit, onCancel } = props;
+	const { variant, character, onUpdated } = props;
 
-  const [error, setError] = useState<ErrorModalInfo | null>(null);
+	const cancelUploads = useRef(new AbortController());
+	const [previewFileProgress, setPreviewFileProgress] =
+		useState<AxiosProgressEvent | null>(null);
 
-  const cancelUploads = useRef(new AbortController());
-  const [previewFileProgress, setPreviewFileProgress] =
-    useState<AxiosProgressEvent | null>(null);
+	const form = useForm<CharacterVariantFormObj>({
+		resolver: valibotResolver(characterVariantForm),
+		defaultValues: {
+			age: variant?.age,
+			defaultVariant: variant?.defaultVariant,
+			description: variant?.description,
+			fromYear: variant?.fromYear,
+			toYear: variant?.toYear,
+			previewImageUrl: variant?.previewImageUrl,
+		},
+	});
 
-  const submitForm = async (
-    values: ICharacterVariant & FormikProps,
-    actions: FormikHelpers<FormikFormProps>
-  ) => {
-    const { previewFile, ...newVariant } = values;
+	const onSubmit = async (values: CharacterVariantFormObj) => {
+		const { previewFile, ...newVariant } = values;
 
-    let variantId = variant?.id ?? null;
-    if (variant == null) {
-      const res = await axios.post(
-        `/api/character/${character.id}/variant`,
-        newVariant
-      );
-      if (res.status != 200) {
-        setError({
-          statusCode: res.status,
-          statusMessage: res.statusText,
-          message: res.data.message,
-        });
-        return null;
-      }
+		let variantId = variant?.id ?? null;
+		try {
+			if (variant == null) {
+				const res = await axios.post(
+					`${NEXT_PUBLIC_API_URL}/api/character/${character.id}/variant`,
+					newVariant,
+				);
 
-      let newVariantData = res.data as ICharacterVariant;
-      variantId = newVariantData.id;
-      onSubmit(newVariantData);
-    } else {
-      if (!_.isEqual(newVariant, variant)) {
-        const res = await axios.put(
-          `/api/character/${character.id}/variant/${variant.id}`,
-          newVariant
-        );
-        if (res.status != 200) {
-          setError({
-            statusCode: res.status,
-            statusMessage: res.statusText,
-            message: res.data.message,
-          });
-          return null;
-        }
+				const newVariantData = res.data as ICharacterVariant;
+				variantId = newVariantData.id;
+				onUpdated(newVariantData);
+			} else {
+				if (!_.isEqual(newVariant, variant)) {
+					const res = await axios.put(
+						`${NEXT_PUBLIC_API_URL}/api/character/${character.id}/variant/${variant.id}`,
+						newVariant,
+					);
 
-        let newVariantData = res.data as ICharacterVariant;
-        onSubmit(newVariantData);
-      }
-    }
+					const newVariantData = res.data as ICharacterVariant;
+					onUpdated(newVariantData);
+				}
+			}
 
-    if (previewFile != null && !isNull(variantId)) {
-      const previewForm = new FormData();
-      previewForm.append("previewFile", previewFile);
-      const res = await axios.postForm(
-        `/api/character/${character.id}/variant/${variantId}/images/preview`,
-        previewForm,
-        {
-          onDownloadProgress: (prog) => {
-            setPreviewFileProgress({ ...prog });
-          },
-          signal: cancelUploads.current.signal,
-        }
-      );
+			if (previewFile != null && !isNull(variantId)) {
+				const previewForm = new FormData();
+				previewForm.append("previewFile", previewFile);
+				const res = await axios.postForm(
+					`${NEXT_PUBLIC_API_URL}/api/character/${character.id}/variant/${variantId}/images/preview`,
+					previewForm,
+					{
+						onDownloadProgress: (prog) => {
+							setPreviewFileProgress({ ...prog });
+						},
+						signal: cancelUploads.current.signal,
+					},
+				);
+			}
+		} catch (err) {
+			toastError(err);
+		}
+	};
 
-      if (res.status != 200) {
-        setError({
-          statusCode: res.status,
-          statusMessage: res.statusText,
-          message: res.data.message,
-        });
-        return;
-      }
-    }
+	return (
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)}>
+				<div>
+					<FormField
+						control={form.control}
+						name="description"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Description</FormLabel>
+								<FormControl>
+									<Textarea {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-    return;
-  };
+					<FormField
+						control={form.control}
+						name="defaultVariant"
+						render={({ field }) => (
+							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+								<FormControl>
+									<Checkbox
+										checked={field.value}
+										onCheckedChange={field.onChange}
+									/>
+								</FormControl>
+								<FormLabel className="font-normal text-sm">
+									Default Variant
+								</FormLabel>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-  const formik = (
-    <Formik<FormikFormProps>
-      initialValues={{ ...variant } as FormikFormProps}
-      enableReinitialize
-      onSubmit={async (values, actions) => {
-        try {
-          await submitForm(values, actions);
-        } catch (err: any) {
-          setError(getErrorInfo(err));
-        }
+					<FormField
+						control={form.control}
+						name="age"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Age</FormLabel>
+								<FormControl>
+									<Input {...field} type="number" />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+				<div>
+					<FormField
+						control={form.control}
+						name="fromYear"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>From Year</FormLabel>
+								<FormControl>
+									<Input {...field} type="number" />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="toYear"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>To Year</FormLabel>
+								<FormControl>
+									<Input {...field} type="number" />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+				<div>
+					<FormField
+						control={form.control}
+						name="previewFile"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Preview Image</FormLabel>
+								<FormControl>
+									<Input
+										type="file"
+										accept="image/*"
+										onChange={(event) => {
+											const files = event.currentTarget.files;
+											if (!files || files.length <= 0) return;
 
-        actions.setSubmitting(false);
-      }}
-    >
-      {({
-        values,
-        dirty,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        isSubmitting,
-        setFieldValue,
-      }) => (
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              name="description"
-              as="textarea"
-              rows={4}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.description}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Default Variant</Form.Label>
-            <Form.Check
-              name="defaultVariant"
-              type="checkbox"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              checked={values.defaultVariant}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Age</Form.Label>
-            <Form.Control
-              name="age"
-              type="number"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.age}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>From Year</Form.Label>
-            <Form.Control
-              name="fromYear"
-              type="number"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.fromYear}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>To Year</Form.Label>
-            <Form.Control
-              name="toYear"
-              type="number"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.toYear}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Preview Image</Form.Label>
-            <Form.Control
-              name="previewFile"
-              type="file"
-              accept="image/*"
-              className="mb-2"
-              onChange={(event) => {
-                setFieldValue(
-                  "previewFile",
-                  (event.currentTarget as any).files[0]
-                );
-              }}
-              onBlur={handleBlur}
-            />
-            <Collapse in={previewFileProgress != null}>
-              <div>
-                <UploadProgress progress={previewFileProgress} />
-              </div>
-            </Collapse>
-            <Form.Control
-              name="previewImageUrl"
-              value={values.previewImageUrl ?? ""}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-            <Button
-              variant="link"
-              disabled={values.previewImageUrl == null}
-              href={replaceCDN(values.previewImageUrl ?? "")}
-              target="_blank"
-            >
-              Preview Image
-            </Button>
-          </Form.Group>
+											field.onChange(files[0]);
+										}}
+										onBlur={field.onBlur}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-          <Form.Group>
-            <ButtonGroup>
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={!dirty || isSubmitting}
-              >
-                Submit
-              </Button>
+					<Collapsible open={previewFileProgress != null}>
+						<CollapsibleContent>
+							<UploadProgress progress={previewFileProgress} />
+						</CollapsibleContent>
+					</Collapsible>
+					<FormField
+						control={form.control}
+						name="previewImageUrl"
+						render={({ field }) => (
+							<FormItem className="pr-2 pl-2">
+								<FormLabel>Preview Image Url</FormLabel>
+								<FormControl>
+									<Input {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
 
-              {!variant && (
-                <Button variant="secondary" onClick={onCancel}>
-                  Cancel
-                </Button>
-              )}
+				<div className="flex flex-row gap-4">
+					<Button
+						type="submit"
+						disabled={!form.formState.isDirty || form.formState.isSubmitting}
+					>
+						Submit
+					</Button>
 
-              {values.previewFile != null && isSubmitting ? (
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    cancelUploads.current.abort();
-                  }}
-                >
-                  Cancel Upload
-                </Button>
-              ) : null}
+					{form.getValues().previewFile != null &&
+					form.formState.isSubmitting ? (
+						<Button
+							type="button"
+							onClick={() => {
+								cancelUploads.current.abort();
+							}}
+						>
+							Cancel Upload
+						</Button>
+					) : null}
 
-              {!isSubmitting ? null : (
-                <Button variant="secondary" disabled>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  <span className="visually-hidden">Loading...</span>
-                </Button>
-              )}
-            </ButtonGroup>
-          </Form.Group>
-
-          {error == null ? null : (
-            <ErrorModal error={error} onHide={() => setError(null)} />
-          )}
-        </Form>
-      )}
-    </Formik>
-  );
-
-  return <div>{formik}</div>;
+					{!form.formState.isSubmitting ? null : (
+						<Button type="button" disabled>
+							<LoaderCircle className="animate-spin" />
+							<span className="sr-only">Loading...</span>
+						</Button>
+					)}
+				</div>
+			</form>
+		</Form>
+	);
 };

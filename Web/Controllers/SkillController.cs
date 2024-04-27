@@ -60,7 +60,7 @@ namespace CliveBot.Web.Controllers
         [HttpPost]
         [ModAuthorize(ManageSkills: true)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
-        public async Task<ActionResult<SkillDto>> EditSkill(SkillCreate.Command skill)
+        public async Task<ActionResult<SkillDto>> CreateSkill(SkillCreate.Command skill)
         {
             return await Mediator.Send(skill);
         }
@@ -74,6 +74,7 @@ namespace CliveBot.Web.Controllers
         [HttpPut("{id}")]
         [ModAuthorize(ManageSkillInfo: true)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SkillDto))]
+        [ProducesResponseType(StatusCodes.Status304NotModified, Type = typeof(SkillDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<SkillDto>> EditSkill(int id, SkillEdit.Command skill)
         {
@@ -82,6 +83,7 @@ namespace CliveBot.Web.Controllers
         }
 
         [HttpGet("{id}/languages")]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SkillLanguageDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<List<SkillLanguageDto>> GetSkillLanguages(int id)

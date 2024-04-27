@@ -31,13 +31,8 @@ namespace CliveBot.Application.Skills.Commands
             }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, SkillDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Command, SkillDto>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config)
-            {
-
-            }
-
             public async Task<SkillDto> Handle(Command request, CancellationToken cancellationToken)
             {
                 var skill = await _context.Skills
@@ -76,11 +71,7 @@ namespace CliveBot.Application.Skills.Commands
                 skill.IconUrl = request.IconUrl;
                 skill.PreviewImageUrl = request.PreviewImageUrl;
 
-                var result = await _context.SaveChangesAsync(cancellationToken);
-                if (result == 0)
-                {
-                    throw new RestException(HttpStatusCode.InternalServerError, "Database failed to save data");
-                }
+                await _context.SaveChangesAsync(cancellationToken);
 
                 return skill.ConvertDto();
             }

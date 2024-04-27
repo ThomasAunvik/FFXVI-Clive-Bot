@@ -1,6 +1,6 @@
 ﻿using CliveBot.Database.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace CliveBot.Database
 {

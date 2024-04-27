@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query;
+using System.IO;
 
 namespace CliveBot.Web.Controllers
 {
     /// <summary>
     /// Creates redirect urls and challanges, and signing out
     /// </summary>
-    public class AuthenticationController : Controller
+    public class AuthenticationController(IConfiguration config) : Controller
     {
         /// <summary>
         /// Signing in to the application trough Cookie
@@ -18,10 +19,19 @@ namespace CliveBot.Web.Controllers
         [HttpGet("~/signin")]
         public IActionResult SignIn(string? redirect)
         {
+            var frontEndUrl = config.GetValue<string>("FrontendUrl");
+
             var redirectUri = "/";
-            if(IsLocalUrl(redirect))
+            if (frontEndUrl != null)
             {
-                redirectUri = redirect;
+                redirectUri = frontEndUrl;
+            }
+
+            if (IsLocalUrl(redirect) && frontEndUrl != null)
+            {
+                Uri newUri = new(new(frontEndUrl), redirect);
+
+                redirectUri = newUri.AbsoluteUri;
             }
 
             return Challenge(new AuthenticationProperties { RedirectUri = redirectUri }, "Discord");
@@ -48,13 +58,31 @@ namespace CliveBot.Web.Controllers
         /// <returns></returns>
         [HttpGet("~/signout")]
         [HttpPost("~/signout")]
-        public IActionResult SignOutCurrentUser()
+        public IActionResult SignOutCurrentUser(string redirect)
         {
             // Instruct the cookies middleware to delete the local cookie created
             // when the user agent is redirected from the external identity provider
             // after a successful authentication flow (e.g Google or Facebook).
-            return SignOut(new AuthenticationProperties { RedirectUri = "/" },
-                CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var frontEndUrl = config.GetValue<string>("FrontendUrl");
+
+            var redirectUri = "/";
+            if (frontEndUrl != null)
+            {
+                redirectUri = frontEndUrl;
+            }
+
+            if (IsLocalUrl(redirect) && frontEndUrl != null)
+            {
+                Uri newUri = new(new(frontEndUrl), redirect);
+
+                redirectUri = newUri.AbsoluteUri;
+            }
+
+            return SignOut(
+                new AuthenticationProperties { RedirectUri = redirectUri },
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
         }
     }
 }

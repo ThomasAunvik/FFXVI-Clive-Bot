@@ -22,10 +22,8 @@ namespace CliveBot.Application.Skills.Queries
             public string? SkillName { get; set; }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Query, SkillDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Query, SkillDto>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config) { }
-
             public async Task<SkillDto> Handle(Query request, CancellationToken cancellationToken)
             {
                 SkillModel? skill = null;

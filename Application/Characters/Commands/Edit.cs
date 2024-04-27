@@ -28,10 +28,8 @@ namespace CliveBot.Application.Characters.Commands
             public CommandValidator() { }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Command, CharacterDto>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Command, CharacterDto>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config) { }
-
             public async Task<CharacterDto> Handle(Command request, CancellationToken cancellationToken)
             {
                 var character = await _context.Characters

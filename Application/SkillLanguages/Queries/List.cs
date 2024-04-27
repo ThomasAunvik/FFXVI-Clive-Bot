@@ -2,18 +2,10 @@
 using CliveBot.Application.Infrastructure;
 using CliveBot.Application.SkillLanguages;
 using CliveBot.Database;
-using CliveBot.Database.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Npgsql.Internal.TypeHandlers.DateTimeHandlers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CliveBot.Application.Skills.Queries
 {
@@ -23,10 +15,8 @@ namespace CliveBot.Application.Skills.Queries
             public required int SkillId { get; set; }
         }
 
-        public class Handler : BaseHandler, IRequestHandler<Query, List<SkillLanguageDto>>
+        public class Handler(ApplicationDbContext context, IConfiguration config) : BaseHandler(context, config), IRequestHandler<Query, List<SkillLanguageDto>>
         {
-            public Handler(ApplicationDbContext context, IConfiguration config) : base(context, config) { }
-
             public async Task<List<SkillLanguageDto>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var skill = await _context.Skills

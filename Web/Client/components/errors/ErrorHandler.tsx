@@ -1,58 +1,48 @@
 import { AxiosError } from "axios";
-import { Button, Modal } from "react-bootstrap";
+import { toast } from "sonner";
 
-export const getErrorInfo = (error: any): ErrorModalInfo => {
-  if (error instanceof AxiosError) {
-    var errorMessage = error.response?.data?.message;
-    if (errorMessage == null) {
-      errorMessage = error.message;
-    }
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export const getErrorInfo = (error: any): ErrorInfo => {
+	if (error instanceof AxiosError) {
+		let errorMessage = error.response?.data?.message;
+		if (errorMessage == null) {
+			errorMessage = error.message;
+		}
 
-    return {
-      statusCode: error.response?.status ?? 0,
-      statusMessage: error.response?.statusText ?? error.message,
-      message: errorMessage,
-    };
-  }
+		return {
+			statusCode: error.response?.status ?? 0,
+			statusMessage: error.response?.statusText ?? error.message,
+			message: errorMessage,
+		};
+	}
 
-  return {
-    statusCode: 0,
-    statusMessage: "Unknown Error",
-    message: error.toString(),
-  };
+	return {
+		statusCode: 0,
+		statusMessage: "Unknown Error",
+		message: error.toString(),
+	};
 };
 
-export interface ErrorModalInfo {
-  statusCode: number;
-  statusMessage: string;
-  message?: string;
-}
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export const toastError = (error: any) => {
+	let errorMessage = "Unknown Error";
+	if (error instanceof AxiosError) {
+		errorMessage = error.response?.data?.message;
+		if (errorMessage == null) {
+			errorMessage = error.message;
+		}
 
-export interface ErrorModalProps {
-  error: ErrorModalInfo;
-  onHide: () => void;
-}
+		const statusCode = error.response?.status ?? 0;
+		errorMessage = `Request Error: (${statusCode}) ${errorMessage}`;
+	} else if (error instanceof Error) {
+		errorMessage = error.message;
+	}
 
-export const ErrorModal = (props: ErrorModalProps) => {
-  const { error, onHide } = props;
-
-  return (
-    <Modal onHide={onHide} show={true}>
-      <Modal.Header closeButton>
-        <Modal.Title>
-          {error.statusCode} Error: {error.statusMessage}
-        </Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body>
-        <p>{error.message ?? "Unknown Error"}</p>
-      </Modal.Body>
-
-      <Modal.Footer>
-        <Button variant="primary" onClick={onHide}>
-          Ok
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
+	toast(errorMessage);
 };
+
+export interface ErrorInfo {
+	statusCode: number;
+	statusMessage: string;
+	message?: string;
+}
