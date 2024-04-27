@@ -2,12 +2,15 @@ import type { ISkillLanguage } from "@/lib/models/skill/SkillLanguageModel";
 
 export enum SkillCategory {
 	None = 0,
-	Defensive = 1,
-	Offensive = 2,
+	Attack = 1,
+	Magic = 3,
+	Other = 4,
+	Jump = 5,
+	Evade = 6,
 }
 
 export enum SkillSummon {
-	None = 0,
+	General = 0,
 	Ifrit = 1,
 	Pheonix = 2,
 	Garuda = 3,
