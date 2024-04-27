@@ -11,18 +11,11 @@ using System.Threading.Tasks;
 
 namespace CliveBot.Bot.Commands
 {
+#if DEBUG
+
     [Group("character", "Characters")]
-    public class CharacterCommand : InteractionModuleBase
+    public class CharacterCommand(ApplicationDbContext db) : InteractionModuleBase
     {
-        private readonly ApplicationDbContext db;
-        private readonly IServiceProvider services;
-
-        public CharacterCommand(IServiceProvider provider, ApplicationDbContext _db)
-        {
-            services = provider;
-            db = _db;
-        }
-
         public static EmbedBuilder CharacterEmbedBuild(Character character, string? locale = null)
         {
             var name = character.Name;
@@ -132,4 +125,5 @@ namespace CliveBot.Bot.Commands
             });
         }
     }
+#endif
 }
